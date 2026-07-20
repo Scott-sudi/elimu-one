@@ -1,0 +1,258 @@
+/* Kalunga School — Login Page
+   Split card max 920px: left 40% solid #1f6f4a, right #f5f8f6 */
+
+.login-page {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--color-background);
+    padding: var(--space-6);
+}
+
+.login-card {
+    display: flex;
+    width: 100%;
+    max-width: 920px;
+    min-height: 520px;
+    border-radius: var(--radius-modal);
+    overflow: hidden;
+    border: 1px solid var(--color-border);
+    box-shadow: var(--shadow-lg);
+}
+
+.login-card__brand {
+    width: 40%;
+    flex-shrink: 0;
+    background-color: #1f6f4a;
+    color: #f4f7f5;
+    padding: var(--space-8) var(--space-6);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.login-card__brand-top {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+}
+
+.login-card__logo {
+    width: 48px;
+    height: 48px;
+    border-radius: var(--radius-sm);
+    background-color: rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: var(--font-size-h3);
+    font-weight: var(--font-weight-bold);
+}
+
+.login-card__brand-name {
+    font-size: var(--font-size-display);
+    font-weight: var(--font-weight-bold);
+    line-height: var(--line-height-tight);
+    letter-spacing: var(--letter-spacing-tight);
+    color: #f4f7f5;
+}
+
+.login-card__brand-tagline {
+    font-size: var(--font-size-body);
+    line-height: var(--line-height-relaxed);
+    color: rgba(244, 247, 245, 0.82);
+    max-width: 260px;
+}
+
+.login-card__brand-footer {
+    font-size: var(--font-size-caption);
+    color: rgba(244, 247, 245, 0.65);
+}
+
+.login-card__form-panel {
+    width: 60%;
+    background-color: #f5f8f6;
+    color: var(--color-light-text-primary);
+    padding: var(--space-8) var(--space-8);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.login-card__form-header {
+    margin-bottom: var(--space-6);
+}
+
+.login-card__form-title {
+    font-size: var(--font-size-h1);
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-light-text-primary);
+    margin: 0 0 var(--space-2);
+    line-height: var(--line-height-tight);
+}
+
+.login-card__form-subtitle {
+    font-size: var(--font-size-body);
+    color: var(--color-light-text-secondary);
+    margin: 0;
+}
+
+.login-form .form-group {
+    margin-bottom: var(--space-4);
+}
+
+.login-form .form-label {
+    color: var(--color-light-text-secondary);
+    font-size: var(--font-size-label);
+    font-weight: var(--font-weight-medium);
+}
+
+.login-form .form-input {
+    height: 44px;
+    background-color: #fff;
+    border: 1px solid var(--color-light-border);
+    border-radius: var(--radius-input);
+    color: var(--color-light-text-primary);
+    font-size: var(--font-size-body);
+}
+
+.login-form .form-input::placeholder {
+    color: var(--color-light-text-secondary);
+}
+
+.login-form .form-input:hover {
+    border-color: #b8c4be;
+}
+
+.login-form .form-input:focus {
+    border-color: #1f6f4a;
+    background-color: #fff;
+    box-shadow: 0 0 0 2px rgba(31, 111, 74, 0.2);
+}
+
+.login-form .form-error {
+    color: var(--color-danger);
+}
+
+.login-form__options {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3);
+    margin-bottom: var(--space-5);
+    font-size: var(--font-size-caption);
+}
+
+.login-form__remember {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    color: var(--color-light-text-secondary);
+    cursor: pointer;
+}
+
+.login-form__remember input {
+    width: 15px;
+    height: 15px;
+    accent-color: #1f6f4a;
+}
+
+.login-form__forgot {
+    color: #1f6f4a;
+    font-weight: var(--font-weight-medium);
+}
+
+.login-form__forgot:hover {
+    color: #2a8058;
+    text-decoration: underline;
+}
+
+/* Login button: height 44-46px, radius 4px, bg #1f6f4a, hover #2a8058, active #174f38 */
+.login-form__submit,
+.btn--login {
+    width: 100%;
+    height: 46px;
+    border: 1px solid #1f6f4a;
+    border-radius: 4px;
+    background-color: #1f6f4a;
+    color: #f4f7f5;
+    font-size: var(--font-size-body-md);
+    font-weight: var(--font-weight-semibold);
+    cursor: pointer;
+    transition: background-color 0.12s ease, border-color 0.12s ease;
+}
+
+.login-form__submit:hover,
+.btn--login:hover {
+    background-color: #2a8058;
+    border-color: #2a8058;
+}
+
+.login-form__submit:active,
+.btn--login:active {
+    background-color: #174f38;
+    border-color: #174f38;
+}
+
+.login-form__submit:disabled,
+.btn--login:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+
+.login-card__form-footer {
+    margin-top: var(--space-6);
+    padding-top: var(--space-4);
+    border-top: 1px solid var(--color-light-border);
+    font-size: var(--font-size-caption);
+    color: var(--color-light-text-secondary);
+    text-align: center;
+}
+
+.login-alert {
+    margin-bottom: var(--space-4);
+    padding: var(--space-3);
+    border-radius: var(--radius-sm);
+    border: 1px solid rgba(209, 91, 91, 0.35);
+    background-color: rgba(209, 91, 91, 0.08);
+    color: #a94444;
+    font-size: var(--font-size-caption);
+}
+
+@media (max-width: 800px) {
+    .login-card {
+        flex-direction: column;
+        min-height: auto;
+        max-width: 440px;
+    }
+
+    .login-card__brand {
+        width: 100%;
+        padding: var(--space-6);
+        min-height: auto;
+    }
+
+    .login-card__brand-tagline {
+        max-width: none;
+    }
+
+    .login-card__form-panel {
+        width: 100%;
+        padding: var(--space-6);
+    }
+}
+
+@media (max-width: 480px) {
+    .login-page {
+        padding: var(--space-3);
+        align-items: flex-start;
+        padding-top: var(--space-5);
+    }
+
+    .login-form__options {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}

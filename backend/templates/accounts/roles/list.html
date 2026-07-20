@@ -1,0 +1,74 @@
+{% extends "layouts/app.html" %}
+
+{% block title %}Rôles et permissions{% endblock %}
+
+{% block content %}
+  <div class="content__header">
+    <div class="content__header-main">
+      <h2 class="content__title">Rôles et permissions</h2>
+      <p class="content__description">Rôles système du personnel et droits associés</p>
+    </div>
+  </div>
+
+  <div class="table-wrap">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Code</th>
+          <th>Nom</th>
+          <th>Description</th>
+          <th>Type</th>
+          <th>Statut</th>
+          <th>Utilisateurs</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for role in roles %}
+          <tr>
+            <td class="table__cell-mono">{{ role.code }}</td>
+            <td>
+              <strong>{{ role.name }}</strong>
+            </td>
+            <td class="table__cell-muted">{{ role.description|default:"—" }}</td>
+            <td>
+              {% if role.is_system %}
+                <span class="badge badge--info">Système</span>
+              {% else %}
+                <span class="badge badge--neutral">Personnalisé</span>
+              {% endif %}
+            </td>
+            <td>
+              {% if role.is_active %}
+                <span class="badge badge--success">Actif</span>
+              {% else %}
+                <span class="badge badge--danger">Inactif</span>
+              {% endif %}
+            </td>
+            <td>{{ role.users_count|default:role.users.count }}</td>
+          </tr>
+        {% empty %}
+          <tr>
+            <td colspan="6" class="table__empty">
+              {% include "components/empty_state.html" with icon="shield" title="Aucun rôle" description="Initialisez les rôles système via la commande dédiée." %}
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <div class="content__section" style="margin-top: 1.5rem;">
+    <h3 class="content__section-title">Permissions de la phase administrateur</h3>
+    <div class="card">
+      <div class="card__body card__body--dense">
+        <ul style="display: flex; flex-direction: column; gap: 0.5rem; font-size: 0.875rem; color: #a2aea8;">
+          <li><span class="badge badge--primary" style="margin-right: 0.5rem;">view_admin_dashboard</span> Consulter le tableau de bord administrateur</li>
+          <li><span class="badge badge--primary" style="margin-right: 0.5rem;">manage_users</span> Gérer les utilisateurs</li>
+          <li><span class="badge badge--primary" style="margin-right: 0.5rem;">view_login_history</span> Consulter l'historique des connexions</li>
+          <li><span class="badge badge--primary" style="margin-right: 0.5rem;">view_audit_log</span> Consulter le journal d'activités</li>
+          <li><span class="badge badge--primary" style="margin-right: 0.5rem;">manage_own_profile</span> Gérer son propre profil</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+{% endblock %}

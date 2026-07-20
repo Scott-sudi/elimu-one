@@ -1,0 +1,18 @@
+{% extends "layouts/auth.html" %}
+{% load static %}
+
+{% block title %}Erreur serveur{% endblock %}
+
+{% block auth_content %}
+  <div class="card" style="max-width: 420px; margin: 0 auto; text-align: center; padding: 2rem;">
+    <div class="sidebar__logo" style="margin: 0 auto 1rem; width: 48px; height: 48px;">
+      <i data-lucide="server-crash" width="24" height="24"></i>
+    </div>
+    <p style="font-size: 0.75rem; letter-spacing: 0.06em; text-transform: uppercase; color: #a2aea8; margin-bottom: 0.5rem;">Erreur 500</p>
+    <h1 style="font-size: 1.35rem; margin: 0 0 0.5rem;">Erreur interne</h1>
+    <p style="color: #a2aea8; font-size: 0.875rem; margin: 0 0 1.5rem;">
+      Une erreur est survenue sur {{ school_name|default:"Kalunga" }}. Réessayez dans un instant.
+    </p>
+    <a href="{% url 'dashboard:home' %}" class="btn btn--primary">Retour à l'accueil</a>
+  </div>
+{% endblock %}

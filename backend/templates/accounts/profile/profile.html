@@ -1,0 +1,80 @@
+{% extends "layouts/app.html" %}
+
+{% block title %}Mon profil{% endblock %}
+
+{% block content %}
+  <div class="profile-page" data-page="profile" data-profile-page>
+    <aside class="profile-sidebar">
+      <div class="profile-sidebar__avatar">{{ request.user.initials }}</div>
+      <div class="profile-sidebar__name">{{ request.user.get_full_name }}</div>
+      <div class="profile-sidebar__email">{{ request.user.email|default:request.user.username }}</div>
+      <div class="profile-sidebar__badges">
+        <span class="badge badge--primary">{{ request.user.role_name|default:"—" }}</span>
+        {% if request.user.is_active %}
+          <span class="badge badge--success">Actif</span>
+        {% endif %}
+      </div>
+      <nav class="profile-nav" aria-label="Profil">
+        <a href="{% url 'accounts:profile' %}" class="profile-nav__link is-active">
+          <i data-lucide="user-round" width="16" height="16"></i>
+          Informations
+        </a>
+        <a href="{% url 'accounts:change_password' %}" class="profile-nav__link">
+          <i data-lucide="key-round" width="16" height="16"></i>
+          Mot de passe
+        </a>
+      </nav>
+    </aside>
+
+    <div class="profile-main">
+      {% include "components/notification.html" %}
+
+      <section class="profile-section">
+        <div class="profile-section__header">
+          <div>
+            <h2 class="profile-section__title">Informations personnelles</h2>
+            <p class="profile-section__desc">Mettez à jour vos coordonnées visibles dans l'administration.</p>
+          </div>
+        </div>
+        <form
+          method="post"
+          action="{% url 'accounts:profile' %}"
+          data-profile-form
+          class="profile-section__body"
+        >
+          {% csrf_token %}
+          <div class="profile-field-grid">
+            <div class="form-group">
+              <label class="form-label form-label--required" for="profile-nom">Nom</label>
+              <input class="form-input" type="text" name="nom" id="profile-nom" required value="{{ form.nom.value|default:request.user.nom }}">
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="profile-postnom">Postnom</label>
+              <input class="form-input" type="text" name="postnom" id="profile-postnom" value="{{ form.postnom.value|default:request.user.postnom }}">
+            </div>
+            <div class="form-group">
+              <label class="form-label form-label--required" for="profile-prenom">Prénom</label>
+              <input class="form-input" type="text" name="prenom" id="profile-prenom" required value="{{ form.prenom.value|default:request.user.prenom }}">
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="profile-telephone">Téléphone</label>
+              <input class="form-input" type="tel" name="telephone" id="profile-telephone" value="{{ form.telephone.value|default:request.user.telephone }}">
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="profile-email">Adresse électronique</label>
+              <input class="form-input" type="email" name="email" id="profile-email" value="{{ form.email.value|default:request.user.email }}">
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="profile-username">Nom d'utilisateur</label>
+              <input class="form-input" type="text" id="profile-username" value="{{ request.user.username }}" disabled>
+              <p class="form-hint">L'identifiant ne peut pas être modifié ici.</p>
+            </div>
+          </div>
+          <div class="profile-section__footer" style="margin: 1.25rem -1rem -1rem;">
+            <button type="submit" class="btn btn--primary">Enregistrer</button>
+          </div>
+        </form>
+      </section>
+    </div>
+  </div>
+{% endblock %}

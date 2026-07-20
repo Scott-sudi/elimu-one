@@ -1,0 +1,41 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="csrf-token" content="{{ csrf_token }}">
+  <meta name="description" content="{{ school_full_name|default:'Kalunga – La Source du Savoir' }} — Administration">
+  <title>{% block title %}{{ page_title|default:"Administration" }}{% endblock %} · {{ school_name|default:"Kalunga" }}</title>
+  {% block extra_head %}{% endblock %}
+  {% block assets %}
+    {# Vite build preferred; fallback to static source paths #}
+    {% if vite_assets %}
+      {{ vite_assets|safe }}
+    {% else %}
+      <link rel="stylesheet" href="{% static 'css/main.css' %}">
+      <script type="module" src="{% static 'js/app.js' %}"></script>
+    {% endif %}
+  {% endblock %}
+</head>
+<body class="{% block body_class %}{% endblock %}" {% block body_attrs %}{% endblock %}>
+  {% block body %}{% endblock %}
+
+  <div id="toast-root" class="toast-root" aria-live="polite" aria-relevant="additions"></div>
+  <div id="modal-root">{% block modal_root %}{% endblock %}</div>
+
+  {% block messages %}
+    {% if messages %}
+      <script type="application/json" id="django-messages">
+        [
+          {% for message in messages %}
+            {"level": "{{ message.tags|escapejs }}", "text": "{{ message|escapejs }}"}{% if not forloop.last %},{% endif %}
+          {% endfor %}
+        ]
+      </script>
+    {% endif %}
+  {% endblock %}
+
+  {% block extra_js %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,128 @@
+/* Kalunga School — Typography Tokens
+   Inter with Segoe UI fallback; dense professional scale */
+
+:root {
+    --font-family-base: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
+    --font-family-mono: "Cascadia Code", "Consolas", "Segoe UI Mono", monospace;
+
+    /* Scale: 28 / 22-24 / 17-18 / 14-16 / 14 / 12-13 / 11-12 */
+    --font-size-display: 28px;
+    --font-size-h1: 24px;
+    --font-size-h2: 22px;
+    --font-size-h3: 18px;
+    --font-size-h4: 17px;
+    --font-size-body: 14px;
+    --font-size-body-lg: 16px;
+    --font-size-body-md: 15px;
+    --font-size-label: 13px;
+    --font-size-caption: 12px;
+    --font-size-micro: 11px;
+
+    --font-weight-regular: 400;
+    --font-weight-medium: 500;
+    --font-weight-semibold: 600;
+    --font-weight-bold: 700;
+
+    --line-height-tight: 1.25;
+    --line-height-snug: 1.35;
+    --line-height-normal: 1.5;
+    --line-height-relaxed: 1.6;
+
+    --letter-spacing-tight: -0.02em;
+    --letter-spacing-normal: 0;
+    --letter-spacing-wide: 0.02em;
+    --letter-spacing-label: 0.04em;
+}
+
+html {
+    font-family: var(--font-family-base);
+    font-size: var(--font-size-body);
+    line-height: var(--line-height-normal);
+    font-weight: var(--font-weight-regular);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+}
+
+h1, .text-h1 {
+    font-size: var(--font-size-h1);
+    font-weight: var(--font-weight-semibold);
+    line-height: var(--line-height-tight);
+    letter-spacing: var(--letter-spacing-tight);
+    color: var(--color-text-primary);
+}
+
+h2, .text-h2 {
+    font-size: var(--font-size-h2);
+    font-weight: var(--font-weight-semibold);
+    line-height: var(--line-height-tight);
+    letter-spacing: var(--letter-spacing-tight);
+    color: var(--color-text-primary);
+}
+
+h3, .text-h3 {
+    font-size: var(--font-size-h3);
+    font-weight: var(--font-weight-semibold);
+    line-height: var(--line-height-snug);
+    color: var(--color-text-primary);
+}
+
+h4, .text-h4 {
+    font-size: var(--font-size-h4);
+    font-weight: var(--font-weight-medium);
+    line-height: var(--line-height-snug);
+    color: var(--color-text-primary);
+}
+
+.text-display {
+    font-size: var(--font-size-display);
+    font-weight: var(--font-weight-bold);
+    line-height: var(--line-height-tight);
+    letter-spacing: var(--letter-spacing-tight);
+}
+
+.text-body {
+    font-size: var(--font-size-body);
+    font-weight: var(--font-weight-regular);
+    line-height: var(--line-height-normal);
+}
+
+.text-body-lg {
+    font-size: var(--font-size-body-lg);
+    line-height: var(--line-height-normal);
+}
+
+.text-label {
+    font-size: var(--font-size-label);
+    font-weight: var(--font-weight-medium);
+    line-height: var(--line-height-snug);
+    letter-spacing: var(--letter-spacing-label);
+    text-transform: uppercase;
+}
+
+.text-caption {
+    font-size: var(--font-size-caption);
+    font-weight: var(--font-weight-regular);
+    line-height: var(--line-height-normal);
+    color: var(--color-text-secondary);
+}
+
+.text-micro {
+    font-size: var(--font-size-micro);
+    font-weight: var(--font-weight-regular);
+    line-height: var(--line-height-snug);
+    color: var(--color-text-secondary);
+}
+
+.text-muted {
+    color: var(--color-text-secondary);
+}
+
+.text-disabled {
+    color: var(--color-text-disabled);
+}
+
+.text-mono {
+    font-family: var(--font-family-mono);
+    font-size: var(--font-size-caption);
+}

@@ -1,0 +1,80 @@
+/* Kalunga School — Accessibility */
+
+:focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+    box-shadow: var(--shadow-focus);
+}
+
+.btn:focus-visible,
+.form-input:focus-visible,
+.form-select:focus-visible,
+.form-textarea:focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 1px;
+}
+
+.skip-link {
+    position: absolute;
+    top: -48px;
+    left: var(--space-4);
+    z-index: 10000;
+    padding: var(--space-2) var(--space-4);
+    background-color: var(--color-primary);
+    color: var(--color-text-primary);
+    border-radius: var(--radius-sm);
+    font-size: var(--font-size-body);
+    font-weight: var(--font-weight-medium);
+}
+
+.skip-link:focus {
+    top: var(--space-4);
+}
+
+[aria-disabled="true"],
+[disabled] {
+    cursor: not-allowed;
+    opacity: 0.55;
+}
+
+[aria-busy="true"] {
+    cursor: wait;
+}
+
+.visually-hidden,
+.sr-only {
+    position: absolute !important;
+    width: 1px !important;
+    height: 1px !important;
+    padding: 0 !important;
+    margin: -1px !important;
+    overflow: hidden !important;
+    clip: rect(0, 0, 0, 0) !important;
+    white-space: nowrap !important;
+    border: 0 !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}
+
+@media (prefers-contrast: more) {
+    :root {
+        --color-border: #4a5c64;
+        --color-text-secondary: #c8d2cc;
+    }
+
+    .btn,
+    .form-input,
+    .form-select,
+    .card {
+        border-width: 2px;
+    }
+}

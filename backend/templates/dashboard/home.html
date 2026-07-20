@@ -1,0 +1,187 @@
+{% extends "layouts/app.html" %}
+
+{% block title %}Tableau de bord{% endblock %}
+
+{% block content %}
+  <div class="dashboard" data-page="dashboard">
+    <div class="dashboard__welcome">
+      <h2 class="dashboard__welcome-title">
+        Bonjour{% if request.user.prenom %}, {{ request.user.prenom }}{% endif %}
+      </h2>
+      <p class="dashboard__welcome-text">
+        Vue d'ensemble des comptes et des accès — {{ school_full_name|default:"Kalunga – La Source du Savoir" }}.
+      </p>
+    </div>
+
+    <div class="dashboard__stats">
+      <div class="stat-card">
+        <div class="stat-card__icon"><i data-lucide="users" width="18" height="18"></i></div>
+        <div class="stat-card__label">Utilisateurs</div>
+        <div class="stat-card__value">{{ stats.users_total|default:0 }}</div>
+        <div class="stat-card__meta">Total des comptes</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card__icon"><i data-lucide="user-check" width="18" height="18"></i></div>
+        <div class="stat-card__label">Actifs</div>
+        <div class="stat-card__value">{{ stats.users_active|default:0 }}</div>
+        <div class="stat-card__meta">Comptes opérationnels</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card__icon"><i data-lucide="user-x" width="18" height="18"></i></div>
+        <div class="stat-card__label">Désactivés</div>
+        <div class="stat-card__value">{{ stats.users_disabled|default:0 }}</div>
+        <div class="stat-card__meta">Accès suspendus</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card__icon"><i data-lucide="shield" width="18" height="18"></i></div>
+        <div class="stat-card__label">Administrateurs</div>
+        <div class="stat-card__value">{{ stats.admins|default:0 }}</div>
+        <div class="stat-card__meta">Rôle Administrateur</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card__icon"><i data-lucide="clipboard-list" width="18" height="18"></i></div>
+        <div class="stat-card__label">Secrétaires</div>
+        <div class="stat-card__value">{{ stats.secretaires|default:0 }}</div>
+        <div class="stat-card__meta">Rôle Secrétaire</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card__icon"><i data-lucide="calculator" width="18" height="18"></i></div>
+        <div class="stat-card__label">Comptables</div>
+        <div class="stat-card__value">{{ stats.comptables|default:0 }}</div>
+        <div class="stat-card__meta">Rôle Comptable</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card__icon"><i data-lucide="scale" width="18" height="18"></i></div>
+        <div class="stat-card__label">Discipline</div>
+        <div class="stat-card__value">{{ stats.discipline|default:0 }}</div>
+        <div class="stat-card__meta">Agents de discipline</div>
+      </div>
+    </div>
+
+    <div class="dashboard__row">
+      <section class="dashboard__panel">
+        <div class="dashboard__panel-header">
+          <h3 class="dashboard__panel-title">Utilisateurs récents</h3>
+          <a href="{% url 'accounts:users' %}" class="btn btn--ghost btn--sm">Voir tout</a>
+        </div>
+        <div class="dashboard__panel-body">
+          {% if recent_users %}
+            <div class="table-wrap" style="border: none;">
+              <table class="table table--dense">
+                <thead>
+                  <tr>
+                    <th>Nom</th>
+                    <th>Rôle</th>
+                    <th>Créé le</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for u in recent_users %}
+                    <tr>
+                      <td>{{ u.get_full_name }}</td>
+                      <td><span class="badge badge--primary">{{ u.role_name|default:"—" }}</span></td>
+                      <td class="table__cell-muted">{{ u.date_joined|date:"j F Y" }}</td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          {% else %}
+            {% include "components/empty_state.html" with icon="users" title="Aucun utilisateur récent" description="Les nouveaux comptes apparaîtront ici." %}
+          {% endif %}
+        </div>
+      </section>
+
+      <section class="dashboard__panel">
+        <div class="dashboard__panel-header">
+          <h3 class="dashboard__panel-title">Dernières connexions</h3>
+          <a href="{% url 'audit:logins' %}" class="btn btn--ghost btn--sm">Journal</a>
+        </div>
+        <div class="dashboard__panel-body">
+          {% if recent_logins %}
+            <div class="dashboard__activity-list">
+              {% for attempt in recent_logins %}
+                <div class="dashboard__activity-item">
+                  <span class="dashboard__activity-dot" {% if not attempt.success %}style="background-color: #d15b5b;"{% endif %}></span>
+                  <div>
+                    <div class="dashboard__activity-text">
+                      {{ attempt.attempted_username }}
+                      — {% if attempt.success %}succès{% else %}échec{% endif %}
+                    </div>
+                    <div class="dashboard__activity-time">
+                      {{ attempt.created_at|date:"j F Y à H\h i" }}
+                      {% if attempt.ip_address %}· {{ attempt.ip_address }}{% endif %}
+                    </div>
+                  </div>
+                </div>
+              {% endfor %}
+            </div>
+          {% else %}
+            {% include "components/empty_state.html" with icon="log-in" title="Aucune connexion" description="Les tentatives récentes s'afficheront ici." %}
+          {% endif %}
+        </div>
+      </section>
+    </div>
+
+    <div class="dashboard__row">
+      <section class="dashboard__panel">
+        <div class="dashboard__panel-header">
+          <h3 class="dashboard__panel-title">Dernières actions</h3>
+          <a href="{% url 'audit:actions' %}" class="btn btn--ghost btn--sm">Journal</a>
+        </div>
+        <div class="dashboard__panel-body">
+          {% if recent_actions %}
+            <div class="dashboard__activity-list">
+              {% for log in recent_actions %}
+                <div class="dashboard__activity-item">
+                  <span class="dashboard__activity-dot"></span>
+                  <div>
+                    <div class="dashboard__activity-text">{{ log.description }}</div>
+                    <div class="dashboard__activity-time">
+                      {% if log.actor %}{{ log.actor.get_full_name }} · {% endif %}
+                      {{ log.created_at|date:"j F Y à H\h i" }}
+                    </div>
+                  </div>
+                </div>
+              {% endfor %}
+            </div>
+          {% else %}
+            {% include "components/empty_state.html" with icon="scroll-text" title="Aucune action" description="Le journal d'activités est vide pour le moment." %}
+          {% endif %}
+        </div>
+      </section>
+
+      <section class="dashboard__panel">
+        <div class="dashboard__panel-header">
+          <h3 class="dashboard__panel-title">Comptes récemment désactivés</h3>
+        </div>
+        <div class="dashboard__panel-body">
+          {% if recently_deactivated %}
+            <div class="table-wrap" style="border: none;">
+              <table class="table table--dense">
+                <thead>
+                  <tr>
+                    <th>Nom</th>
+                    <th>Rôle</th>
+                    <th>Mis à jour</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for u in recently_deactivated %}
+                    <tr>
+                      <td>{{ u.get_full_name }}</td>
+                      <td>{{ u.role_name|default:"—" }}</td>
+                      <td class="table__cell-muted">{{ u.updated_at|date:"j F Y" }}</td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          {% else %}
+            {% include "components/empty_state.html" with icon="user-x" title="Aucun compte désactivé" description="Les désactivations récentes apparaîtront ici." %}
+          {% endif %}
+        </div>
+      </section>
+    </div>
+  </div>
+{% endblock %}

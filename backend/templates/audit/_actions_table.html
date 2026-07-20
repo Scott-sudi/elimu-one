@@ -1,0 +1,54 @@
+<div id="actions-table" class="audit-table" data-actions-table>
+  <div class="table-wrap">
+    <table class="table table--dense">
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Acteur</th>
+          <th>Action</th>
+          <th>Description</th>
+          <th>Entité</th>
+          <th>Adresse IP</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for log in page_obj %}
+          <tr>
+            <td class="audit-table__timestamp">{{ log.created_at|date:"j F Y à H\h i" }}</td>
+            <td class="audit-table__actor">
+              {% if log.actor %}{{ log.actor.get_full_name }}{% else %}Système{% endif %}
+            </td>
+            <td><span class="audit-table__action">{{ log.get_action_display|default:log.action }}</span></td>
+            <td>{{ log.description|truncatechars:80 }}</td>
+            <td class="audit-table__target">
+              {% if log.entity_type %}{{ log.entity_type }}{% if log.entity_public_id %} · {{ log.entity_public_id|truncatechars:12 }}{% endif %}{% else %}—{% endif %}
+            </td>
+            <td class="audit-table__ip">{{ log.ip_address|default:"—" }}</td>
+            <td>
+              {% if log.pk %}
+                <button
+                  type="button"
+                  class="btn btn--ghost btn--sm"
+                  data-audit-detail="{% url 'audit:actions' %}{{ log.pk }}/"
+                  data-audit-target="#audit-detail"
+                  title="Détail"
+                >
+                  <i data-lucide="eye" width="14" height="14"></i>
+                </button>
+              {% endif %}
+            </td>
+          </tr>
+        {% empty %}
+          <tr>
+            <td colspan="7" class="table__empty">
+              {% include "components/empty_state.html" with icon="scroll-text" title="Aucune activité" description="Le journal ne contient aucune entrée pour ces filtres." %}
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  {% include "components/pagination.html" with page_obj=page_obj hx_target="#actions-table" hx_swap="outerHTML" querystring=filter_querystring %}
+</div>

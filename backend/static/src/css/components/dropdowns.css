@@ -1,0 +1,97 @@
+/* Kalunga School — Dropdowns */
+
+.dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.dropdown__menu {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    z-index: 300;
+    min-width: 180px;
+    padding: var(--space-1);
+    background-color: var(--color-surface-elevated);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-dropdown);
+    box-shadow: var(--shadow-dropdown);
+    display: none;
+}
+
+.dropdown__menu--right {
+    left: auto;
+    right: 0;
+}
+
+.dropdown.is-open .dropdown__menu,
+.dropdown__menu.is-open {
+    display: block;
+}
+
+.dropdown__item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    width: 100%;
+    height: 32px;
+    padding: 0 var(--space-3);
+    border-radius: var(--radius-sm);
+    font-size: var(--font-size-body);
+    color: var(--color-text-primary);
+    text-align: left;
+    white-space: nowrap;
+    cursor: pointer;
+}
+
+.dropdown__item:hover,
+.dropdown__item:focus {
+    background-color: var(--color-surface);
+    color: var(--color-text-primary);
+}
+
+.dropdown__item.is-active {
+    background-color: var(--color-primary-soft);
+}
+
+.dropdown__item--danger {
+    color: var(--color-danger);
+}
+
+.dropdown__item--danger:hover {
+    background-color: rgba(209, 91, 91, 0.12);
+    color: var(--color-danger);
+}
+
+.dropdown__item:disabled,
+.dropdown__item.is-disabled {
+    color: var(--color-text-disabled);
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+.dropdown__divider {
+    height: 1px;
+    margin: var(--space-1) 0;
+    background-color: var(--color-divider);
+    border: none;
+}
+
+.dropdown__label {
+    padding: var(--space-2) var(--space-3) var(--space-1);
+    font-size: var(--font-size-micro);
+    font-weight: var(--font-weight-medium);
+    letter-spacing: var(--letter-spacing-label);
+    text-transform: uppercase;
+    color: var(--color-text-disabled);
+}
+
+.dropdown__icon {
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-text-secondary);
+}

@@ -1,0 +1,83 @@
+/* Kalunga School — Pagination */
+
+.pagination {
+    display: flex;
+    align-items: center;
+    gap: var(--space-1);
+}
+
+.pagination__btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 32px;
+    height: 32px;
+    padding: 0 var(--space-2);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    background-color: var(--color-surface);
+    color: var(--color-text-secondary);
+    font-size: var(--font-size-caption);
+    font-weight: var(--font-weight-medium);
+    cursor: pointer;
+    transition: background-color 0.12s ease, border-color 0.12s ease, color 0.12s ease;
+}
+
+.pagination__btn:hover:not(:disabled):not(.is-active) {
+    background-color: var(--color-surface-elevated);
+    color: var(--color-text-primary);
+    border-color: #3a4a52;
+}
+
+.pagination__btn.is-active {
+    background-color: var(--color-primary);
+    border-color: var(--color-primary);
+    color: var(--color-text-primary);
+}
+
+.pagination__btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.pagination__ellipsis {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 32px;
+    height: 32px;
+    color: var(--color-text-disabled);
+    font-size: var(--font-size-caption);
+    user-select: none;
+}
+
+.pagination__info {
+    font-size: var(--font-size-caption);
+    color: var(--color-text-secondary);
+    margin-right: var(--space-3);
+}
+
+.pagination__size {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    margin-left: var(--space-3);
+    font-size: var(--font-size-caption);
+    color: var(--color-text-secondary);
+}
+
+.pagination__size .form-select {
+    width: auto;
+    height: 32px;
+    min-width: 72px;
+    font-size: var(--font-size-caption);
+}
+
+.pagination-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3);
+    flex-wrap: wrap;
+    padding-top: var(--space-3);
+}

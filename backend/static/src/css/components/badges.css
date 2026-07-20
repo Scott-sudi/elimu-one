@@ -1,0 +1,91 @@
+/* Kalunga School — Badges (NOT pill-shaped — max radius 4px) */
+
+.badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    height: 22px;
+    padding: 0 8px;
+    border: 1px solid transparent;
+    border-radius: var(--radius-badge);
+    font-size: var(--font-size-micro);
+    font-weight: var(--font-weight-semibold);
+    line-height: 1;
+    white-space: nowrap;
+    vertical-align: middle;
+}
+
+.badge--sm {
+    height: 18px;
+    padding: 0 6px;
+    font-size: 10px;
+}
+
+.badge--lg {
+    height: 26px;
+    padding: 0 10px;
+    font-size: var(--font-size-caption);
+}
+
+.badge--neutral {
+    background-color: var(--color-surface);
+    border-color: var(--color-border);
+    color: var(--color-text-secondary);
+}
+
+.badge--primary {
+    background-color: var(--color-primary-soft);
+    border-color: rgba(31, 111, 74, 0.45);
+    color: #8fd4ae;
+}
+
+.badge--success {
+    background-color: rgba(47, 147, 98, 0.15);
+    border-color: rgba(47, 147, 98, 0.4);
+    color: #6fc494;
+}
+
+.badge--warning {
+    background-color: rgba(209, 161, 60, 0.15);
+    border-color: rgba(209, 161, 60, 0.4);
+    color: #e0c070;
+}
+
+.badge--danger {
+    background-color: rgba(209, 91, 91, 0.15);
+    border-color: rgba(209, 91, 91, 0.4);
+    color: #e09090;
+}
+
+.badge--info {
+    background-color: rgba(79, 135, 197, 0.15);
+    border-color: rgba(79, 135, 197, 0.4);
+    color: #8bb0d9;
+}
+
+.badge--solid-primary {
+    background-color: var(--color-primary);
+    border-color: var(--color-primary);
+    color: var(--color-text-primary);
+}
+
+.badge--solid-success {
+    background-color: var(--color-success);
+    border-color: var(--color-success);
+    color: #fff;
+}
+
+.badge--solid-danger {
+    background-color: var(--color-danger);
+    border-color: var(--color-danger);
+    color: #fff;
+}
+
+.badge__dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 1px;
+    background-color: currentColor;
+    flex-shrink: 0;
+}

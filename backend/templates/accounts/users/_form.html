@@ -1,0 +1,140 @@
+{% with u=user_obj %}
+<form
+  id="user-form"
+  class="users-form"
+  method="post"
+  action="{% if mode == 'edit' and u %}{% url 'accounts:user_update' u.public_id %}{% elif mode == 'reset_password' and u %}{% url 'accounts:user_reset_password' u.public_id %}{% else %}{% url 'accounts:user_create' %}{% endif %}"
+  data-user-form
+  novalidate
+>
+  {% csrf_token %}
+
+  {% if mode == 'reset_password' and u %}
+    <p class="form-hint">Réinitialisation du mot de passe pour {{ u.get_full_name }} ({{ u.username }}).</p>
+    <div class="form-group">
+      <label class="form-label form-label--required" for="user-password">Mot de passe temporaire</label>
+      <div class="form-input-wrap">
+        <input class="form-input" type="password" name="temporary_password" id="user-password" required autocomplete="new-password">
+        <button type="button" class="form-input-wrap__action" data-password-toggle="#user-password" aria-label="Afficher le mot de passe">
+          <i data-lucide="eye" width="16" height="16"></i>
+        </button>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label form-label--required" for="user-password-confirm">Confirmation</label>
+      <div class="form-input-wrap">
+        <input class="form-input" type="password" name="temporary_password_confirm" id="user-password-confirm" required autocomplete="new-password">
+        <button type="button" class="form-input-wrap__action" data-password-toggle="#user-password-confirm" aria-label="Afficher le mot de passe">
+          <i data-lucide="eye" width="16" height="16"></i>
+        </button>
+      </div>
+    </div>
+    <label class="form-check">
+      <input type="checkbox" name="must_change_password" value="1" checked>
+      Exiger le changement de mot de passe à la prochaine connexion
+    </label>
+  {% else %}
+    <div class="users-form__section">
+      <div class="users-form__section-title">Identité</div>
+      <div class="form-row form-row--3">
+        <div class="form-group">
+          <label class="form-label form-label--required" for="user-nom">Nom</label>
+          <input class="form-input" type="text" name="nom" id="user-nom" required maxlength="100" value="{% if u %}{{ u.nom }}{% endif %}">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="user-postnom">Postnom</label>
+          <input class="form-input" type="text" name="postnom" id="user-postnom" maxlength="100" value="{% if u %}{{ u.postnom }}{% endif %}">
+        </div>
+        <div class="form-group">
+          <label class="form-label form-label--required" for="user-prenom">Prénom</label>
+          <input class="form-input" type="text" name="prenom" id="user-prenom" required maxlength="100" value="{% if u %}{{ u.prenom }}{% endif %}">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label" for="user-sexe">Sexe</label>
+          <select class="form-select" name="sexe" id="user-sexe">
+            <option value="">—</option>
+            <option value="M" {% if u and u.sexe == 'M' %}selected{% endif %}>Masculin</option>
+            <option value="F" {% if u and u.sexe == 'F' %}selected{% endif %}>Féminin</option>
+            <option value="O" {% if u and u.sexe == 'O' %}selected{% endif %}>Autre</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="user-telephone">Téléphone</label>
+          <input class="form-input" type="tel" name="telephone" id="user-telephone" maxlength="30" value="{% if u %}{{ u.telephone }}{% endif %}">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="user-email">Adresse électronique</label>
+        <input class="form-input" type="email" name="email" id="user-email" value="{% if u %}{{ u.email }}{% endif %}">
+      </div>
+    </div>
+
+    <div class="users-form__section">
+      <div class="users-form__section-title">Compte</div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label form-label--required" for="user-username">Nom d'utilisateur</label>
+          <input class="form-input" type="text" name="username" id="user-username" required maxlength="150" value="{% if u %}{{ u.username }}{% endif %}" autocomplete="off">
+        </div>
+        <div class="form-group">
+          <label class="form-label form-label--required" for="user-role">Rôle</label>
+          <select class="form-select" name="role_id" id="user-role" required>
+            <option value="">Sélectionner…</option>
+            {% for role in roles %}
+              <option value="{{ role.id }}" {% if u and u.role_id == role.id %}selected{% endif %}>{{ role.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+      <label class="form-check">
+        <input type="checkbox" name="is_active" value="1" {% if not u or u.is_active %}checked{% endif %}>
+        Compte actif
+      </label>
+    </div>
+
+    {% if mode != 'edit' %}
+      <div class="users-form__section">
+        <div class="users-form__section-title">Mot de passe temporaire</div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label form-label--required" for="user-password">Mot de passe</label>
+            <div class="form-input-wrap">
+              <input class="form-input" type="password" name="password" id="user-password" required autocomplete="new-password">
+              <button type="button" class="form-input-wrap__action" data-password-toggle="#user-password" aria-label="Afficher le mot de passe">
+                <i data-lucide="eye" width="16" height="16"></i>
+              </button>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label form-label--required" for="user-password-confirm">Confirmation</label>
+            <div class="form-input-wrap">
+              <input class="form-input" type="password" name="password_confirm" id="user-password-confirm" required autocomplete="new-password">
+              <button type="button" class="form-input-wrap__action" data-password-toggle="#user-password-confirm" aria-label="Afficher le mot de passe">
+                <i data-lucide="eye" width="16" height="16"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+        <label class="form-check">
+          <input type="checkbox" name="must_change_password" value="1" checked>
+          Exiger le changement de mot de passe à la prochaine connexion
+        </label>
+      </div>
+    {% else %}
+      <label class="form-check">
+        <input type="checkbox" name="must_change_password" value="1" {% if u and u.must_change_password %}checked{% endif %}>
+        Exiger le changement de mot de passe à la prochaine connexion
+      </label>
+    {% endif %}
+  {% endif %}
+
+  <div class="modal__footer" style="margin: 1rem -1rem -1rem;">
+    <button type="button" class="btn btn--secondary" data-modal-close>Annuler</button>
+    <button type="submit" class="btn btn--primary" data-user-submit>
+      {% if mode == 'edit' %}Enregistrer{% elif mode == 'reset_password' %}Réinitialiser{% else %}Créer l'utilisateur{% endif %}
+    </button>
+  </div>
+</form>
+{% endwith %}

@@ -1,0 +1,207 @@
+/* Kalunga School — Form Inputs */
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+    margin-bottom: var(--space-4);
+}
+
+.form-group:last-child {
+    margin-bottom: 0;
+}
+
+.form-label {
+    font-size: var(--font-size-label);
+    font-weight: var(--font-weight-medium);
+    color: var(--color-text-secondary);
+}
+
+.form-label--required::after {
+    content: " *";
+    color: var(--color-danger);
+}
+
+.form-hint {
+    font-size: var(--font-size-caption);
+    color: var(--color-text-disabled);
+}
+
+.form-error {
+    font-size: var(--font-size-caption);
+    color: var(--color-danger);
+}
+
+.form-input,
+.form-select,
+.form-textarea {
+    width: 100%;
+    height: var(--control-height-md);
+    padding: 0 var(--space-3);
+    background-color: var(--color-input-dark);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-input);
+    color: var(--color-text-primary);
+    font-size: var(--font-size-body);
+    transition: border-color 0.12s ease, background-color 0.12s ease;
+}
+
+.form-input::placeholder,
+.form-textarea::placeholder {
+    color: var(--color-text-disabled);
+}
+
+.form-input:hover,
+.form-select:hover,
+.form-textarea:hover {
+    border-color: #3a4a52;
+}
+
+.form-input:focus,
+.form-select:focus,
+.form-textarea:focus {
+    border-color: var(--color-primary);
+    background-color: #0d161c;
+}
+
+.form-input:disabled,
+.form-select:disabled,
+.form-textarea:disabled {
+    background-color: var(--color-surface);
+    color: var(--color-text-disabled);
+    cursor: not-allowed;
+}
+
+.form-input.is-invalid,
+.form-select.is-invalid,
+.form-textarea.is-invalid,
+.form-group.has-error .form-input,
+.form-group.has-error .form-select,
+.form-group.has-error .form-textarea {
+    border-color: var(--color-danger);
+}
+
+.form-input.is-valid,
+.form-group.has-success .form-input {
+    border-color: var(--color-success);
+}
+
+.form-textarea {
+    height: auto;
+    min-height: 96px;
+    padding: var(--space-3);
+    line-height: var(--line-height-normal);
+    resize: vertical;
+}
+
+.form-select {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23a2aea8' d='M3 4.5L6 8l3-3.5'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    padding-right: 36px;
+    cursor: pointer;
+}
+
+.form-input--sm,
+.form-select--sm {
+    height: var(--control-height-sm);
+    font-size: var(--font-size-caption);
+    padding: 0 var(--space-2);
+}
+
+.form-input--lg {
+    height: var(--control-height-lg);
+}
+
+.form-input-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.form-input-wrap .form-input {
+    padding-right: 40px;
+}
+
+.form-input-wrap__icon {
+    position: absolute;
+    right: 12px;
+    color: var(--color-text-disabled);
+    display: flex;
+    align-items: center;
+    pointer-events: none;
+}
+
+.form-input-wrap__action {
+    position: absolute;
+    right: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 28px;
+    border-radius: var(--radius-sm);
+    color: var(--color-text-secondary);
+}
+
+.form-input-wrap__action:hover {
+    color: var(--color-text-primary);
+    background-color: var(--color-surface);
+}
+
+/* Light surface inputs (login / public forms) */
+.form-input--light,
+.form-select--light,
+.form-textarea--light {
+    background-color: #fff;
+    border-color: var(--color-light-border);
+    color: var(--color-light-text-primary);
+}
+
+.form-input--light::placeholder {
+    color: var(--color-light-text-secondary);
+}
+
+.form-input--light:focus,
+.form-select--light:focus,
+.form-textarea--light:focus {
+    border-color: var(--color-primary);
+    background-color: #fff;
+}
+
+.form-check {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    font-size: var(--font-size-body);
+    color: var(--color-text-secondary);
+    cursor: pointer;
+    user-select: none;
+}
+
+.form-check input[type="checkbox"],
+.form-check input[type="radio"] {
+    width: 16px;
+    height: 16px;
+    accent-color: var(--color-primary);
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-4);
+}
+
+.form-row--3 {
+    grid-template-columns: repeat(3, 1fr);
+}
+
+@media (max-width: 640px) {
+    .form-row,
+    .form-row--3 {
+        grid-template-columns: 1fr;
+    }
+}

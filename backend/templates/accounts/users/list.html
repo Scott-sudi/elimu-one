@@ -1,0 +1,135 @@
+{% extends "layouts/app.html" %}
+
+{% block title %}Utilisateurs{% endblock %}
+
+{% block content %}
+  <div class="users-page" data-page="users" data-users-page>
+    <div class="content__header">
+      <div class="content__header-main">
+        <h2 class="content__title">Utilisateurs</h2>
+        <p class="content__description">Gestion des comptes du personnel scolaire</p>
+      </div>
+      <div class="content__actions">
+        <button
+          type="button"
+          class="btn btn--primary"
+          data-user-create="user-modal"
+          data-modal-open="user-modal"
+        >
+          <i data-lucide="user-plus" width="16" height="16"></i>
+          Nouvel utilisateur
+        </button>
+      </div>
+    </div>
+
+    <form
+      class="users-toolbar"
+      method="get"
+      action="{% url 'accounts:users' %}"
+      id="users-filters"
+      data-users-filter
+      hx-get="{% url 'accounts:users' %}"
+      hx-target="#users-table"
+      hx-swap="outerHTML"
+      hx-push-url="true"
+      hx-trigger="submit, change delay:200ms from:select, keyup changed delay:400ms from:input[name='q']"
+    >
+      <div class="users-toolbar__filters">
+        <div class="users-toolbar__search">
+          <input
+            type="search"
+            name="q"
+            class="form-input form-input--sm"
+            placeholder="Rechercher…"
+            value="{{ request.GET.q|default:'' }}"
+            aria-label="Rechercher un utilisateur"
+          >
+        </div>
+        <div class="users-filters">
+          <select name="role" class="form-select" aria-label="Filtrer par rôle">
+            <option value="">Tous les rôles</option>
+            {% for role in roles %}
+              <option value="{{ role.code }}" {% if request.GET.role == role.code %}selected{% endif %}>{{ role.name }}</option>
+            {% empty %}
+              <option value="ADMINISTRATEUR" {% if request.GET.role == 'ADMINISTRATEUR' %}selected{% endif %}>Administrateur</option>
+              <option value="SECRETAIRE" {% if request.GET.role == 'SECRETAIRE' %}selected{% endif %}>Secrétaire</option>
+              <option value="COMPTABLE" {% if request.GET.role == 'COMPTABLE' %}selected{% endif %}>Comptable</option>
+              <option value="DISCIPLINE" {% if request.GET.role == 'DISCIPLINE' %}selected{% endif %}>Discipline</option>
+            {% endfor %}
+          </select>
+          <select name="status" class="form-select" aria-label="Filtrer par statut">
+            <option value="">Tous les statuts</option>
+            <option value="active" {% if request.GET.status == 'active' %}selected{% endif %}>Actifs</option>
+            <option value="disabled" {% if request.GET.status == 'disabled' %}selected{% endif %}>Désactivés</option>
+            <option value="archived" {% if request.GET.status == 'archived' %}selected{% endif %}>Archivés</option>
+          </select>
+        </div>
+      </div>
+      <div class="content__toolbar-right">
+        <a href="{% url 'accounts:users' %}" class="btn btn--secondary btn--sm" title="Réinitialiser les filtres">
+          <i data-lucide="rotate-ccw" width="14" height="14"></i>
+          Réinitialiser
+        </a>
+        <button
+          type="button"
+          class="btn btn--secondary btn--sm"
+          title="Actualiser"
+          hx-get="{% url 'accounts:users' %}?{{ request.GET.urlencode }}"
+          hx-target="#users-table"
+          hx-swap="outerHTML"
+        >
+          <i data-lucide="refresh-cw" width="14" height="14"></i>
+          Actualiser
+        </button>
+      </div>
+    </form>
+
+    {% include "accounts/users/_table.html" %}
+  </div>
+{% endblock %}
+
+{% block modals %}
+  <div
+    class="modal-backdrop"
+    id="user-modal"
+    data-modal="user-modal"
+    data-user-modal
+    hidden
+    aria-hidden="true"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="user-modal-title"
+  >
+    <div class="modal modal--lg" data-modal-panel tabindex="-1">
+      <div class="modal__header">
+        <h2 class="modal__title" id="user-modal-title" data-user-modal-title>Nouvel utilisateur</h2>
+        <button type="button" class="modal__close" data-modal-close aria-label="Fermer">
+          <i data-lucide="x" width="18" height="18"></i>
+        </button>
+      </div>
+      <div class="modal__body" data-user-modal-body>
+        {% include "accounts/users/_form.html" with mode="create" %}
+      </div>
+    </div>
+  </div>
+
+  <div
+    class="modal-backdrop"
+    id="user-detail-modal"
+    data-modal="user-detail-modal"
+    hidden
+    aria-hidden="true"
+    role="dialog"
+    aria-modal="true"
+  >
+    <div class="modal modal--lg" data-modal-panel tabindex="-1">
+      <div class="modal__header">
+        <h2 class="modal__title">Détail utilisateur</h2>
+        <button type="button" class="modal__close" data-modal-close aria-label="Fermer">
+          <i data-lucide="x" width="18" height="18"></i>
+        </button>
+      </div>
+      <div class="modal__body" id="user-detail-body" data-user-detail-body></div>
+    </div>
+  </div>
+{% endblock %}

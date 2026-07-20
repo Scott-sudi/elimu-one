@@ -1,0 +1,23 @@
+<div class="content__empty" data-empty-state>
+  <div class="content__empty-icon" style="margin-bottom: 0.75rem; color: #66736d;">
+    {% if icon %}
+      <i data-lucide="{{ icon }}" width="36" height="36"></i>
+    {% else %}
+      <i data-lucide="inbox" width="36" height="36"></i>
+    {% endif %}
+  </div>
+  <div class="content__empty-title">{{ title|default:"Aucune donnée" }}</div>
+  {% if description %}
+    <p style="max-width: 28rem; margin: 0 auto; font-size: 0.875rem; color: #a2aea8;">{{ description }}</p>
+  {% endif %}
+  {% if action_label and action_url %}
+    <div style="margin-top: 1.25rem;">
+      <a href="{{ action_url }}" class="btn btn--primary btn--sm">{{ action_label }}</a>
+    </div>
+  {% elif action_slot %}
+    <div style="margin-top: 1.25rem;">
+      {{ action_slot }}
+    </div>
+  {% endif %}
+  {% block empty_action %}{% endblock %}
+</div>

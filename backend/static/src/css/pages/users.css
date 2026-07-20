@@ -1,0 +1,174 @@
+/* Kalunga School — Users Page */
+
+.users-page {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+}
+
+.users-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3);
+    flex-wrap: wrap;
+}
+
+.users-toolbar__filters {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    flex-wrap: wrap;
+}
+
+.users-toolbar__search {
+    width: 240px;
+}
+
+.users-toolbar__search .form-input {
+    height: var(--control-height-sm);
+    font-size: var(--font-size-caption);
+}
+
+.users-filters {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    flex-wrap: wrap;
+}
+
+.users-filters .form-select {
+    width: auto;
+    min-width: 140px;
+    height: var(--control-height-sm);
+    font-size: var(--font-size-caption);
+}
+
+.users-table .table td {
+    font-size: var(--font-size-body);
+}
+
+.users-table__user {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+}
+
+.users-table__avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: var(--radius-sm);
+    background-color: var(--color-primary-soft);
+    color: var(--color-primary-hover);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: var(--font-size-micro);
+    font-weight: var(--font-weight-semibold);
+    flex-shrink: 0;
+}
+
+.users-table__name {
+    font-weight: var(--font-weight-medium);
+    color: var(--color-text-primary);
+}
+
+.users-table__email {
+    font-size: var(--font-size-caption);
+    color: var(--color-text-secondary);
+}
+
+.users-form .form-row {
+    margin-bottom: 0;
+}
+
+.users-form__section {
+    margin-bottom: var(--space-5);
+}
+
+.users-form__section-title {
+    font-size: var(--font-size-label);
+    font-weight: var(--font-weight-semibold);
+    letter-spacing: var(--letter-spacing-label);
+    text-transform: uppercase;
+    color: var(--color-text-secondary);
+    margin-bottom: var(--space-3);
+    padding-bottom: var(--space-2);
+    border-bottom: 1px solid var(--color-divider);
+}
+
+.users-detail {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: var(--space-4);
+}
+
+.users-detail__sidebar {
+    background-color: var(--color-card);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-card);
+    padding: var(--space-5);
+    text-align: center;
+}
+
+.users-detail__avatar {
+    width: 72px;
+    height: 72px;
+    margin: 0 auto var(--space-3);
+    border-radius: var(--radius-md);
+    background-color: var(--color-primary);
+    color: var(--color-text-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: var(--font-size-h1);
+    font-weight: var(--font-weight-semibold);
+}
+
+.users-detail__name {
+    font-size: var(--font-size-h3);
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-text-primary);
+    margin-bottom: var(--space-1);
+}
+
+.users-detail__role {
+    margin-bottom: var(--space-4);
+}
+
+.users-detail__meta {
+    text-align: left;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    padding-top: var(--space-4);
+    border-top: 1px solid var(--color-divider);
+}
+
+.users-detail__meta-item {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.users-detail__meta-label {
+    font-size: var(--font-size-micro);
+    text-transform: uppercase;
+    letter-spacing: var(--letter-spacing-label);
+    color: var(--color-text-disabled);
+}
+
+.users-detail__meta-value {
+    font-size: var(--font-size-body);
+    color: var(--color-text-primary);
+}
+
+@media (max-width: 900px) {
+    .users-detail {
+        grid-template-columns: 1fr;
+    }
+
+    .users-toolbar__search {
+        width: 100%;
+    }
+}

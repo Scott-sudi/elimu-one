@@ -1,0 +1,183 @@
+/* Kalunga School — Topbar */
+
+.topbar {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-4);
+    height: var(--topbar-height);
+    padding: 0 var(--space-5);
+    background-color: var(--color-topbar);
+    border-bottom: 1px solid var(--color-border);
+    flex-shrink: 0;
+}
+
+.topbar__left {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    min-width: 0;
+}
+
+.topbar__menu-btn {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--color-border);
+    background-color: var(--color-surface);
+    color: var(--color-text-secondary);
+}
+
+.topbar__menu-btn:hover {
+    background-color: var(--color-surface-elevated);
+    color: var(--color-text-primary);
+}
+
+.topbar__title {
+    font-size: var(--font-size-h4);
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.topbar__subtitle {
+    font-size: var(--font-size-caption);
+    color: var(--color-text-secondary);
+    margin-left: var(--space-2);
+}
+
+.topbar__right {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    flex-shrink: 0;
+}
+
+.topbar__search {
+    position: relative;
+    width: 220px;
+}
+
+.topbar__search-input {
+    width: 100%;
+    height: var(--control-height-sm);
+    padding: 0 var(--space-3) 0 32px;
+    background-color: var(--color-input-dark);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-input);
+    color: var(--color-text-primary);
+    font-size: var(--font-size-caption);
+}
+
+.topbar__search-input::placeholder {
+    color: var(--color-text-disabled);
+}
+
+.topbar__search-input:focus {
+    border-color: var(--color-primary);
+}
+
+.topbar__search-icon {
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--color-text-disabled);
+    font-size: 14px;
+    pointer-events: none;
+}
+
+.topbar__action {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: var(--radius-sm);
+    color: var(--color-text-secondary);
+    border: 1px solid transparent;
+}
+
+.topbar__action:hover {
+    background-color: var(--color-surface);
+    border-color: var(--color-border);
+    color: var(--color-text-primary);
+}
+
+.topbar__user {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-1) var(--space-2);
+    border-radius: var(--radius-sm);
+    border: 1px solid transparent;
+    cursor: pointer;
+}
+
+.topbar__user:hover {
+    background-color: var(--color-surface);
+    border-color: var(--color-border);
+}
+
+.topbar__avatar {
+    width: 28px;
+    height: 28px;
+    border-radius: var(--radius-sm);
+    background-color: var(--color-primary);
+    color: var(--color-text-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: var(--font-size-micro);
+    font-weight: var(--font-weight-semibold);
+    flex-shrink: 0;
+}
+
+.topbar__user-meta {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.2;
+}
+
+.topbar__user-name {
+    font-size: var(--font-size-caption);
+    font-weight: var(--font-weight-medium);
+    color: var(--color-text-primary);
+}
+
+.topbar__user-role {
+    font-size: var(--font-size-micro);
+    color: var(--color-text-secondary);
+}
+
+@media (max-width: 960px) {
+    .topbar__menu-btn {
+        display: flex;
+    }
+
+    .topbar__search {
+        display: none;
+    }
+
+    .topbar__user-meta {
+        display: none;
+    }
+}
+
+@media (max-width: 640px) {
+    .topbar {
+        padding: 0 var(--space-3);
+    }
+
+    .topbar__subtitle {
+        display: none;
+    }
+}

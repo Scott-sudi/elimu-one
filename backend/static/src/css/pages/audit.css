@@ -1,0 +1,193 @@
+/* Kalunga School — Audit Log Page */
+
+.audit-page {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+}
+
+.audit-toolbar {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: var(--space-3);
+    flex-wrap: wrap;
+    padding: var(--space-4);
+    background-color: var(--color-card);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-card);
+}
+
+.audit-toolbar__filters {
+    display: flex;
+    align-items: flex-end;
+    gap: var(--space-3);
+    flex-wrap: wrap;
+}
+
+.audit-toolbar__field {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+}
+
+.audit-toolbar__field .form-label {
+    font-size: var(--font-size-micro);
+}
+
+.audit-toolbar__field .form-input,
+.audit-toolbar__field .form-select {
+    height: var(--control-height-sm);
+    font-size: var(--font-size-caption);
+    min-width: 140px;
+}
+
+.audit-toolbar__field--date .form-input {
+    min-width: 150px;
+}
+
+.audit-toolbar__field--search .form-input {
+    min-width: 200px;
+}
+
+.audit-table .table th {
+    white-space: nowrap;
+}
+
+.audit-table__action {
+    font-family: var(--font-family-mono);
+    font-size: var(--font-size-caption);
+    color: var(--color-text-primary);
+}
+
+.audit-table__actor {
+    font-weight: var(--font-weight-medium);
+}
+
+.audit-table__target {
+    color: var(--color-text-secondary);
+    font-size: var(--font-size-caption);
+}
+
+.audit-table__timestamp {
+    font-family: var(--font-family-mono);
+    font-size: var(--font-size-caption);
+    color: var(--color-text-secondary);
+    white-space: nowrap;
+}
+
+.audit-table__ip {
+    font-family: var(--font-family-mono);
+    font-size: var(--font-size-micro);
+    color: var(--color-text-disabled);
+}
+
+.audit-detail {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+}
+
+.audit-detail__grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-4);
+}
+
+.audit-detail__field {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+}
+
+.audit-detail__label {
+    font-size: var(--font-size-micro);
+    font-weight: var(--font-weight-medium);
+    letter-spacing: var(--letter-spacing-label);
+    text-transform: uppercase;
+    color: var(--color-text-disabled);
+}
+
+.audit-detail__value {
+    font-size: var(--font-size-body);
+    color: var(--color-text-primary);
+}
+
+.audit-detail__payload {
+    padding: var(--space-3);
+    background-color: var(--color-input-dark);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    font-family: var(--font-family-mono);
+    font-size: var(--font-size-caption);
+    color: var(--color-text-secondary);
+    white-space: pre-wrap;
+    word-break: break-word;
+    max-height: 280px;
+    overflow-y: auto;
+}
+
+.audit-timeline {
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    padding-left: var(--space-5);
+}
+
+.audit-timeline::before {
+    content: "";
+    position: absolute;
+    left: 7px;
+    top: 4px;
+    bottom: 4px;
+    width: 1px;
+    background-color: var(--color-divider);
+}
+
+.audit-timeline__item {
+    position: relative;
+    padding-bottom: var(--space-4);
+}
+
+.audit-timeline__item:last-child {
+    padding-bottom: 0;
+}
+
+.audit-timeline__marker {
+    position: absolute;
+    left: calc(-1 * var(--space-5) + 3px);
+    top: 4px;
+    width: 9px;
+    height: 9px;
+    border-radius: 2px;
+    background-color: var(--color-primary);
+    border: 1px solid var(--color-primary-dark);
+}
+
+.audit-timeline__time {
+    font-size: var(--font-size-caption);
+    color: var(--color-text-disabled);
+    margin-bottom: 2px;
+}
+
+.audit-timeline__text {
+    font-size: var(--font-size-body);
+    color: var(--color-text-primary);
+}
+
+@media (max-width: 720px) {
+    .audit-toolbar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .audit-detail__grid {
+        grid-template-columns: 1fr;
+    }
+
+    .audit-toolbar__field .form-input,
+    .audit-toolbar__field .form-select {
+        min-width: 0;
+        width: 100%;
+    }
+}

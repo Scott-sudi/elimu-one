@@ -1,0 +1,226 @@
+/* Kalunga School — Profile Page */
+
+.profile-page {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: var(--space-5);
+    align-items: start;
+}
+
+.profile-sidebar {
+    background-color: var(--color-card);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-card);
+    padding: var(--space-5);
+    box-shadow: var(--shadow-xs);
+}
+
+.profile-sidebar__avatar {
+    width: 80px;
+    height: 80px;
+    margin: 0 auto var(--space-4);
+    border-radius: var(--radius-md);
+    background-color: var(--color-primary);
+    color: var(--color-text-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: var(--font-size-display);
+    font-weight: var(--font-weight-semibold);
+}
+
+.profile-sidebar__name {
+    text-align: center;
+    font-size: var(--font-size-h3);
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-text-primary);
+    margin-bottom: var(--space-1);
+}
+
+.profile-sidebar__email {
+    text-align: center;
+    font-size: var(--font-size-caption);
+    color: var(--color-text-secondary);
+    margin-bottom: var(--space-4);
+}
+
+.profile-sidebar__badges {
+    display: flex;
+    justify-content: center;
+    gap: var(--space-2);
+    flex-wrap: wrap;
+    margin-bottom: var(--space-5);
+}
+
+.profile-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    border-top: 1px solid var(--color-divider);
+    padding-top: var(--space-3);
+}
+
+.profile-nav__link {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    height: 36px;
+    padding: 0 var(--space-3);
+    border-radius: var(--radius-sm);
+    font-size: var(--font-size-body);
+    font-weight: var(--font-weight-medium);
+    color: var(--color-text-secondary);
+}
+
+.profile-nav__link:hover {
+    background-color: var(--color-surface);
+    color: var(--color-text-primary);
+}
+
+.profile-nav__link.is-active {
+    background-color: var(--color-primary-soft);
+    color: var(--color-text-primary);
+}
+
+.profile-main {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+}
+
+.profile-section {
+    background-color: var(--color-card);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-card);
+    box-shadow: var(--shadow-xs);
+}
+
+.profile-section__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3);
+    padding: var(--space-3) var(--space-4);
+    border-bottom: 1px solid var(--color-divider);
+}
+
+.profile-section__title {
+    font-size: var(--font-size-h4);
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-text-primary);
+    margin: 0;
+}
+
+.profile-section__desc {
+    font-size: var(--font-size-caption);
+    color: var(--color-text-secondary);
+    margin-top: 2px;
+}
+
+.profile-section__body {
+    padding: var(--space-4);
+}
+
+.profile-section__footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--space-2);
+    padding: var(--space-3) var(--space-4);
+    border-top: 1px solid var(--color-divider);
+    background-color: var(--color-surface);
+    border-radius: 0 0 var(--radius-card) var(--radius-card);
+}
+
+.profile-field-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-4);
+}
+
+.profile-password-rules {
+    margin-top: var(--space-2);
+    padding: var(--space-3);
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-divider);
+    border-radius: var(--radius-sm);
+    font-size: var(--font-size-caption);
+    color: var(--color-text-secondary);
+}
+
+.profile-password-rules ul {
+    margin-top: var(--space-2);
+    padding-left: var(--space-4);
+    list-style: disc;
+}
+
+.profile-password-rules li {
+    margin-bottom: var(--space-1);
+}
+
+.profile-password-rules li.is-met {
+    color: var(--color-success);
+}
+
+.profile-sessions {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+}
+
+.profile-session {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3);
+    padding: var(--space-3);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    background-color: var(--color-surface);
+}
+
+.profile-session__info {
+    min-width: 0;
+}
+
+.profile-session__device {
+    font-size: var(--font-size-body);
+    font-weight: var(--font-weight-medium);
+    color: var(--color-text-primary);
+}
+
+.profile-session__meta {
+    font-size: var(--font-size-caption);
+    color: var(--color-text-secondary);
+    margin-top: 2px;
+}
+
+.profile-session__current {
+    margin-left: var(--space-2);
+}
+
+@media (max-width: 900px) {
+    .profile-page {
+        grid-template-columns: 1fr;
+    }
+
+    .profile-nav {
+        flex-direction: row;
+        flex-wrap: wrap;
+        border-top: none;
+        padding-top: 0;
+        border-bottom: 1px solid var(--color-divider);
+        padding-bottom: var(--space-3);
+        margin-bottom: var(--space-3);
+    }
+}
+
+@media (max-width: 640px) {
+    .profile-field-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .profile-session {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}

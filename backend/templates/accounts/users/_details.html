@@ -1,0 +1,82 @@
+{% with u=user_obj %}
+<div class="users-detail" data-user-details>
+  <aside class="users-detail__sidebar">
+    <div class="users-detail__avatar">{{ u.initials }}</div>
+    <div class="users-detail__name">{{ u.get_full_name }}</div>
+    <div class="users-detail__role">
+      <span class="badge badge--primary">{{ u.role_name|default:"—" }}</span>
+      {% if u.is_archived %}
+        <span class="badge badge--neutral">Archivé</span>
+      {% elif u.is_active %}
+        <span class="badge badge--success">Actif</span>
+      {% else %}
+        <span class="badge badge--danger">Désactivé</span>
+      {% endif %}
+    </div>
+    <div class="users-detail__meta">
+      <div class="users-detail__meta-item">
+        <span class="users-detail__meta-label">Nom d'utilisateur</span>
+        <span class="users-detail__meta-value">{{ u.username }}</span>
+      </div>
+      <div class="users-detail__meta-item">
+        <span class="users-detail__meta-label">Téléphone</span>
+        <span class="users-detail__meta-value">{{ u.telephone|default:"—" }}</span>
+      </div>
+      <div class="users-detail__meta-item">
+        <span class="users-detail__meta-label">Adresse électronique</span>
+        <span class="users-detail__meta-value">{{ u.email|default:"—" }}</span>
+      </div>
+    </div>
+  </aside>
+
+  <div>
+    <div class="card">
+      <div class="card__header">
+        <h3 class="card__title">Informations</h3>
+      </div>
+      <div class="card__body">
+        <div class="form-row">
+          <div class="users-detail__meta-item">
+            <span class="users-detail__meta-label">Nom</span>
+            <span class="users-detail__meta-value">{{ u.nom }}</span>
+          </div>
+          <div class="users-detail__meta-item">
+            <span class="users-detail__meta-label">Postnom</span>
+            <span class="users-detail__meta-value">{{ u.postnom|default:"—" }}</span>
+          </div>
+        </div>
+        <div class="form-row" style="margin-top: 1rem;">
+          <div class="users-detail__meta-item">
+            <span class="users-detail__meta-label">Prénom</span>
+            <span class="users-detail__meta-value">{{ u.prenom }}</span>
+          </div>
+          <div class="users-detail__meta-item">
+            <span class="users-detail__meta-label">Sexe</span>
+            <span class="users-detail__meta-value">{{ u.get_sexe_display|default:"—" }}</span>
+          </div>
+        </div>
+        <div class="form-row" style="margin-top: 1rem;">
+          <div class="users-detail__meta-item">
+            <span class="users-detail__meta-label">Créé le</span>
+            <span class="users-detail__meta-value">{{ u.date_joined|date:"j F Y à H\h i" }}</span>
+          </div>
+          <div class="users-detail__meta-item">
+            <span class="users-detail__meta-label">Dernière connexion</span>
+            <span class="users-detail__meta-value">{% if u.last_login %}{{ u.last_login|date:"j F Y à H\h i" }}{% else %}Jamais{% endif %}</span>
+          </div>
+        </div>
+        <div class="form-row" style="margin-top: 1rem;">
+          <div class="users-detail__meta-item">
+            <span class="users-detail__meta-label">Changement de mot de passe obligatoire</span>
+            <span class="users-detail__meta-value">{% if u.must_change_password %}Oui{% else %}Non{% endif %}</span>
+          </div>
+          <div class="users-detail__meta-item">
+            <span class="users-detail__meta-label">Identifiant public</span>
+            <span class="users-detail__meta-value table__cell-mono" style="font-size: 0.75rem;">{{ u.public_id }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endwith %}

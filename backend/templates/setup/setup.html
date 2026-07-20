@@ -1,0 +1,95 @@
+{% extends "layouts/auth.html" %}
+{% load static %}
+
+{% block title %}Configuration initiale{% endblock %}
+{% block body_class %}auth-layout setup-page{% endblock %}
+
+{% block auth_content %}
+  <div class="card" style="max-width: 560px; margin: 0 auto;">
+    <div class="card__header">
+      <div>
+        <h1 class="card__title">Configuration initiale</h1>
+        <p class="card__subtitle">Création du premier administrateur — {{ school_full_name|default:"Kalunga – La Source du Savoir" }}</p>
+      </div>
+    </div>
+    <div class="card__body">
+      {% include "components/notification.html" %}
+
+      <form method="post" action="{% url 'setup:setup' %}" id="setup-form" novalidate>
+        {% csrf_token %}
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label form-label--required" for="id_nom">Nom</label>
+            <input class="form-input" type="text" name="nom" id="id_nom" required maxlength="100" value="{{ form.nom.value|default:'' }}" autocomplete="family-name">
+            {% if form.nom.errors %}<p class="form-error">{{ form.nom.errors.0 }}</p>{% endif %}
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="id_postnom">Postnom</label>
+            <input class="form-input" type="text" name="postnom" id="id_postnom" maxlength="100" value="{{ form.postnom.value|default:'' }}">
+            {% if form.postnom.errors %}<p class="form-error">{{ form.postnom.errors.0 }}</p>{% endif %}
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label form-label--required" for="id_prenom">Prénom</label>
+            <input class="form-input" type="text" name="prenom" id="id_prenom" required maxlength="100" value="{{ form.prenom.value|default:'' }}" autocomplete="given-name">
+            {% if form.prenom.errors %}<p class="form-error">{{ form.prenom.errors.0 }}</p>{% endif %}
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="id_telephone">Téléphone</label>
+            <input class="form-input" type="tel" name="telephone" id="id_telephone" maxlength="30" value="{{ form.telephone.value|default:'' }}" autocomplete="tel">
+            {% if form.telephone.errors %}<p class="form-error">{{ form.telephone.errors.0 }}</p>{% endif %}
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="id_email">Adresse électronique <span class="form-hint">(facultatif)</span></label>
+          <input class="form-input" type="email" name="email" id="id_email" value="{{ form.email.value|default:'' }}" autocomplete="email">
+          {% if form.email.errors %}<p class="form-error">{{ form.email.errors.0 }}</p>{% endif %}
+        </div>
+
+        <div class="form-group">
+          <label class="form-label form-label--required" for="id_username">Nom d'utilisateur</label>
+          <input class="form-input" type="text" name="username" id="id_username" required maxlength="150" value="{{ form.username.value|default:'' }}" autocomplete="username">
+          {% if form.username.errors %}<p class="form-error">{{ form.username.errors.0 }}</p>{% endif %}
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label form-label--required" for="id_password">Mot de passe</label>
+            <div class="form-input-wrap">
+              <input class="form-input" type="password" name="password" id="id_password" required autocomplete="new-password">
+              <button type="button" class="form-input-wrap__action" data-password-toggle="#id_password" aria-label="Afficher le mot de passe" aria-pressed="false">
+                <i data-lucide="eye" width="16" height="16"></i>
+              </button>
+            </div>
+            {% if form.password.errors %}<p class="form-error">{{ form.password.errors.0 }}</p>{% endif %}
+          </div>
+          <div class="form-group">
+            <label class="form-label form-label--required" for="id_password_confirm">Confirmation</label>
+            <div class="form-input-wrap">
+              <input class="form-input" type="password" name="password_confirm" id="id_password_confirm" required autocomplete="new-password">
+              <button type="button" class="form-input-wrap__action" data-password-toggle="#id_password_confirm" aria-label="Afficher le mot de passe" aria-pressed="false">
+                <i data-lucide="eye" width="16" height="16"></i>
+              </button>
+            </div>
+            {% if form.password_confirm.errors %}<p class="form-error">{{ form.password_confirm.errors.0 }}</p>{% endif %}
+          </div>
+        </div>
+
+        {% if form.non_field_errors %}
+          <div class="alert alert--danger" style="margin-bottom: 1rem;">
+            <div class="alert__content">{{ form.non_field_errors.0 }}</div>
+          </div>
+        {% endif %}
+
+        <div class="card__footer" style="margin: 1.5rem -1rem -1rem; border-radius: 0 0 5px 5px;">
+          <button type="submit" class="btn btn--primary">Créer l'administrateur</button>
+        </div>
+      </form>
+    </div>
+  </div>
+  <p class="auth-footer">{{ school_name|default:"Kalunga" }} · v{{ app_version|default:"1.0.0-admin" }}</p>
+{% endblock %}

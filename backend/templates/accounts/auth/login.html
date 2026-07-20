@@ -1,0 +1,115 @@
+{% extends "layouts/auth.html" %}
+{% load static %}
+
+{% block title %}Connexion{% endblock %}
+{% block body_class %}auth-layout login-page{% endblock %}
+
+{% block auth_content %}
+  <div class="login-page" style="padding: 0; min-height: auto;">
+    <div class="login-card">
+      <aside class="login-card__brand">
+        <div class="login-card__brand-top">
+          <div class="login-card__logo">
+            <img
+              src="{% static 'images/branding/logo.png' %}"
+              alt="{{ school_name|default:'Kalunga' }}"
+              width="40"
+              height="40"
+              style="object-fit: contain;"
+              onerror="this.remove(); this.parentElement.insertAdjacentHTML('beforeend', '<i data-lucide=\'school\' width=\'28\' height=\'28\'></i>'); if (window.Kalunga?.icons?.refresh) window.Kalunga.icons.refresh(this.parentElement);"
+            >
+          </div>
+          <div class="login-card__brand-name">{{ school_name|default:"Kalunga" }}</div>
+          <p class="login-card__brand-tagline">{{ school_slogan|default:"La Source du Savoir" }}</p>
+          <p class="login-card__brand-tagline" style="margin-top: 0.5rem;">
+            Système intégré de gestion scolaire
+          </p>
+          <p class="login-card__brand-tagline" style="margin-top: 0.75rem; font-size: 0.8rem;">
+            Espace d'administration du personnel et des accès.
+          </p>
+        </div>
+        <div class="login-card__brand-footer">
+          {{ school_full_name|default:"Kalunga – La Source du Savoir" }}
+        </div>
+      </aside>
+
+      <div class="login-card__form-panel">
+        <div class="login-card__form-header">
+          <h1 class="login-card__form-title">Connexion</h1>
+          <p class="login-card__form-subtitle">Accédez à votre espace d'administration</p>
+        </div>
+
+        <form
+          id="login-form"
+          class="login-form"
+          method="post"
+          action="{% url 'accounts:login' %}"
+          data-login-form
+          data-login-redirect="{% url 'dashboard:home' %}"
+          novalidate
+        >
+          {% csrf_token %}
+
+          <div class="form-group">
+            <label class="form-label" for="id_username">Nom d'utilisateur</label>
+            <input
+              class="form-input form-input--light"
+              type="text"
+              name="username"
+              id="id_username"
+              data-login-username
+              required
+              autocomplete="username"
+              autofocus
+              placeholder="Identifiant"
+            >
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="id_password">Mot de passe</label>
+            <div class="form-input-wrap">
+              <input
+                class="form-input form-input--light"
+                type="password"
+                name="password"
+                id="id_password"
+                data-login-password
+                required
+                autocomplete="current-password"
+                placeholder="Mot de passe"
+              >
+              <button
+                type="button"
+                class="form-input-wrap__action"
+                data-password-toggle="#id_password"
+                aria-label="Afficher le mot de passe"
+                aria-pressed="false"
+              >
+                <i data-lucide="eye" width="16" height="16"></i>
+              </button>
+            </div>
+          </div>
+
+          <div
+            class="login-alert"
+            data-login-error
+            hidden
+            role="alert"
+          ></div>
+
+          {% if form.non_field_errors %}
+            <div class="login-alert" role="alert">{{ form.non_field_errors.0 }}</div>
+          {% endif %}
+
+          <button type="submit" class="login-form__submit" data-login-submit>
+            Se connecter
+          </button>
+        </form>
+
+        <div class="login-card__form-footer">
+          Version {{ app_version|default:"1.0.0-admin" }}
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}

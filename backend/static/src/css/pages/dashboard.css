@@ -1,0 +1,148 @@
+/* Kalunga School — Dashboard Page */
+
+.dashboard {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-5);
+}
+
+.dashboard__stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--space-4);
+}
+
+.dashboard__row {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: var(--space-4);
+}
+
+.dashboard__panel {
+    background-color: var(--color-card);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-card);
+    box-shadow: var(--shadow-xs);
+}
+
+.dashboard__panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3);
+    padding: var(--space-3) var(--space-4);
+    border-bottom: 1px solid var(--color-divider);
+}
+
+.dashboard__panel-title {
+    font-size: var(--font-size-h4);
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-text-primary);
+    margin: 0;
+}
+
+.dashboard__panel-body {
+    padding: var(--space-4);
+}
+
+.dashboard__activity-list {
+    display: flex;
+    flex-direction: column;
+}
+
+.dashboard__activity-item {
+    display: flex;
+    gap: var(--space-3);
+    padding: var(--space-3) 0;
+    border-bottom: 1px solid var(--color-divider);
+}
+
+.dashboard__activity-item:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.dashboard__activity-item:first-child {
+    padding-top: 0;
+}
+
+.dashboard__activity-dot {
+    width: 8px;
+    height: 8px;
+    margin-top: 6px;
+    border-radius: 2px;
+    background-color: var(--color-primary);
+    flex-shrink: 0;
+}
+
+.dashboard__activity-text {
+    font-size: var(--font-size-body);
+    color: var(--color-text-primary);
+}
+
+.dashboard__activity-time {
+    font-size: var(--font-size-caption);
+    color: var(--color-text-disabled);
+    margin-top: 2px;
+}
+
+.dashboard__quick-actions {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+}
+
+.dashboard__quick-action {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    height: 40px;
+    padding: 0 var(--space-3);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    background-color: var(--color-surface);
+    color: var(--color-text-primary);
+    font-size: var(--font-size-body);
+    font-weight: var(--font-weight-medium);
+}
+
+.dashboard__quick-action:hover {
+    background-color: var(--color-surface-elevated);
+    border-color: var(--color-primary);
+}
+
+.dashboard__welcome {
+    padding: var(--space-4) var(--space-5);
+    background-color: var(--color-primary-soft);
+    border: 1px solid rgba(31, 111, 74, 0.35);
+    border-radius: var(--radius-card);
+}
+
+.dashboard__welcome-title {
+    font-size: var(--font-size-h3);
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-text-primary);
+    margin: 0 0 var(--space-1);
+}
+
+.dashboard__welcome-text {
+    font-size: var(--font-size-body);
+    color: var(--color-text-secondary);
+    margin: 0;
+}
+
+@media (max-width: 1100px) {
+    .dashboard__stats {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .dashboard__row {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 640px) {
+    .dashboard__stats {
+        grid-template-columns: 1fr;
+    }
+}

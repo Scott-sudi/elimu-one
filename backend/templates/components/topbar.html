@@ -1,0 +1,144 @@
+{% with user=request.user ns=request.resolver_match.namespace|default:'' name=request.resolver_match.url_name|default:'' %}
+<header class="topbar">
+  <div class="topbar__left">
+    <button
+      type="button"
+      class="topbar__menu-btn"
+      @click="openMobile()"
+      aria-label="Ouvrir le menu"
+    >
+      <i data-lucide="menu" width="18" height="18"></i>
+    </button>
+
+    <div class="topbar__title-block">
+      <h1 class="topbar__title">
+        {% if page_title %}
+          {{ page_title }}
+        {% elif ns == 'dashboard' %}
+          Tableau de bord
+        {% elif ns == 'accounts' and name == 'roles' %}
+          Rôles et permissions
+        {% elif ns == 'accounts' and name == 'profile' %}
+          Mon profil
+        {% elif ns == 'accounts' and name == 'change_password' %}
+          Changer le mot de passe
+        {% elif ns == 'accounts' %}
+          Utilisateurs
+        {% elif ns == 'audit' and name == 'logins' %}
+          Connexions
+        {% elif ns == 'audit' %}
+          Journal d'activités
+        {% else %}
+          Administration
+        {% endif %}
+      </h1>
+      {% if breadcrumbs %}
+        <nav class="topbar__breadcrumb" aria-label="Fil d'Ariane">
+          {% for crumb in breadcrumbs %}
+            {% if crumb.url %}
+              <a href="{{ crumb.url }}">{{ crumb.label }}</a>
+            {% else %}
+              <span>{{ crumb.label }}</span>
+            {% endif %}
+            {% if not forloop.last %}<span class="topbar__breadcrumb-sep" aria-hidden="true">/</span>{% endif %}
+          {% endfor %}
+        </nav>
+      {% elif page_subtitle %}
+        <span class="topbar__subtitle">{{ page_subtitle }}</span>
+      {% else %}
+        <nav class="topbar__breadcrumb" aria-label="Fil d'Ariane">
+          <a href="{% url 'dashboard:home' %}">Accueil</a>
+          <span class="topbar__breadcrumb-sep" aria-hidden="true">/</span>
+          <span>
+            {% if page_title %}
+              {{ page_title }}
+            {% elif ns == 'dashboard' %}
+              Tableau de bord
+            {% elif ns == 'accounts' and name == 'roles' %}
+              Rôles et permissions
+            {% elif ns == 'accounts' and name == 'profile' %}
+              Mon profil
+            {% elif ns == 'accounts' and name == 'change_password' %}
+              Mot de passe
+            {% elif ns == 'accounts' %}
+              Utilisateurs
+            {% elif ns == 'audit' and name == 'logins' %}
+              Connexions
+            {% elif ns == 'audit' %}
+              Journal d'activités
+            {% else %}
+              Administration
+            {% endif %}
+          </span>
+        </nav>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="topbar__right">
+    {% block topbar_actions %}{% endblock %}
+
+    <div class="dropdown" data-dropdown x-data="{ open: false }" @click.outside="open = false">
+      <button
+        type="button"
+        class="topbar__user"
+        data-dropdown-trigger
+        @click="open = !open"
+        :aria-expanded="open.toString()"
+        aria-haspopup="menu"
+      >
+        <span class="topbar__avatar" aria-hidden="true">{{ user.initials|default:"?" }}</span>
+        <span class="topbar__user-meta">
+          <span class="topbar__user-name">{{ user.get_full_name|default:user.username }}</span>
+          <span class="topbar__user-role">{{ user.role_name|default:"Utilisateur" }}</span>
+        </span>
+        <i data-lucide="chevron-down" width="14" height="14"></i>
+      </button>
+
+      <div
+        class="dropdown__menu dropdown__menu--right"
+        data-dropdown-menu
+        x-show="open"
+        x-cloak
+        role="menu"
+        style="display: none;"
+        :style="open ? 'display: block;' : 'display: none;'"
+      >
+        <div class="dropdown__label">Compte</div>
+        <a href="{% url 'accounts:profile' %}" class="dropdown__item" data-dropdown-item role="menuitem">
+          <span class="dropdown__icon"><i data-lucide="user-round" width="16" height="16"></i></span>
+          Mon profil
+        </a>
+        <a href="{% url 'accounts:change_password' %}" class="dropdown__item" data-dropdown-item role="menuitem">
+          <span class="dropdown__icon"><i data-lucide="key-round" width="16" height="16"></i></span>
+          Changer le mot de passe
+        </a>
+        <div class="dropdown__divider"></div>
+        <form method="post" action="{% url 'accounts:logout' %}">
+          {% csrf_token %}
+          <button type="submit" class="dropdown__item dropdown__item--danger" data-dropdown-item role="menuitem">
+            <span class="dropdown__icon"><i data-lucide="log-out" width="16" height="16"></i></span>
+            Déconnexion
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+</header>
+
+<style>
+  .topbar__title-block { min-width: 0; }
+  .topbar__breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    margin-top: 2px;
+    font-size: 0.75rem;
+    color: #a2aea8;
+    flex-wrap: wrap;
+  }
+  .topbar__breadcrumb a { color: #a2aea8; }
+  .topbar__breadcrumb a:hover { color: #f4f7f5; }
+  .topbar__breadcrumb-sep { color: #66736d; }
+</style>
+{% endwith %}

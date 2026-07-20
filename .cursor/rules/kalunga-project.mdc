@@ -1,0 +1,40 @@
+---
+description: Règles permanentes du projet Kalunga School
+globs:
+  - "**/*"
+alwaysApply: true
+---
+
+# Kalunga – La Source du Savoir
+
+## Stack obligatoire
+- Backend : Django + Django REST Framework + MySQL (`kalunga_school`)
+- Frontend web : Django Templates, HTMX, Alpine.js, JavaScript ES6, CSS personnalisé, Vite
+- Aucun React pour l’instant
+- Connecteur MySQL : mysqlclient (préféré)
+
+## Design
+- Aucun dégradé CSS (`linear-gradient`, `radial-gradient`, `conic-gradient`)
+- Rayons faibles (max 6 px pour les boutons/champs/cartes)
+- Couleur principale : vert sombre `#1f6f4a`
+- Interface métier dense, professionnelle, légèrement sombre
+- Pas de glassmorphism, néon, boutons pilule, coins très arrondis
+
+## Phase actuelle
+- Développer UNIQUEMENT le module Administrateur
+- Ne pas commencer : secrétariat, finance, discipline, Flutter, élèves, parents, paiements, présences, BI
+- Le dossier `mobile/kalunga_parents` reste vide (`.gitkeep` uniquement)
+
+## Sécurité
+- Mots de passe jamais en clair (Django hashers uniquement)
+- CSRF toujours actif
+- Flutter ne se connectera jamais directement à MySQL — uniquement via l’API Django REST `/api/v1/`
+- Ne pas exposer les secrets, traces Python, ou mots de passe dans l’UI
+
+## Langue
+- Interface utilisateur entièrement en français
+- Code Python/JS : anglais acceptable pour les identifiants techniques
+
+## Identité
+- Établissement : Kalunga – La Source du Savoir
+- Logo officiel absent : utiliser icône Lucide provisoire + texte jusqu’à `static/src/images/branding/logo.png`

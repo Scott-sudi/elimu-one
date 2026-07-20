@@ -1,0 +1,63 @@
+{% extends "layouts/app.html" %}
+
+{% block title %}Connexions{% endblock %}
+
+{% block content %}
+  <div class="audit-page" data-page="logins" data-logins-page>
+    <div class="content__header">
+      <div class="content__header-main">
+        <h2 class="content__title">Connexions</h2>
+        <p class="content__description">Historique des tentatives de connexion</p>
+      </div>
+    </div>
+
+    <form
+      class="audit-toolbar"
+      method="get"
+      action="{% url 'audit:logins' %}"
+      data-logins-filter
+      hx-get="{% url 'audit:logins' %}"
+      hx-target="#logins-table"
+      hx-swap="outerHTML"
+      hx-push-url="true"
+      hx-trigger="submit, change"
+    >
+      <div class="audit-toolbar__filters">
+        <div class="audit-toolbar__field audit-toolbar__field--search">
+          <label class="form-label" for="logins-q">Utilisateur</label>
+          <input class="form-input" type="search" name="q" id="logins-q" value="{{ request.GET.q|default:'' }}" placeholder="Nom d'utilisateur…">
+        </div>
+        <div class="audit-toolbar__field">
+          <label class="form-label" for="logins-status">Statut</label>
+          <select class="form-select" name="status" id="logins-status">
+            <option value="">Tous</option>
+            <option value="success" {% if request.GET.status == 'success' %}selected{% endif %}>Succès</option>
+            <option value="failed" {% if request.GET.status == 'failed' %}selected{% endif %}>Échec</option>
+          </select>
+        </div>
+        <div class="audit-toolbar__field audit-toolbar__field--date">
+          <label class="form-label" for="logins-date-from">Du</label>
+          <input class="form-input" type="date" name="date_from" id="logins-date-from" value="{{ request.GET.date_from|default:'' }}">
+        </div>
+        <div class="audit-toolbar__field audit-toolbar__field--date">
+          <label class="form-label" for="logins-date-to">Au</label>
+          <input class="form-input" type="date" name="date_to" id="logins-date-to" value="{{ request.GET.date_to|default:'' }}">
+        </div>
+        <div class="audit-toolbar__field">
+          <label class="form-label" for="logins-ip">Adresse IP</label>
+          <input class="form-input" type="text" name="ip" id="logins-ip" value="{{ request.GET.ip|default:'' }}" placeholder="IP">
+        </div>
+        <div class="audit-toolbar__field">
+          <label class="form-label" for="logins-browser">Navigateur</label>
+          <input class="form-input" type="text" name="browser" id="logins-browser" value="{{ request.GET.browser|default:'' }}" placeholder="Navigateur">
+        </div>
+      </div>
+      <div style="display: flex; gap: 0.5rem;">
+        <a href="{% url 'audit:logins' %}" class="btn btn--secondary btn--sm">Réinitialiser</a>
+        <button type="submit" class="btn btn--primary btn--sm">Filtrer</button>
+      </div>
+    </form>
+
+    {% include "audit/_logins_table.html" %}
+  </div>
+{% endblock %}

@@ -1,0 +1,149 @@
+<div id="users-table" class="users-table" data-users-table>
+  <div class="table-wrap">
+    <table class="table table--dense">
+      <thead>
+        <tr>
+          <th>Nom complet</th>
+          <th>Nom d'utilisateur</th>
+          <th>Rôle</th>
+          <th>Téléphone</th>
+          <th>Adresse électronique</th>
+          <th>Statut</th>
+          <th>Date de création</th>
+          <th>Dernière connexion</th>
+          <th style="text-align: right;">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for u in page_obj %}
+          <tr data-user-id="{{ u.public_id }}">
+            <td>
+              <div class="users-table__user">
+                <span class="users-table__avatar">{{ u.initials }}</span>
+                <div>
+                  <div class="users-table__name">{{ u.get_full_name }}</div>
+                </div>
+              </div>
+            </td>
+            <td class="table__cell-mono">{{ u.username }}</td>
+            <td>
+              <span class="badge badge--primary">{{ u.role_name|default:"—" }}</span>
+            </td>
+            <td class="table__cell-muted">{{ u.telephone|default:"—" }}</td>
+            <td class="table__cell-muted">{{ u.email|default:"—" }}</td>
+            <td>
+              {% if u.is_archived %}
+                <span class="badge badge--neutral">Archivé</span>
+              {% elif u.is_active %}
+                <span class="badge badge--success">Actif</span>
+              {% else %}
+                <span class="badge badge--danger">Désactivé</span>
+              {% endif %}
+            </td>
+            <td class="table__cell-muted">{{ u.date_joined|date:"j F Y" }}</td>
+            <td class="table__cell-muted">
+              {% if u.last_login %}{{ u.last_login|date:"j F Y H:i" }}{% else %}—{% endif %}
+            </td>
+            <td>
+              <div class="dropdown" data-dropdown style="display: flex; justify-content: flex-end;">
+                <button
+                  type="button"
+                  class="btn btn--ghost btn--sm"
+                  data-dropdown-trigger
+                  aria-label="Actions"
+                  aria-haspopup="menu"
+                >
+                  <i data-lucide="ellipsis-vertical" width="16" height="16"></i>
+                </button>
+                <div class="dropdown__menu dropdown__menu--right" data-dropdown-menu hidden role="menu">
+                  <button
+                    type="button"
+                    class="dropdown__item"
+                    data-dropdown-item
+                    hx-get="{% url 'accounts:user_detail' u.public_id %}"
+                    hx-target="#user-detail-body"
+                    hx-swap="innerHTML"
+                    data-modal-open="user-detail-modal"
+                  >
+                    <span class="dropdown__icon"><i data-lucide="eye" width="16" height="16"></i></span>
+                    Consulter
+                  </button>
+                  <button
+                    type="button"
+                    class="dropdown__item"
+                    data-dropdown-item
+                    data-user-edit="{{ u.public_id }}"
+                    data-user-modal="user-modal"
+                    data-user-edit-url="{% url 'accounts:user_update' u.public_id %}"
+                    hx-get="{% url 'accounts:user_update' u.public_id %}"
+                    hx-target="#user-modal [data-user-modal-body]"
+                    hx-swap="innerHTML"
+                  >
+                    <span class="dropdown__icon"><i data-lucide="pencil" width="16" height="16"></i></span>
+                    Modifier
+                  </button>
+                  <button
+                    type="button"
+                    class="dropdown__item"
+                    data-dropdown-item
+                    hx-get="{% url 'accounts:user_reset_password' u.public_id %}"
+                    hx-target="#user-modal [data-user-modal-body]"
+                    hx-swap="innerHTML"
+                    data-modal-open="user-modal"
+                  >
+                    <span class="dropdown__icon"><i data-lucide="key-round" width="16" height="16"></i></span>
+                    Réinitialiser le mot de passe
+                  </button>
+                  <div class="dropdown__divider"></div>
+                  {% if u.is_active and not u.is_archived %}
+                    <button
+                      type="button"
+                      class="dropdown__item"
+                      data-dropdown-item
+                      data-user-status-url="{% url 'accounts:user_status' u.public_id 'deactivate' %}"
+                      data-confirm="Désactiver {{ u.get_full_name }} ?"
+                    >
+                      <span class="dropdown__icon"><i data-lucide="user-x" width="16" height="16"></i></span>
+                      Désactiver
+                    </button>
+                  {% elif not u.is_archived %}
+                    <button
+                      type="button"
+                      class="dropdown__item"
+                      data-dropdown-item
+                      data-user-status-url="{% url 'accounts:user_status' u.public_id 'activate' %}"
+                      data-confirm="Réactiver {{ u.get_full_name }} ?"
+                    >
+                      <span class="dropdown__icon"><i data-lucide="user-check" width="16" height="16"></i></span>
+                      Activer
+                    </button>
+                  {% endif %}
+                  {% if not u.is_archived %}
+                    <button
+                      type="button"
+                      class="dropdown__item dropdown__item--danger"
+                      data-dropdown-item
+                      data-user-status-url="{% url 'accounts:user_status' u.public_id 'archive' %}"
+                      data-confirm="Archiver {{ u.get_full_name }} ?"
+                    >
+                      <span class="dropdown__icon"><i data-lucide="archive" width="16" height="16"></i></span>
+                      Archiver
+                    </button>
+                  {% endif %}
+                </div>
+              </div>
+            </td>
+          </tr>
+        {% empty %}
+          <tr>
+            <td colspan="9" class="table__empty">
+              {% include "components/empty_state.html" with icon="users" title="Aucun utilisateur trouvé." description="Modifiez les filtres ou créez un nouvel utilisateur." %}
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  {% include "components/pagination.html" with page_obj=page_obj hx_target="#users-table" hx_swap="outerHTML" %}
+</div>

@@ -1,0 +1,69 @@
+{% extends "layouts/app.html" %}
+
+{% block title %}Journal d'activités{% endblock %}
+
+{% block content %}
+  <div class="audit-page" data-page="audit" data-audit-page>
+    <div class="content__header">
+      <div class="content__header-main">
+        <h2 class="content__title">Journal d'activités</h2>
+        <p class="content__description">Actions enregistrées sur les comptes et accès</p>
+      </div>
+    </div>
+
+    <form
+      class="audit-toolbar"
+      method="get"
+      action="{% url 'audit:actions' %}"
+      hx-get="{% url 'audit:actions' %}"
+      hx-target="#actions-table"
+      hx-swap="outerHTML"
+      hx-push-url="true"
+      hx-trigger="submit, change"
+    >
+      <div class="audit-toolbar__filters">
+        <div class="audit-toolbar__field audit-toolbar__field--search">
+          <label class="form-label" for="actions-q">Recherche</label>
+          <input class="form-input" type="search" name="q" id="actions-q" value="{{ request.GET.q|default:'' }}" placeholder="Description, acteur…">
+        </div>
+        <div class="audit-toolbar__field">
+          <label class="form-label" for="actions-action">Action</label>
+          <select class="form-select" name="action" id="actions-action">
+            <option value="">Toutes</option>
+            {% for value, label in action_choices %}
+              <option value="{{ value }}" {% if request.GET.action == value %}selected{% endif %}>{{ label }}</option>
+            {% empty %}
+              <option value="user_created">Création d'utilisateur</option>
+              <option value="user_updated">Modification d'utilisateur</option>
+              <option value="role_changed">Changement de rôle</option>
+              <option value="user_activated">Activation</option>
+              <option value="user_deactivated">Désactivation</option>
+              <option value="user_archived">Archivage</option>
+              <option value="login_success">Connexion réussie</option>
+              <option value="login_failed">Connexion échouée</option>
+              <option value="profile_updated">Modification du profil</option>
+              <option value="password_changed">Changement de mot de passe</option>
+              <option value="logout">Déconnexion</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="audit-toolbar__field audit-toolbar__field--date">
+          <label class="form-label" for="actions-date-from">Du</label>
+          <input class="form-input" type="date" name="date_from" id="actions-date-from" value="{{ request.GET.date_from|default:'' }}">
+        </div>
+        <div class="audit-toolbar__field audit-toolbar__field--date">
+          <label class="form-label" for="actions-date-to">Au</label>
+          <input class="form-input" type="date" name="date_to" id="actions-date-to" value="{{ request.GET.date_to|default:'' }}">
+        </div>
+      </div>
+      <div style="display: flex; gap: 0.5rem;">
+        <a href="{% url 'audit:actions' %}" class="btn btn--secondary btn--sm">Réinitialiser</a>
+        <button type="submit" class="btn btn--primary btn--sm">Filtrer</button>
+      </div>
+    </form>
+
+    {% include "audit/_actions_table.html" %}
+
+    <div id="audit-detail" class="audit-detail" style="margin-top: 1rem;"></div>
+  </div>
+{% endblock %}

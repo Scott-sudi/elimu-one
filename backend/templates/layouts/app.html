@@ -1,0 +1,40 @@
+{% extends "layouts/base.html" %}
+
+{% block body_class %}app-layout{% endblock %}
+
+{% block body_attrs %}
+  x-data="{
+    collapsed: localStorage.getItem('kalunga.sidebar.collapsed') === '1',
+    mobileOpen: false,
+    toggleCollapsed() {
+      this.collapsed = !this.collapsed;
+      localStorage.setItem('kalunga.sidebar.collapsed', this.collapsed ? '1' : '0');
+      document.documentElement.classList.toggle('sidebar-collapsed', this.collapsed);
+    },
+    openMobile() { this.mobileOpen = true; },
+    closeMobile() { this.mobileOpen = false; }
+  }"
+  :class="{ 'app-shell--collapsed': collapsed, 'app-shell--sidebar-open': mobileOpen }"
+{% endblock %}
+
+{% block body %}
+  <div class="app-shell" :class="{ 'app-shell--collapsed': collapsed, 'app-shell--sidebar-open': mobileOpen }">
+    {% include "components/sidebar.html" %}
+
+    <div class="app-shell__main">
+      {% include "components/topbar.html" %}
+      <div class="app-shell__body">
+        <main class="content" id="main-content">
+          <div class="content__inner">
+            {% block content_header %}{% endblock %}
+            {% block content %}{% endblock %}
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+{% endblock %}
+
+{% block modal_root %}
+  {% block modals %}{% endblock %}
+{% endblock %}

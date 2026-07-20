@@ -1,0 +1,119 @@
+{% with ns=request.resolver_match.namespace|default:'' name=request.resolver_match.url_name|default:'' %}
+<aside
+  class="sidebar"
+  data-sidebar
+  :class="{ 'is-collapsed': collapsed }"
+  :data-collapsed="collapsed ? 'true' : 'false'"
+  :aria-expanded="collapsed ? 'false' : 'true'"
+  aria-label="Navigation principale"
+>
+  <div class="sidebar__brand">
+    {% include "components/brand.html" with compact=True %}
+  </div>
+
+  <nav class="sidebar__nav" aria-label="Menu">
+    <div class="sidebar__section">
+      <div class="sidebar__section-label">Administration</div>
+
+      {% if ns == 'dashboard' %}
+        <a href="{% url 'dashboard:home' %}" class="sidebar__link is-active" aria-current="page" style="border-left: 3px solid #1f6f4a;">
+          <span class="sidebar__link-icon" style="color: #2a8058;"><i data-lucide="layout-dashboard" width="18" height="18"></i></span>
+          <span class="sidebar__link-label">Tableau de bord</span>
+        </a>
+      {% else %}
+        <a href="{% url 'dashboard:home' %}" class="sidebar__link">
+          <span class="sidebar__link-icon"><i data-lucide="layout-dashboard" width="18" height="18"></i></span>
+          <span class="sidebar__link-label">Tableau de bord</span>
+        </a>
+      {% endif %}
+
+      {% if ns == 'accounts' and name == 'users' or ns == 'accounts' and name == 'user_create' or ns == 'accounts' and name == 'user_detail' or ns == 'accounts' and name == 'user_update' %}
+        <a href="{% url 'accounts:users' %}" class="sidebar__link is-active" aria-current="page" style="border-left: 3px solid #1f6f4a;">
+          <span class="sidebar__link-icon" style="color: #2a8058;"><i data-lucide="users" width="18" height="18"></i></span>
+          <span class="sidebar__link-label">Utilisateurs</span>
+        </a>
+      {% else %}
+        <a href="{% url 'accounts:users' %}" class="sidebar__link">
+          <span class="sidebar__link-icon"><i data-lucide="users" width="18" height="18"></i></span>
+          <span class="sidebar__link-label">Utilisateurs</span>
+        </a>
+      {% endif %}
+
+      {% if ns == 'accounts' and name == 'roles' %}
+        <a href="{% url 'accounts:roles' %}" class="sidebar__link is-active" aria-current="page" style="border-left: 3px solid #1f6f4a;">
+          <span class="sidebar__link-icon" style="color: #2a8058;"><i data-lucide="shield" width="18" height="18"></i></span>
+          <span class="sidebar__link-label">Rôles et permissions</span>
+        </a>
+      {% else %}
+        <a href="{% url 'accounts:roles' %}" class="sidebar__link">
+          <span class="sidebar__link-icon"><i data-lucide="shield" width="18" height="18"></i></span>
+          <span class="sidebar__link-label">Rôles et permissions</span>
+        </a>
+      {% endif %}
+
+      {% if ns == 'audit' and name == 'logins' %}
+        <a href="{% url 'audit:logins' %}" class="sidebar__link is-active" aria-current="page" style="border-left: 3px solid #1f6f4a;">
+          <span class="sidebar__link-icon" style="color: #2a8058;"><i data-lucide="log-in" width="18" height="18"></i></span>
+          <span class="sidebar__link-label">Connexions</span>
+        </a>
+      {% else %}
+        <a href="{% url 'audit:logins' %}" class="sidebar__link">
+          <span class="sidebar__link-icon"><i data-lucide="log-in" width="18" height="18"></i></span>
+          <span class="sidebar__link-label">Connexions</span>
+        </a>
+      {% endif %}
+
+      {% if ns == 'audit' and name == 'actions' %}
+        <a href="{% url 'audit:actions' %}" class="sidebar__link is-active" aria-current="page" style="border-left: 3px solid #1f6f4a;">
+          <span class="sidebar__link-icon" style="color: #2a8058;"><i data-lucide="scroll-text" width="18" height="18"></i></span>
+          <span class="sidebar__link-label">Journal d'activités</span>
+        </a>
+      {% else %}
+        <a href="{% url 'audit:actions' %}" class="sidebar__link">
+          <span class="sidebar__link-icon"><i data-lucide="scroll-text" width="18" height="18"></i></span>
+          <span class="sidebar__link-label">Journal d'activités</span>
+        </a>
+      {% endif %}
+    </div>
+
+    <div class="sidebar__section">
+      <div class="sidebar__section-label">Compte</div>
+
+      {% if ns == 'accounts' and name == 'profile' or ns == 'accounts' and name == 'change_password' %}
+        <a href="{% url 'accounts:profile' %}" class="sidebar__link is-active" aria-current="page" style="border-left: 3px solid #1f6f4a;">
+          <span class="sidebar__link-icon" style="color: #2a8058;"><i data-lucide="user-round" width="18" height="18"></i></span>
+          <span class="sidebar__link-label">Mon profil</span>
+        </a>
+      {% else %}
+        <a href="{% url 'accounts:profile' %}" class="sidebar__link">
+          <span class="sidebar__link-icon"><i data-lucide="user-round" width="18" height="18"></i></span>
+          <span class="sidebar__link-label">Mon profil</span>
+        </a>
+      {% endif %}
+
+      <form method="post" action="{% url 'accounts:logout' %}">
+        {% csrf_token %}
+        <button type="submit" class="sidebar__link" style="width: 100%; border: none; background: transparent; cursor: pointer; text-align: left; font: inherit;">
+          <span class="sidebar__link-icon"><i data-lucide="log-out" width="18" height="18"></i></span>
+          <span class="sidebar__link-label">Déconnexion</span>
+        </button>
+      </form>
+    </div>
+  </nav>
+
+  <div class="sidebar__footer">
+    <button
+      type="button"
+      class="sidebar__toggle"
+      data-sidebar-toggle
+      @click="toggleCollapsed()"
+      :aria-label="collapsed ? 'Développer le menu' : 'Réduire le menu'"
+      title="Réduire / développer"
+    >
+      <i data-lucide="panel-left" width="16" height="16"></i>
+    </button>
+  </div>
+</aside>
+
+<div class="sidebar__overlay" @click="closeMobile()" x-show="mobileOpen" x-cloak></div>
+{% endwith %}
