@@ -20,6 +20,7 @@ from apps.api.views import (
     UserStatusAPIView,
     UserViewSet,
 )
+from apps.secretariat.api.views import CardResolveAPIView
 
 app_name = "api"
 
@@ -44,6 +45,15 @@ urlpatterns = [
         "users/<uuid:public_id>/reset-password/",
         UserResetPasswordAPIView.as_view(),
         name="user-reset-password",
+    ),
+    path(
+        "secretariat/",
+        include(("apps.secretariat.api.urls", "secretariat-api")),
+    ),
+    path(
+        "cards/resolve/<str:qr_identifier>/",
+        CardResolveAPIView.as_view(),
+        name="card-resolve",
     ),
     path("", include(router.urls)),
 ]
