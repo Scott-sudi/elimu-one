@@ -34,7 +34,7 @@
               {% if role.is_system %}
                 <span class="badge badge--info">Système</span>
               {% else %}
-                <span class="badge badge--neutral">Personnalisé</span>
+                <span class="badge badge--custom">Personnalisé</span>
               {% endif %}
             </td>
             <td>
@@ -57,18 +57,4 @@
     </table>
   </div>
 
-  <div class="content__section" style="margin-top: 1.5rem;">
-    <h3 class="content__section-title">Permissions de la phase administrateur</h3>
-    <div class="card">
-      <div class="card__body card__body--dense">
-        <ul style="display: flex; flex-direction: column; gap: 0.5rem; font-size: 0.875rem; color: #a2aea8;">
-          <li><span class="badge badge--primary" style="margin-right: 0.5rem;">view_admin_dashboard</span> Consulter le tableau de bord administrateur</li>
-          <li><span class="badge badge--primary" style="margin-right: 0.5rem;">manage_users</span> Gérer les utilisateurs</li>
-          <li><span class="badge badge--primary" style="margin-right: 0.5rem;">view_login_history</span> Consulter l'historique des connexions</li>
-          <li><span class="badge badge--primary" style="margin-right: 0.5rem;">view_audit_log</span> Consulter le journal d'activités</li>
-          <li><span class="badge badge--primary" style="margin-right: 0.5rem;">manage_own_profile</span> Gérer son propre profil</li>
-        </ul>
-      </div>
-    </div>
-  </div>
 {% endblock %}

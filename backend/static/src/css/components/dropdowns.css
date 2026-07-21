@@ -19,6 +19,10 @@
     display: none;
 }
 
+.dropdown__menu[hidden] {
+    display: none !important;
+}
+
 .dropdown__menu--right {
     left: auto;
     right: 0;

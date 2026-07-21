@@ -2,7 +2,7 @@
  * Modal open/close with Escape and basic focus trap.
  */
 
-const ANIM_MS = 180;
+const ANIM_MS = 160;
 const OPEN_MODALS = new Set();
 
 /**
@@ -33,9 +33,7 @@ export function initModals(root = document) {
     if (modal.dataset.modalOverlayBound) return;
     modal.dataset.modalOverlayBound = '1';
     modal.addEventListener('click', (e) => {
-      if (e.target === modal || e.target.matches('[data-modal-backdrop]')) {
-        closeModal(modal);
-      }
+      if (e.target === modal) closeModal(modal);
     });
   });
 }
@@ -46,18 +44,23 @@ export function initModals(root = document) {
  */
 export function openModal(target) {
   const modal = resolveModal(target);
-  if (!modal) return null;
+  if (!modal) {
+    console.error('[Kalunga] Modale introuvable:', target);
+    return null;
+  }
 
   modal.hidden = false;
+  modal.removeAttribute('hidden');
   modal.classList.add('is-open');
   modal.setAttribute('aria-hidden', 'false');
+  modal.style.display = 'flex';
   modal.style.opacity = '0';
   modal.style.transition = `opacity ${ANIM_MS}ms ease`;
 
-  const panel = modal.querySelector('[data-modal-panel]') || modal.firstElementChild;
+  const panel = modal.querySelector('[data-modal-panel]') || modal.querySelector('.modal');
   if (panel) {
     panel.style.transition = `transform ${ANIM_MS}ms ease`;
-    panel.style.transform = 'translateY(6px)';
+    panel.style.transform = 'translateY(8px)';
   }
 
   requestAnimationFrame(() => {
@@ -65,12 +68,14 @@ export function openModal(target) {
     if (panel) panel.style.transform = 'translateY(0)';
   });
 
-  const previouslyFocused = document.activeElement;
-  modal._kalungaPrevFocus = previouslyFocused;
+  modal._kalungaPrevFocus = document.activeElement;
   OPEN_MODALS.add(modal);
 
-  const focusable = getFocusable(modal);
-  (focusable[0] || modal).focus?.();
+  window.setTimeout(() => {
+    const focusable = getFocusable(modal);
+    const first = focusable[0] || panel;
+    if (first && typeof first.focus === 'function') first.focus();
+  }, 20);
 
   if (!modal._kalungaKeyHandler) {
     modal._kalungaKeyHandler = (e) => onKeyDown(e, modal);
@@ -90,13 +95,15 @@ export function closeModal(target) {
   if (!modal) return;
 
   modal.style.opacity = '0';
-  const panel = modal.querySelector('[data-modal-panel]') || modal.firstElementChild;
-  if (panel) panel.style.transform = 'translateY(6px)';
+  const panel = modal.querySelector('[data-modal-panel]') || modal.querySelector('.modal');
+  if (panel) panel.style.transform = 'translateY(8px)';
 
   window.setTimeout(() => {
     modal.hidden = true;
+    modal.setAttribute('hidden', '');
     modal.classList.remove('is-open');
     modal.setAttribute('aria-hidden', 'true');
+    modal.style.display = '';
   }, ANIM_MS);
 
   OPEN_MODALS.delete(modal);
@@ -110,17 +117,11 @@ export function closeModal(target) {
   }
 
   const prev = modal._kalungaPrevFocus;
-  if (prev && typeof prev.focus === 'function') {
-    prev.focus();
-  }
+  if (prev && typeof prev.focus === 'function') prev.focus();
 
   document.dispatchEvent(new CustomEvent('kalunga:modal-close', { detail: { modal } }));
 }
 
-/**
- * @param {KeyboardEvent} e
- * @param {HTMLElement} modal
- */
 function onKeyDown(e, modal) {
   if (e.key === 'Escape') {
     e.preventDefault();
@@ -130,10 +131,7 @@ function onKeyDown(e, modal) {
   if (e.key !== 'Tab') return;
 
   const focusable = getFocusable(modal);
-  if (!focusable.length) {
-    e.preventDefault();
-    return;
-  }
+  if (!focusable.length) return;
 
   const first = focusable[0];
   const last = focusable[focusable.length - 1];
@@ -146,29 +144,22 @@ function onKeyDown(e, modal) {
   }
 }
 
-/**
- * @param {HTMLElement} root
- * @returns {HTMLElement[]}
- */
 function getFocusable(root) {
   return Array.from(
     root.querySelectorAll(
       'a[href], button:not([disabled]), textarea:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])',
     ),
-  ).filter((el) => !el.hasAttribute('disabled') && el.offsetParent !== null);
+  ).filter((el) => {
+    if (el.hasAttribute('disabled')) return false;
+    const style = window.getComputedStyle(el);
+    return style.display !== 'none' && style.visibility !== 'hidden';
+  });
 }
 
-/**
- * @param {string|HTMLElement} target
- * @returns {HTMLElement|null}
- */
 function resolveModal(target) {
   if (!target) return null;
   if (typeof target === 'string') {
-    return (
-      document.querySelector(`[data-modal="${target}"]`) ||
-      document.getElementById(target)
-    );
+    return document.querySelector(`[data-modal="${target}"]`) || document.getElementById(target);
   }
   return target;
 }

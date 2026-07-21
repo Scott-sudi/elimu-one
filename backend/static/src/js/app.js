@@ -16,8 +16,10 @@ import { confirmDialog } from './core/dialogs.js';
 import { setButtonLoading, withButtonLoading } from './core/loading.js';
 
 import { initSidebar } from './components/sidebar.js';
+import { initNavbar } from './components/navbar.js';
 import { initModals, openModal, closeModal } from './components/modal.js';
 import { initDropdowns } from './components/dropdown.js';
+import { initLogoutConfirmations } from './components/logout-confirm.js';
 import { initPasswordToggles } from './components/password-toggle.js';
 import { initDataTables } from './components/data-table.js';
 
@@ -44,9 +46,11 @@ export function refreshIcons(root = document) {
  * @param {ParentNode} [root=document]
  */
 function bootUi(root = document) {
+  initNavbar(root);
   initSidebar(root);
-  initModals(root);
+  initModals(document);
   initDropdowns(root);
+  initLogoutConfirmations(root);
   initPasswordToggles(root);
   initDataTables(root);
   refreshIcons(root);

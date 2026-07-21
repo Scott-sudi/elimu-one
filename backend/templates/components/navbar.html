@@ -1,0 +1,116 @@
+{% load static %}
+{% with ns=request.resolver_match.namespace|default:'' name=request.resolver_match.url_name|default:'' %}
+<header class="navbar" data-navbar>
+  <div class="navbar__inner">
+    <div class="navbar__row">
+      <a href="{% url 'dashboard:home' %}" class="navbar__brand" title="{{ school_full_name }}">
+        <span class="navbar__brand-mark">
+          <img
+            src="{% static 'images/branding/logo.png' %}"
+            alt="Logo {{ school_name }}"
+            width="24"
+            height="24"
+            onerror="this.hidden = true;"
+          >
+        </span>
+        <span class="navbar__brand-text">
+          <span class="navbar__brand-name">{{ school_name }}</span>
+          <span class="navbar__brand-tag">{{ school_slogan }}</span>
+        </span>
+      </a>
+
+      {% if request.user.is_administrateur %}
+      <nav class="navbar__nav navbar__nav--desktop" aria-label="Navigation principale">
+        <a href="{% url 'dashboard:home' %}" class="navbar__link {% if ns == 'dashboard' %}is-active{% endif %}" {% if ns == 'dashboard' %}aria-current="page"{% endif %}>
+          <span class="navbar__link-icon"><i data-lucide="layout-dashboard" width="16" height="16"></i></span>
+          Tableau de bord
+        </a>
+        <a href="{% url 'accounts:users' %}" class="navbar__link {% if ns == 'accounts' and name != 'roles' and name != 'profile' and name != 'change_password' %}is-active{% endif %}">
+          <span class="navbar__link-icon"><i data-lucide="users" width="16" height="16"></i></span>
+          Utilisateurs
+        </a>
+        <a href="{% url 'accounts:roles' %}" class="navbar__link {% if name == 'roles' %}is-active{% endif %}">
+          <span class="navbar__link-icon"><i data-lucide="shield" width="16" height="16"></i></span>
+          Rôles
+        </a>
+        <a href="{% url 'audit:logins' %}" class="navbar__link {% if ns == 'audit' and name == 'logins' %}is-active{% endif %}">
+          <span class="navbar__link-icon"><i data-lucide="log-in" width="16" height="16"></i></span>
+          Connexions
+        </a>
+        <a href="{% url 'audit:actions' %}" class="navbar__link {% if ns == 'audit' and name == 'actions' %}is-active{% endif %}">
+          <span class="navbar__link-icon"><i data-lucide="scroll-text" width="16" height="16"></i></span>
+          Journal
+        </a>
+      </nav>
+      {% else %}
+      <nav class="navbar__nav navbar__nav--desktop" aria-label="Navigation principale">
+        <a href="{% url 'dashboard:home' %}" class="navbar__link is-active" aria-current="page">
+          <span class="navbar__link-icon"><i data-lucide="briefcase-business" width="16" height="16"></i></span>
+          Mon espace de travail
+        </a>
+      </nav>
+      {% endif %}
+
+      <div class="navbar__user">
+        <a href="{% url 'accounts:profile' %}" class="navbar__user-chip" title="Mon profil">
+          <span class="navbar__user-avatar" aria-hidden="true">
+            {% if request.user.profile_photo %}
+              <img src="{{ request.user.profile_photo.url }}" alt="">
+            {% else %}
+              {{ request.user.initials }}
+            {% endif %}
+          </span>
+          <span>{{ request.user.username }} | {{ request.user.role_name|default:"Administrateur" }}</span>
+        </a>
+
+        <form method="post" action="{% url 'accounts:logout' %}" data-logout-confirm>
+          {% csrf_token %}
+          <button type="submit" class="navbar__logout">Déconnexion</button>
+        </form>
+
+        <button type="button" class="navbar__menu-toggle" data-navbar-toggle aria-label="Ouvrir le menu" aria-expanded="false">
+          <i data-lucide="menu" width="18" height="18"></i>
+        </button>
+      </div>
+    </div>
+
+    <div class="navbar__drawer" data-navbar-drawer hidden>
+      {% if request.user.is_administrateur %}
+      <a href="{% url 'dashboard:home' %}" class="navbar__link {% if ns == 'dashboard' %}is-active{% endif %}">
+        <span class="navbar__link-icon"><i data-lucide="layout-dashboard" width="16" height="16"></i></span>
+        Tableau de bord
+      </a>
+      <a href="{% url 'accounts:users' %}" class="navbar__link">
+        <span class="navbar__link-icon"><i data-lucide="users" width="16" height="16"></i></span>
+        Utilisateurs
+      </a>
+      <a href="{% url 'accounts:roles' %}" class="navbar__link">
+        <span class="navbar__link-icon"><i data-lucide="shield" width="16" height="16"></i></span>
+        Rôles
+      </a>
+      <a href="{% url 'audit:logins' %}" class="navbar__link">
+        <span class="navbar__link-icon"><i data-lucide="log-in" width="16" height="16"></i></span>
+        Connexions
+      </a>
+      <a href="{% url 'audit:actions' %}" class="navbar__link">
+        <span class="navbar__link-icon"><i data-lucide="scroll-text" width="16" height="16"></i></span>
+        Journal
+      </a>
+      <a href="{% url 'accounts:profile' %}" class="navbar__link">
+        <span class="navbar__link-icon"><i data-lucide="user-round" width="16" height="16"></i></span>
+        Mon profil
+      </a>
+      {% else %}
+      <a href="{% url 'dashboard:home' %}" class="navbar__link is-active">
+        <span class="navbar__link-icon"><i data-lucide="briefcase-business" width="16" height="16"></i></span>
+        Mon espace de travail
+      </a>
+      <a href="{% url 'accounts:profile' %}" class="navbar__link">
+        <span class="navbar__link-icon"><i data-lucide="user-round" width="16" height="16"></i></span>
+        Mon profil
+      </a>
+      {% endif %}
+    </div>
+  </div>
+</header>
+{% endwith %}

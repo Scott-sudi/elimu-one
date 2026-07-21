@@ -5,7 +5,22 @@
 {% block content %}
   <div class="profile-page" data-page="profile" data-profile-page>
     <aside class="profile-sidebar">
-      <div class="profile-sidebar__avatar">{{ request.user.initials }}</div>
+      {% if request.user.profile_photo %}
+        <button
+          type="button"
+          class="profile-sidebar__avatar profile-sidebar__avatar--button"
+          data-modal-open="profile-photo-modal"
+          aria-label="Agrandir ma photo de profil"
+          title="Agrandir la photo"
+        >
+          <img src="{{ request.user.profile_photo.url }}" alt="Photo de {{ request.user.get_full_name }}" data-profile-avatar-image>
+        </button>
+      {% else %}
+        <div class="profile-sidebar__avatar">
+          <span data-profile-avatar-initials>{{ request.user.initials }}</span>
+          <img src="" alt="" data-profile-avatar-image hidden>
+        </div>
+      {% endif %}
       <div class="profile-sidebar__name">{{ request.user.get_full_name }}</div>
       <div class="profile-sidebar__email">{{ request.user.email|default:request.user.username }}</div>
       <div class="profile-sidebar__badges">
@@ -39,10 +54,42 @@
         <form
           method="post"
           action="{% url 'accounts:profile' %}"
-          data-profile-form
           class="profile-section__body"
+          enctype="multipart/form-data"
         >
           {% csrf_token %}
+          <div class="profile-photo-control">
+            <div>
+              <label class="form-label">Photo de profil</label>
+              <p class="form-hint">PNG, JPEG ou WebP, jusqu’à 5 Mo.</p>
+            </div>
+            <div class="profile-photo-control__actions">
+              <input
+                type="file"
+                name="profile_photo"
+                id="profile-photo-input"
+                accept="image/png,image/jpeg,image/webp"
+                data-profile-photo-input
+                hidden
+              >
+              <button type="button" class="btn btn--secondary btn--sm" data-profile-photo-select>
+                <i data-lucide="image-plus" width="15" height="15"></i>
+                Choisir une image
+              </button>
+              <button type="button" class="btn btn--secondary btn--sm" data-profile-camera-open>
+                <i data-lucide="camera" width="15" height="15"></i>
+                Prendre une photo
+              </button>
+            </div>
+          </div>
+          <div class="profile-camera" data-profile-camera hidden>
+            <video class="profile-camera__preview" data-profile-camera-video autoplay playsinline></video>
+            <canvas data-profile-camera-canvas hidden></canvas>
+            <div class="profile-camera__actions">
+              <button type="button" class="btn btn--secondary btn--sm" data-profile-camera-cancel>Annuler</button>
+              <button type="button" class="btn btn--primary btn--sm" data-profile-camera-capture>Utiliser cette photo</button>
+            </div>
+          </div>
           <div class="profile-field-grid">
             <div class="form-group">
               <label class="form-label form-label--required" for="profile-nom">Nom</label>
@@ -77,4 +124,31 @@
       </section>
     </div>
   </div>
+{% endblock %}
+
+{% block modals %}
+  {% if request.user.profile_photo %}
+    <div
+      class="modal-backdrop"
+      id="profile-photo-modal"
+      data-modal="profile-photo-modal"
+      hidden
+      aria-hidden="true"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="profile-photo-modal-title"
+    >
+      <div class="modal modal--lg profile-photo-modal" data-modal-panel tabindex="-1">
+        <div class="modal__header">
+          <h2 class="modal__title" id="profile-photo-modal-title">Ma photo de profil</h2>
+          <button type="button" class="modal__close" data-modal-close aria-label="Fermer">
+            <i data-lucide="x" width="18" height="18"></i>
+          </button>
+        </div>
+        <div class="modal__body">
+          <img src="{{ request.user.profile_photo.url }}" alt="Photo de {{ request.user.get_full_name }}">
+        </div>
+      </div>
+    </div>
+  {% endif %}
 {% endblock %}

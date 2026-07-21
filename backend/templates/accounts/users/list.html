@@ -10,15 +10,13 @@
         <p class="content__description">Gestion des comptes du personnel scolaire</p>
       </div>
       <div class="content__actions">
-        <button
-          type="button"
+        <a
+          href="{% url 'accounts:user_create' %}"
           class="btn btn--primary"
-          data-user-create="user-modal"
-          data-modal-open="user-modal"
         >
           <i data-lucide="user-plus" width="16" height="16"></i>
           Nouvel utilisateur
-        </button>
+        </a>
       </div>
     </div>
 
@@ -93,7 +91,6 @@
     class="modal-backdrop"
     id="user-modal"
     data-modal="user-modal"
-    data-user-modal
     hidden
     aria-hidden="true"
     role="dialog"
@@ -102,14 +99,12 @@
   >
     <div class="modal modal--lg" data-modal-panel tabindex="-1">
       <div class="modal__header">
-        <h2 class="modal__title" id="user-modal-title" data-user-modal-title>Nouvel utilisateur</h2>
+        <h2 class="modal__title" id="user-modal-title" data-user-modal-title>Utilisateur</h2>
         <button type="button" class="modal__close" data-modal-close aria-label="Fermer">
           <i data-lucide="x" width="18" height="18"></i>
         </button>
       </div>
-      <div class="modal__body" data-user-modal-body>
-        {% include "accounts/users/_form.html" with mode="create" %}
-      </div>
+      <div class="modal__body" data-user-modal-body></div>
     </div>
   </div>
 

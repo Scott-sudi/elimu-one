@@ -1,0 +1,17 @@
+{% extends "layouts/app.html" %}
+
+{% block title %}Mon espace de travail{% endblock %}
+
+{% block content %}
+  <section class="profile-section">
+    <div class="profile-section__header">
+      <div>
+        <h2 class="profile-section__title">Bienvenue, {{ request.user.get_short_name }}</h2>
+        <p class="profile-section__desc">Votre espace de travail {{ request.user.role_name|default:"personnel" }}.</p>
+      </div>
+    </div>
+    <div class="profile-section__body">
+      {% include "components/empty_state.html" with icon="briefcase-business" title="Espace de travail prêt" description="Les outils spécifiques à votre rôle seront ajoutés ici au fur et à mesure de leur déploiement." %}
+    </div>
+  </section>
+{% endblock %}

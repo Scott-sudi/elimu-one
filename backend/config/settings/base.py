@@ -145,7 +145,7 @@ CSRF_COOKIE_SAMESITE = "Lax"
 MAX_FAILED_LOGIN_ATTEMPTS = env("MAX_FAILED_LOGIN_ATTEMPTS")
 ACCOUNT_LOCKOUT_MINUTES = env("ACCOUNT_LOCKOUT_MINUTES")
 
-SCHOOL_NAME = env("SCHOOL_NAME", default="Kalunga")
+SCHOOL_NAME = env("SCHOOL_NAME", default="Institut Kalunga")
 SCHOOL_SLOGAN = env("SCHOOL_SLOGAN", default="La Source du Savoir")
 APP_VERSION = env("APP_VERSION", default="1.0.0-admin")
 

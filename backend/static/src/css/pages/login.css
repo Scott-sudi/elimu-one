@@ -7,6 +7,10 @@
     align-items: center;
     justify-content: center;
     background-color: var(--color-background);
+    background-image:
+        linear-gradient(var(--color-grid-line) 1px, transparent 1px),
+        linear-gradient(90deg, var(--color-grid-line) 1px, transparent 1px);
+    background-size: 22px 22px;
     padding: var(--space-6);
 }
 
@@ -24,7 +28,7 @@
 .login-card__brand {
     width: 40%;
     flex-shrink: 0;
-    background-color: #1f6f4a;
+    background-color: var(--color-primary);
     color: #f4f7f5;
     padding: var(--space-8) var(--space-6);
     display: flex;
@@ -39,16 +43,26 @@
 }
 
 .login-card__logo {
-    width: 48px;
-    height: 48px;
-    border-radius: var(--radius-sm);
-    background-color: rgba(255, 255, 255, 0.15);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    width: 72px;
+    height: 72px;
+    overflow: hidden;
+    border-radius: 50%;
+    background-color: #ffffff;
+    border: 2px solid rgba(255, 255, 255, 0.8);
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: var(--font-size-h3);
     font-weight: var(--font-weight-bold);
+    box-shadow: 0 4px 12px rgba(7, 60, 22, 0.24);
+}
+
+.login-card__logo img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transform: scale(1.06);
 }
 
 .login-card__brand-name {
@@ -127,9 +141,9 @@
 }
 
 .login-form .form-input:focus {
-    border-color: #1f6f4a;
+    border-color: var(--color-primary);
     background-color: #fff;
-    box-shadow: 0 0 0 2px rgba(31, 111, 74, 0.2);
+    box-shadow: 0 0 0 2px var(--color-focus-ring);
 }
 
 .login-form .form-error {
@@ -156,27 +170,27 @@
 .login-form__remember input {
     width: 15px;
     height: 15px;
-    accent-color: #1f6f4a;
+    accent-color: var(--color-primary);
 }
 
 .login-form__forgot {
-    color: #1f6f4a;
+    color: var(--color-primary);
     font-weight: var(--font-weight-medium);
 }
 
 .login-form__forgot:hover {
-    color: #2a8058;
+    color: var(--color-primary-hover);
     text-decoration: underline;
 }
 
-/* Login button: height 44-46px, radius 4px, bg #1f6f4a, hover #2a8058, active #174f38 */
+/* Login button follows the school green from the logo. */
 .login-form__submit,
 .btn--login {
     width: 100%;
     height: 46px;
-    border: 1px solid #1f6f4a;
+    border: 1px solid var(--color-primary);
     border-radius: 4px;
-    background-color: #1f6f4a;
+    background-color: var(--color-primary);
     color: #f4f7f5;
     font-size: var(--font-size-body-md);
     font-weight: var(--font-weight-semibold);
@@ -186,14 +200,14 @@
 
 .login-form__submit:hover,
 .btn--login:hover {
-    background-color: #2a8058;
-    border-color: #2a8058;
+    background-color: var(--color-primary-hover);
+    border-color: var(--color-primary-hover);
 }
 
 .login-form__submit:active,
 .btn--login:active {
-    background-color: #174f38;
-    border-color: #174f38;
+    background-color: var(--color-primary-dark);
+    border-color: var(--color-primary-dark);
 }
 
 .login-form__submit:disabled,

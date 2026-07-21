@@ -114,7 +114,7 @@
           Changer le mot de passe
         </a>
         <div class="dropdown__divider"></div>
-        <form method="post" action="{% url 'accounts:logout' %}">
+        <form method="post" action="{% url 'accounts:logout' %}" data-logout-confirm>
           {% csrf_token %}
           <button type="submit" class="dropdown__item dropdown__item--danger" data-dropdown-item role="menuitem">
             <span class="dropdown__icon"><i data-lucide="log-out" width="16" height="16"></i></span>

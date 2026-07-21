@@ -64,6 +64,21 @@
     font-weight: var(--font-weight-medium);
 }
 
+.audit-table__actor-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.audit-table__actor-label--person::before {
+    content: "";
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #9c67c4 0%, #704091 100%);
+    box-shadow: 0 0 0 3px #f1e9f7;
+}
+
 .audit-table__target {
     color: var(--color-text-secondary);
     font-size: var(--font-size-caption);

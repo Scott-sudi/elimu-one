@@ -1,41 +1,43 @@
 /* Kalunga School — Color Tokens
-   Dark-theme primary green palette for French school management */
+   Light notebook UI inspired by school exercise book */
 
 :root {
-    --color-primary: #1f6f4a;
-    --color-primary-dark: #174f38;
-    --color-primary-hover: #2a8058;
-    --color-primary-soft: #294f3d;
+    --color-primary: #0d5a22;
+    --color-primary-dark: #073c16;
+    --color-primary-hover: #167033;
+    --color-primary-soft: #e6f2e8;
+    --color-primary-muted: #c7dfcb;
+    --color-primary-on: #ffffff;
 
-    --color-background: #0b1116;
-    --color-sidebar: #0e171d;
-    --color-topbar: #111a20;
-    --color-surface: #152028;
-    --color-surface-elevated: #1a2730;
-    --color-card: #1b2932;
-    --color-input-dark: #101a20;
+    --color-background: #f7f7f5;
+    --color-grid-line: #e4e4e0;
+    --color-navbar: #ffffff;
+    --color-surface: #ffffff;
+    --color-surface-elevated: #ffffff;
+    --color-card: #ffffff;
+    --color-input: #ffffff;
+    --color-input-dark: #ffffff;
+    --color-table-head: #eaf5ef;
 
-    --color-border: #2b3940;
-    --color-divider: #233139;
+    --color-border: #dcdfd9;
+    --color-divider: #eceeea;
 
-    --color-text-primary: #f4f7f5;
-    --color-text-secondary: #a2aea8;
-    --color-text-disabled: #66736d;
+    --color-text-primary: #1a1f1c;
+    --color-text-secondary: #6b736e;
+    --color-text-disabled: #9aa39c;
+    --color-text-inverse: #ffffff;
 
-    --color-light-surface: #f5f8f6;
-    --color-light-text-primary: #17211c;
-    --color-light-text-secondary: #66736d;
-    --color-light-border: #d4ddd8;
+    --color-success: #167033;
+    --color-warning: #c4922e;
+    --color-danger: #c0392b;
+    --color-danger-hover: #a93226;
+    --color-information: #3f76b5;
 
-    --color-success: #2f9362;
-    --color-warning: #d1a13c;
-    --color-danger: #d15b5b;
-    --color-information: #4f87c5;
+    --color-focus-ring: rgba(13, 90, 34, 0.22);
+    --color-overlay: rgba(26, 31, 28, 0.4);
+    --color-scrollbar-track: #efefec;
+    --color-scrollbar-thumb: #c9cbc6;
+    --color-scrollbar-thumb-hover: #b0b3ad;
 
-    /* Semantic aliases */
-    --color-focus-ring: rgba(31, 111, 74, 0.45);
-    --color-overlay: rgba(11, 17, 22, 0.72);
-    --color-scrollbar-track: #0e171d;
-    --color-scrollbar-thumb: #2b3940;
-    --color-scrollbar-thumb-hover: #3a4a52;
+    --navbar-height: 64px;
 }

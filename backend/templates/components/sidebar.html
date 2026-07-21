@@ -91,7 +91,7 @@
         </a>
       {% endif %}
 
-      <form method="post" action="{% url 'accounts:logout' %}">
+      <form method="post" action="{% url 'accounts:logout' %}" data-logout-confirm>
         {% csrf_token %}
         <button type="submit" class="sidebar__link" style="width: 100%; border: none; background: transparent; cursor: pointer; text-align: left; font: inherit;">
           <span class="sidebar__link-icon"><i data-lucide="log-out" width="18" height="18"></i></span>

@@ -1,8 +1,8 @@
-/* Kalunga School — Content Area */
+/* Content area on notebook background */
 
 .content {
     flex: 1;
-    padding: var(--space-5) var(--space-6);
+    padding: 18px 20px 28px;
     overflow-y: auto;
     min-height: 0;
 }
@@ -17,8 +17,13 @@
     display: flex;
     align-items: flex-start;
     justify-content: space-between;
-    gap: var(--space-4);
-    margin-bottom: var(--space-5);
+    gap: 16px;
+    margin-bottom: 16px;
+    padding: 22px 24px;
+    background: var(--color-card);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-card);
+    box-shadow: var(--shadow-sm);
 }
 
 .content__header-main {
@@ -26,23 +31,24 @@
 }
 
 .content__title {
-    font-size: var(--font-size-h1);
-    font-weight: var(--font-weight-semibold);
+    font-size: 26px;
+    font-weight: 700;
     color: var(--color-text-primary);
-    line-height: var(--line-height-tight);
+    line-height: 1.2;
     margin: 0;
+    letter-spacing: -0.02em;
 }
 
 .content__description {
-    margin-top: var(--space-1);
-    font-size: var(--font-size-body);
+    margin-top: 6px;
+    font-size: 14px;
     color: var(--color-text-secondary);
 }
 
 .content__actions {
     display: flex;
     align-items: center;
-    gap: var(--space-2);
+    gap: 8px;
     flex-shrink: 0;
 }
 
@@ -50,8 +56,8 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: var(--space-3);
-    margin-bottom: var(--space-4);
+    gap: 12px;
+    margin-bottom: 16px;
     flex-wrap: wrap;
 }
 
@@ -59,89 +65,47 @@
 .content__toolbar-right {
     display: flex;
     align-items: center;
-    gap: var(--space-2);
+    gap: 8px;
     flex-wrap: wrap;
 }
 
 .content__section {
-    margin-bottom: var(--space-6);
-}
-
-.content__section:last-child {
-    margin-bottom: 0;
+    margin-bottom: 20px;
 }
 
 .content__section-title {
-    font-size: var(--font-size-h3);
-    font-weight: var(--font-weight-semibold);
+    font-size: 16px;
+    font-weight: 650;
     color: var(--color-text-primary);
-    margin-bottom: var(--space-3);
+    margin-bottom: 12px;
 }
 
-.content__empty {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    padding: var(--space-10) var(--space-6);
-    color: var(--color-text-secondary);
-    background-color: var(--color-card);
+.content__panel {
+    background: var(--color-card);
     border: 1px solid var(--color-border);
     border-radius: var(--radius-card);
-}
-
-.content__empty-title {
-    font-size: var(--font-size-h4);
-    font-weight: var(--font-weight-medium);
-    color: var(--color-text-primary);
-    margin-bottom: var(--space-2);
+    box-shadow: var(--shadow-sm);
+    padding: 18px 20px;
 }
 
 .content__grid {
     display: grid;
-    gap: var(--space-4);
+    gap: 16px;
 }
 
-.content__grid--2 {
-    grid-template-columns: repeat(2, 1fr);
-}
-
-.content__grid--3 {
-    grid-template-columns: repeat(3, 1fr);
-}
-
-.content__grid--4 {
-    grid-template-columns: repeat(4, 1fr);
-}
+.content__grid--2 { grid-template-columns: repeat(2, 1fr); }
+.content__grid--3 { grid-template-columns: repeat(3, 1fr); }
+.content__grid--4 { grid-template-columns: repeat(4, 1fr); }
 
 @media (max-width: 1100px) {
-    .content__grid--4 {
-        grid-template-columns: repeat(2, 1fr);
-    }
-
-    .content__grid--3 {
-        grid-template-columns: repeat(2, 1fr);
-    }
+    .content__grid--4,
+    .content__grid--3 { grid-template-columns: repeat(2, 1fr); }
 }
 
 @media (max-width: 720px) {
-    .content {
-        padding: var(--space-4);
-    }
-
-    .content__header {
-        flex-direction: column;
-        align-items: stretch;
-    }
-
-    .content__actions {
-        justify-content: flex-start;
-    }
-
+    .content { padding: 12px; }
+    .content__header { flex-direction: column; align-items: stretch; }
     .content__grid--2,
     .content__grid--3,
-    .content__grid--4 {
-        grid-template-columns: 1fr;
-    }
+    .content__grid--4 { grid-template-columns: 1fr; }
 }

@@ -1,0 +1,18 @@
+{% extends "layouts/app.html" %}
+
+{% block title %}Nouvel utilisateur{% endblock %}
+
+{% block content %}
+  <div class="content__header">
+    <div class="content__header-main">
+      <h2 class="content__title">Nouvel utilisateur</h2>
+      <p class="content__description">Créez un compte pour un membre du personnel.</p>
+    </div>
+  </div>
+
+  <section class="profile-section">
+    <div class="profile-section__body">
+      {% include "accounts/users/_form.html" with mode="create" standalone=True %}
+    </div>
+  </section>
+{% endblock %}

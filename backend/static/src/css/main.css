@@ -15,6 +15,7 @@
 /* Layouts */
 @import url("./layouts/auth.css");
 @import url("./layouts/shell.css");
+@import url("./layouts/navbar.css");
 @import url("./layouts/sidebar.css");
 @import url("./layouts/topbar.css");
 @import url("./layouts/content.css");

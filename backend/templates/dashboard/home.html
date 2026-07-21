@@ -17,37 +17,37 @@
       <div class="stat-card">
         <div class="stat-card__icon"><i data-lucide="users" width="18" height="18"></i></div>
         <div class="stat-card__label">Utilisateurs</div>
-        <div class="stat-card__value">{{ stats.users_total|default:0 }}</div>
+        <div class="stat-card__value">{{ stats.total_users|default:0 }}</div>
         <div class="stat-card__meta">Total des comptes</div>
       </div>
       <div class="stat-card">
         <div class="stat-card__icon"><i data-lucide="user-check" width="18" height="18"></i></div>
         <div class="stat-card__label">Actifs</div>
-        <div class="stat-card__value">{{ stats.users_active|default:0 }}</div>
+        <div class="stat-card__value">{{ stats.active_users|default:0 }}</div>
         <div class="stat-card__meta">Comptes opérationnels</div>
       </div>
       <div class="stat-card">
         <div class="stat-card__icon"><i data-lucide="user-x" width="18" height="18"></i></div>
         <div class="stat-card__label">Désactivés</div>
-        <div class="stat-card__value">{{ stats.users_disabled|default:0 }}</div>
+        <div class="stat-card__value">{{ stats.inactive_users|default:0 }}</div>
         <div class="stat-card__meta">Accès suspendus</div>
       </div>
       <div class="stat-card">
         <div class="stat-card__icon"><i data-lucide="shield" width="18" height="18"></i></div>
         <div class="stat-card__label">Administrateurs</div>
-        <div class="stat-card__value">{{ stats.admins|default:0 }}</div>
+        <div class="stat-card__value">{{ stats.administrators|default:0 }}</div>
         <div class="stat-card__meta">Rôle Administrateur</div>
       </div>
       <div class="stat-card">
         <div class="stat-card__icon"><i data-lucide="clipboard-list" width="18" height="18"></i></div>
         <div class="stat-card__label">Secrétaires</div>
-        <div class="stat-card__value">{{ stats.secretaires|default:0 }}</div>
+        <div class="stat-card__value">{{ stats.secretaries|default:0 }}</div>
         <div class="stat-card__meta">Rôle Secrétaire</div>
       </div>
       <div class="stat-card">
         <div class="stat-card__icon"><i data-lucide="calculator" width="18" height="18"></i></div>
         <div class="stat-card__label">Comptables</div>
-        <div class="stat-card__value">{{ stats.comptables|default:0 }}</div>
+        <div class="stat-card__value">{{ stats.accountants|default:0 }}</div>
         <div class="stat-card__meta">Rôle Comptable</div>
       </div>
       <div class="stat-card">

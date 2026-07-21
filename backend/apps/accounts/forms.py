@@ -144,8 +144,18 @@ class PasswordResetForm(forms.Form):
 
 
 class ProfileForm(forms.Form):
+    nom = forms.CharField(label="Nom", max_length=100)
+    postnom = forms.CharField(label="Postnom", max_length=100, required=False)
+    prenom = forms.CharField(label="Prénom", max_length=100)
     telephone = forms.CharField(label="Téléphone", max_length=30, required=False)
     email = forms.EmailField(label="Adresse électronique", required=False)
+    profile_photo = forms.ImageField(label="Photo de profil", required=False)
+
+    def clean_profile_photo(self):
+        photo = self.cleaned_data.get("profile_photo")
+        if photo and photo.size > 5 * 1024 * 1024:
+            raise ValidationError("La photo ne doit pas dépasser 5 Mo.")
+        return photo
 
 
 class ChangePasswordForm(forms.Form):

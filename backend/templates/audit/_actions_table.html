@@ -17,7 +17,11 @@
           <tr>
             <td class="audit-table__timestamp">{{ log.created_at|date:"j F Y à H\h i" }}</td>
             <td class="audit-table__actor">
-              {% if log.actor %}{{ log.actor.get_full_name }}{% else %}Système{% endif %}
+              {% if log.actor %}
+                <span class="audit-table__actor-label audit-table__actor-label--person">{{ log.actor.get_full_name }}</span>
+              {% else %}
+                <span class="badge badge--info">Système</span>
+              {% endif %}
             </td>
             <td><span class="audit-table__action">{{ log.get_action_display|default:log.action }}</span></td>
             <td>{{ log.description|truncatechars:80 }}</td>

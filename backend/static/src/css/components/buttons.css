@@ -51,12 +51,13 @@
 .btn--primary {
     background-color: var(--color-primary);
     border-color: var(--color-primary);
-    color: var(--color-text-primary);
+    color: var(--color-primary-on);
 }
 
 .btn--primary:hover {
     background-color: var(--color-primary-hover);
     border-color: var(--color-primary-hover);
+    color: var(--color-primary-on);
 }
 
 .btn--primary:active {
@@ -71,12 +72,12 @@
 }
 
 .btn--secondary:hover {
-    background-color: var(--color-card);
-    border-color: #3a4a52;
+    background-color: #f3f5f3;
+    border-color: #cfd5d0;
 }
 
 .btn--secondary:active {
-    background-color: var(--color-surface);
+    background-color: #eef1ee;
 }
 
 .btn--ghost {
@@ -86,7 +87,7 @@
 }
 
 .btn--ghost:hover {
-    background-color: var(--color-surface);
+    background-color: #f3f5f3;
     color: var(--color-text-primary);
 }
 
@@ -97,7 +98,7 @@
 }
 
 .btn--outline:hover {
-    background-color: var(--color-surface);
+    background-color: #f3f5f3;
     border-color: var(--color-primary);
 }
 
@@ -108,12 +109,12 @@
 }
 
 .btn--danger:hover {
-    background-color: #c04e4e;
-    border-color: #c04e4e;
+    background-color: var(--color-danger-hover);
+    border-color: var(--color-danger-hover);
 }
 
 .btn--danger:active {
-    background-color: #a94444;
+    background-color: #922b21;
 }
 
 .btn--success {

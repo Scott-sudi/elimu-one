@@ -92,6 +92,7 @@ class User(AbstractUser):
     prenom = models.CharField(max_length=100)
     sexe = models.CharField(max_length=1, choices=Gender.choices, blank=True)
     telephone = models.CharField(max_length=30, blank=True)
+    profile_photo = models.ImageField(upload_to="profile_photos/", blank=True)
     role = models.ForeignKey(
         Role,
         on_delete=models.PROTECT,

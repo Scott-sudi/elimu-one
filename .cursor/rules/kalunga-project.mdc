@@ -14,15 +14,17 @@ alwaysApply: true
 - Connecteur MySQL : mysqlclient (préféré)
 
 ## Design
-- Aucun dégradé CSS (`linear-gradient`, `radial-gradient`, `conic-gradient`)
-- Rayons faibles (max 6 px pour les boutons/champs/cartes)
-- Couleur principale : vert sombre `#1f6f4a`
-- Interface métier dense, professionnelle, légèrement sombre
-- Pas de glassmorphism, néon, boutons pilule, coins très arrondis
+- Thème clair type cahier scolaire (fond à petits carreaux)
+- Cartes blanches flottantes, navbar haute arrondie
+- Vert `#1f6f4a` / `#0d5a22` pour accents / boutons principaux (valeurs du code actuel = référence)
+- Bouton Déconnexion rouge
+- Grille de fond autorisée (effet cahier)
+- Aucun dégradé décoratif, aucun glassmorphism, faibles rayons de bordure, ombres modérées
 
 ## Phase actuelle
-- Développer UNIQUEMENT le module Administrateur
-- Ne pas commencer : secrétariat, finance, discipline, Flutter, élèves, parents, paiements, présences, BI
+- Module Administrateur : TERMINÉ — ne pas le reconstruire ni changer son apparence/fonctionnalités sans nécessité
+- Développer UNIQUEMENT le module Secrétariat
+- Ne pas commencer : comptabilité, finance, discipline, Flutter, paiements, présences, BI, espace directeur/préfet
 - Le dossier `mobile/kalunga_parents` reste vide (`.gitkeep` uniquement)
 
 ## Sécurité
@@ -30,6 +32,7 @@ alwaysApply: true
 - CSRF toujours actif
 - Flutter ne se connectera jamais directement à MySQL — uniquement via l’API Django REST `/api/v1/`
 - Ne pas exposer les secrets, traces Python, ou mots de passe dans l’UI
+- Documents élèves / pièces jointes : accès contrôlé, pas d’URL publique non protégée en production
 
 ## Langue
 - Interface utilisateur entièrement en français
@@ -37,4 +40,9 @@ alwaysApply: true
 
 ## Identité
 - Établissement : Kalunga – La Source du Savoir
-- Logo officiel absent : utiliser icône Lucide provisoire + texte jusqu’à `static/src/images/branding/logo.png`
+- Logo : `static/src/images/branding/logo.png` s’il existe ; sinon texte + icône Lucide
+- Ne pas inventer de coordonnées d’école absentes de la configuration
+
+## Non-régression
+- Après toute modification partagée, vérifier que l’Administrateur fonctionne comme avant
+- Base MySQL : `kalunga_school` — ne pas flush / reset

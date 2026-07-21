@@ -130,8 +130,12 @@
     {% endif %}
   {% endif %}
 
-  <div class="modal__footer" style="margin: 1rem -1rem -1rem;">
-    <button type="button" class="btn btn--secondary" data-modal-close>Annuler</button>
+  <div class="modal__footer" {% if not standalone %}style="margin: 1rem -1rem -1rem;"{% endif %}>
+    {% if standalone %}
+      <a href="{% url 'accounts:users' %}" class="btn btn--secondary">Annuler</a>
+    {% else %}
+      <button type="button" class="btn btn--secondary" data-modal-close>Annuler</button>
+    {% endif %}
     <button type="submit" class="btn btn--primary" data-user-submit>
       {% if mode == 'edit' %}Enregistrer{% elif mode == 'reset_password' %}Réinitialiser{% else %}Créer l'utilisateur{% endif %}
     </button>

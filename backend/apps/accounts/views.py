@@ -97,7 +97,7 @@ class LoginView(View):
     def dispatch(self, request, *args, **kwargs):
         if not has_administrator() and not SystemConfiguration.is_setup_complete():
             return redirect("setup:setup")
-        if request.user.is_authenticated and request.user.is_administrateur():
+        if request.user.is_authenticated:
             return redirect("dashboard:home")
         return super().dispatch(request, *args, **kwargs)
 
@@ -204,8 +204,14 @@ class UserCreateView(AdministratorRequiredMixin, View):
         form = UserCreateForm()
         return render(
             request,
-            "accounts/users/_form.html",
-            {"form": form, "mode": "create", "roles": Role.objects.filter(is_active=True)},
+            "accounts/users/create.html",
+            {
+                "form": form,
+                "mode": "create",
+                "roles": Role.objects.filter(is_active=True),
+                "page_title": "Nouvel utilisateur",
+                "breadcrumb": [("Utilisateurs", reverse("accounts:users")), ("Nouvel utilisateur", None)],
+            },
         )
 
     def post(self, request):
@@ -223,8 +229,14 @@ class UserCreateView(AdministratorRequiredMixin, View):
                 return api_response(success=False, message="Formulaire invalide.", errors=form.errors, status=400)
             return render(
                 request,
-                "accounts/users/_form.html",
-                {"form": form, "mode": "create", "roles": Role.objects.filter(is_active=True)},
+                "accounts/users/create.html",
+                {
+                    "form": form,
+                    "mode": "create",
+                    "roles": Role.objects.filter(is_active=True),
+                    "page_title": "Nouvel utilisateur",
+                    "breadcrumb": [("Utilisateurs", reverse("accounts:users")), ("Nouvel utilisateur", None)],
+                },
                 status=400,
             )
         try:
@@ -237,11 +249,14 @@ class UserCreateView(AdministratorRequiredMixin, View):
             )
         except AuthenticationError as exc:
             return api_response(success=False, message=exc.message, status=400)
-        return api_response(
-            success=True,
-            message="Utilisateur créé avec succès.",
-            data={"public_id": str(user.public_id)},
-        )
+        if request.headers.get("HX-Request") or "application/json" in request.headers.get("Accept", ""):
+            return api_response(
+                success=True,
+                message="Utilisateur créé avec succès.",
+                data={"public_id": str(user.public_id)},
+            )
+        messages.success(request, "Utilisateur créé avec succès.")
+        return redirect("accounts:users")
 
 
 class UserDetailView(AdministratorRequiredMixin, View):
@@ -361,7 +376,15 @@ class ProfileView(AdministratorRequiredMixin, View):
     template_name = "accounts/profile/profile.html"
 
     def get(self, request):
-        form = ProfileForm(initial={"telephone": request.user.telephone, "email": request.user.email})
+        form = ProfileForm(
+            initial={
+                "nom": request.user.nom,
+                "postnom": request.user.postnom,
+                "prenom": request.user.prenom,
+                "telephone": request.user.telephone,
+                "email": request.user.email,
+            }
+        )
         return render(
             request,
             self.template_name,
@@ -373,7 +396,7 @@ class ProfileView(AdministratorRequiredMixin, View):
         )
 
     def post(self, request):
-        form = ProfileForm(request.POST)
+        form = ProfileForm(request.POST, request.FILES)
         if not form.is_valid():
             return render(
                 request,
@@ -388,8 +411,12 @@ class ProfileView(AdministratorRequiredMixin, View):
         update_own_profile(
             request=request,
             user=request.user,
+            nom=form.cleaned_data["nom"],
+            postnom=form.cleaned_data.get("postnom") or "",
+            prenom=form.cleaned_data["prenom"],
             telephone=form.cleaned_data.get("telephone") or "",
             email=form.cleaned_data.get("email") or "",
+            profile_photo=form.cleaned_data.get("profile_photo"),
         )
         messages.success(request, "Les modifications ont été enregistrées.")
         return redirect("accounts:profile")

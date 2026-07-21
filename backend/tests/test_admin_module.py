@@ -181,7 +181,7 @@ def test_user_lifecycle(client, admin_user, roles):
 
 
 @pytest.mark.django_db
-def test_non_admin_cannot_login_web(rf, roles):
+def test_non_admin_can_login_to_personal_workspace(client, roles, admin_user):
     role = roles[Role.CODE_SECRETAIRE]
     user = User.objects.create_user(
         username="sec.only",
@@ -190,10 +190,17 @@ def test_non_admin_cannot_login_web(rf, roles):
         prenom="Only",
         role=role,
     )
-    request = rf.post("/connexion/")
-    request.session = {}
-    with pytest.raises(AuthenticationError):
-        authenticate_user(request=request, username="sec.only", password="TempPass123!")
+
+    response = client.post(
+        reverse("accounts:login"),
+        {"username": "sec.only", "password": "TempPass123!"},
+    )
+
+    assert response.status_code == 302
+    assert response.url == reverse("dashboard:home")
+    response = client.get(reverse("dashboard:home"))
+    assert response.status_code == 200
+    assert b"Espace de travail" in response.content
     assert user.pk
 
 

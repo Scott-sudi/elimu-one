@@ -161,16 +161,6 @@ def authenticate_user(*, request, username: str, password: str) -> User:
         )
         raise AuthenticationError("Identifiants incorrects.")
 
-    if not user.is_administrateur():
-        record_login_attempt(
-            request=request,
-            attempted_username=username,
-            success=False,
-            user=user,
-            failure_reason="Rôle non autorisé pour cette phase",
-        )
-        raise AuthenticationError("Vous ne disposez pas de cette autorisation.")
-
     user.reset_failed_attempts()
     login(request, user)
     record_login_attempt(
@@ -357,11 +347,28 @@ def change_own_password(*, request, user: User, old_password: str, new_password:
     return user
 
 
-def update_own_profile(*, request, user: User, telephone: str, email: str) -> User:
+def update_own_profile(
+    *,
+    request,
+    user: User,
+    nom: str,
+    postnom: str,
+    prenom: str,
+    telephone: str,
+    email: str,
+    profile_photo=None,
+) -> User:
     old = user_snapshot(user)
+    user.nom = nom.strip()
+    user.postnom = postnom.strip()
+    user.prenom = prenom.strip()
     user.telephone = telephone or ""
     user.email = email or ""
-    user.save(update_fields=["telephone", "email", "updated_at"])
+    update_fields = ["nom", "postnom", "prenom", "telephone", "email", "updated_at"]
+    if profile_photo:
+        user.profile_photo = profile_photo
+        update_fields.append("profile_photo")
+    user.save(update_fields=update_fields)
     log_action(
         request=request,
         actor=user,

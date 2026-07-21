@@ -1,18 +1,32 @@
 """Administrator dashboard views."""
 
 from django.db.models import Count, Q
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic import TemplateView
 
 from apps.accounts.models import Role, User
 from apps.audit.models import AuditLog, LoginAttempt
-from apps.core.mixins import AdministratorRequiredMixin
 
 
-class DashboardView(AdministratorRequiredMixin, TemplateView):
+class DashboardView(LoginRequiredMixin, TemplateView):
     template_name = "dashboard/home.html"
+
+    def get_template_names(self):
+        if self.request.user.is_administrateur():
+            return [self.template_name]
+        return ["workspaces/home.html"]
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        if not self.request.user.is_administrateur():
+            context.update(
+                {
+                    "page_title": "Mon espace de travail",
+                    "breadcrumb": [("Mon espace de travail", None)],
+                }
+            )
+            return context
+
         users = User.objects.select_related("role")
         role_counts = {
             row["role__code"]: row["total"]

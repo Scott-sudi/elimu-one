@@ -1,10 +1,17 @@
-/* Kalunga School — App Shell Layout */
+/* Kalunga School — App Shell with notebook grid background */
 
 .app-shell {
     display: flex;
+    flex-direction: column;
     min-height: 100vh;
-    background-color: var(--color-background);
     color: var(--color-text-primary);
+    background-color: var(--color-background);
+    /* Cahier à petits carreaux — domaine scolaire */
+    background-image:
+        linear-gradient(var(--color-grid-line) 1px, transparent 1px),
+        linear-gradient(90deg, var(--color-grid-line) 1px, transparent 1px);
+    background-size: 22px 22px;
+    background-position: -1px -1px;
 }
 
 .app-shell__main {
@@ -12,12 +19,7 @@
     display: flex;
     flex-direction: column;
     min-width: 0;
-    margin-left: var(--sidebar-width);
-    transition: margin-left 0.2s ease;
-}
-
-.app-shell--collapsed .app-shell__main {
-    margin-left: var(--sidebar-collapsed);
+    margin-left: 0;
 }
 
 .app-shell__body {
@@ -25,14 +27,4 @@
     display: flex;
     flex-direction: column;
     min-height: 0;
-}
-
-@media (max-width: 960px) {
-    .app-shell__main {
-        margin-left: 0;
-    }
-
-    .app-shell--collapsed .app-shell__main {
-        margin-left: 0;
-    }
 }

@@ -1,6 +1,3 @@
-/* Kalunga School — Spacing Tokens
-   Dense 4px-based scale: 4, 8, 12, 16, 20, 24, 32, 40 */
-
 :root {
     --space-1: 4px;
     --space-2: 8px;
@@ -11,29 +8,15 @@
     --space-8: 32px;
     --space-10: 40px;
 
-    /* Layout dimensions */
     --sidebar-width: 248px;
     --sidebar-collapsed: 72px;
     --topbar-height: 56px;
     --content-max-width: 1280px;
     --login-card-max: 920px;
 
-    /* Component radii (strict caps) */
-    --radius-none: 0;
-    --radius-sm: 4px;
-    --radius-md: 5px;
-    --radius-lg: 6px;
-    --radius-button: 4px;
-    --radius-input: 4px;
-    --radius-card: 5px;
-    --radius-modal: 6px;
-    --radius-dropdown: 4px;
-    --radius-badge: 4px;
-
-    /* Control heights */
-    --control-height-sm: 32px;
-    --control-height-md: 36px;
-    --control-height-lg: 40px;
-    --control-height-xl: 44px;
+    --control-height-sm: 34px;
+    --control-height-md: 42px;
+    --control-height-lg: 44px;
+    --control-height-xl: 46px;
     --control-height-login: 46px;
 }
