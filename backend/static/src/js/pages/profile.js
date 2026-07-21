@@ -24,8 +24,8 @@ export function initProfile(root = document) {
     e.preventDefault();
 
     const btn = passwordForm.querySelector('[type="submit"]');
-    const newPass = passwordForm.querySelector('[name="new_password1"], [name="new_password"]')?.value;
-    const confirm = passwordForm.querySelector('[name="new_password2"], [name="confirm_password"]')?.value;
+    const newPass = passwordForm.querySelector('[name="new_password"], [name="new_password1"]')?.value;
+    const confirm = passwordForm.querySelector('[name="new_password_confirm"], [name="new_password2"], [name="confirm_password"]')?.value;
 
     if (newPass && confirm && newPass !== confirm) {
       toast.error('Les mots de passe ne correspondent pas.');
@@ -42,6 +42,8 @@ export function initProfile(root = document) {
       }
       passwordForm.reset();
       toast.success('Mot de passe mis à jour.');
+      // Reload so the forced-change middleware releases navigation.
+      window.setTimeout(() => { window.location.href = '/tableau-de-bord/'; }, 600);
     } finally {
       setButtonLoading(btn, false);
     }
