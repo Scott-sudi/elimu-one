@@ -1,0 +1,6 @@
+<div class="secretariat-stats" id="secretariat-stats">
+  <article class="card"><div class="card__body"><span class="table__cell-muted">Élèves actifs</span><h3>{{ stats.students.active }}</h3></div></article>
+  <article class="card"><div class="card__body"><span class="table__cell-muted">Inscriptions validées</span><h3>{{ stats.enrollments.total|default:0 }}</h3></div></article>
+  <article class="card"><div class="card__body"><span class="table__cell-muted">Occupation</span><h3>{{ stats.classes.occupancy_percentage }} %</h3></div></article>
+  <article class="card"><div class="card__body"><span class="table__cell-muted">Documents en attente</span><h3>{{ stats.documents_pending }}</h3></div></article>
+</div>

@@ -1,0 +1,1 @@
+<form method="post" action="{% url 'secretariat:class-create' %}">{% csrf_token %}{% include "secretariat/_form_fields.html" with form=form %}<div class="modal__footer"><button type="button" class="btn btn--secondary" data-modal-close>Annuler</button><button class="btn btn--primary">Créer la classe</button></div></form>

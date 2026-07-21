@@ -29,6 +29,14 @@ import { initUsers, closeUserModal } from './pages/users.js';
 import { initLogins } from './pages/logins.js';
 import { initAudit } from './pages/audit.js';
 import { initProfile } from './pages/profile.js';
+import { initSecretariatDashboard } from './pages/secretariat/dashboard.js';
+import { initSecretariatStudents } from './pages/secretariat/students.js';
+import { initSecretariatGuardians } from './pages/secretariat/guardians.js';
+import { initSecretariatEnrollments } from './pages/secretariat/enrollments.js';
+import { initSecretariatClasses } from './pages/secretariat/classes.js';
+import { initSecretariatCards } from './pages/secretariat/cards.js';
+import { initSecretariatCommunications } from './pages/secretariat/communications.js';
+import { initSecretariatDocuments } from './pages/secretariat/documents.js';
 
 window.htmx = htmx;
 window.Alpine = Alpine;
@@ -63,6 +71,14 @@ function bootPages(root = document) {
   initLogins(root);
   initAudit(root);
   initProfile(root);
+  initSecretariatDashboard(root);
+  initSecretariatStudents(root);
+  initSecretariatGuardians(root);
+  initSecretariatEnrollments(root);
+  initSecretariatClasses(root);
+  initSecretariatCards(root);
+  initSecretariatCommunications(root);
+  initSecretariatDocuments(root);
 }
 
 function onReady() {
@@ -81,6 +97,7 @@ document.body.addEventListener('htmx:afterSwap', (e) => {
   const target = e.target;
   if (target instanceof Element) {
     bootUi(target);
+    bootPages(target);
   }
 });
 

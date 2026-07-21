@@ -1,0 +1,4 @@
+<form method="post" action="{% url 'secretariat:academic-year-create' %}">
+  {% csrf_token %}{% include "secretariat/_form_fields.html" with form=form %}
+  <div class="modal__footer"><button type="button" class="btn btn--secondary" data-modal-close>Annuler</button><button class="btn btn--primary" type="submit">Créer l'année</button></div>
+</form>

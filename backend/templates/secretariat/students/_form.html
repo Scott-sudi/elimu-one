@@ -1,0 +1,1 @@
+<form method="post" enctype="multipart/form-data">{% csrf_token %}{% include "secretariat/_form_fields.html" with form=form %}<div class="content__actions"><a class="btn btn--secondary" href="{% url 'secretariat:students' %}">Annuler</a><button class="btn btn--primary">Enregistrer</button></div></form>

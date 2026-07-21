@@ -1,0 +1,7 @@
+<div id="academic-years-table"><div class="table-wrap"><table class="table table--dense">
+<thead><tr><th>Année</th><th>Début</th><th>Fin</th><th>État</th><th>Actions</th></tr></thead><tbody>
+{% for year in page_obj %}
+<tr><td>{{ year.label }}</td><td>{{ year.start_date|date:"d/m/Y" }}</td><td>{{ year.end_date|date:"d/m/Y" }}</td><td>{% if year.is_closed %}<span class="badge badge--neutral">Clôturée</span>{% elif year.is_active %}<span class="badge badge--success">Active</span>{% else %}<span class="badge">Inactive</span>{% endif %}</td>
+<td><div class="secretariat-actions">{% if not year.is_active and not year.is_closed %}<form method="post" action="{% url 'secretariat:academic-year-activate' year.public_id %}">{% csrf_token %}<button class="btn btn--secondary btn--sm">Activer</button></form>{% endif %}{% if not year.is_closed %}<form method="post" action="{% url 'secretariat:academic-year-close' year.public_id %}" data-confirm-form="Clôturer cette année scolaire ?">{% csrf_token %}<button class="btn btn--ghost btn--sm">Clôturer</button></form>{% endif %}</div></td></tr>
+{% empty %}<tr><td colspan="5" class="table__empty">{% include "components/empty_state.html" with icon="calendar" title="Aucune année scolaire" %}</td></tr>{% endfor %}
+</tbody></table></div>{% include "components/pagination.html" with page_obj=page_obj hx_target="#academic-years-table" hx_swap="outerHTML" %}</div>

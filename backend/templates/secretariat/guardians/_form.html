@@ -1,0 +1,1 @@
+<form method="post" action="{% url 'secretariat:guardians' %}">{% csrf_token %}{% include "secretariat/_form_fields.html" with form=form %}<div class="modal__footer"><button type="button" class="btn btn--secondary" data-modal-close>Annuler</button><button class="btn btn--primary">Créer le responsable</button></div></form>

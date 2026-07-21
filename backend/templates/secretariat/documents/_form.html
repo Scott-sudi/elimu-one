@@ -1,0 +1,1 @@
+<form method="post" enctype="multipart/form-data" action="{% url 'secretariat:documents' %}">{% csrf_token %}{% include "secretariat/_form_fields.html" with form=form %}<div class="modal__footer"><button type="button" class="btn btn--secondary" data-modal-close>Annuler</button><button class="btn btn--primary">Ajouter le document</button></div></form>

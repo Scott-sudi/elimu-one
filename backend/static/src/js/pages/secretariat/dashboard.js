@@ -1,0 +1,5 @@
+export function initSecretariatDashboard(root = document) {
+  const page = root.querySelector('[data-page="secretariat-dashboard"]');
+  if (!page || page.dataset.pageBound) return;
+  page.dataset.pageBound = '1';
+}
