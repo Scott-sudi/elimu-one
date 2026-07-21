@@ -242,6 +242,33 @@ def test_secretary_can_access_profile(client, roles, admin_user):
 
 
 @pytest.mark.django_db
+def test_forced_password_change_does_not_redirect_loop(client, roles, admin_user):
+    role = roles[Role.CODE_SECRETAIRE]
+    user = User.objects.create_user(
+        username="sec.forcepwd",
+        password="TempPass123!",
+        nom="Sec",
+        prenom="Force",
+        role=role,
+        must_change_password=True,
+    )
+    client.force_login(user)
+    url = reverse("accounts:change_password") + "?forced=1"
+    response = client.get(url)
+    assert response.status_code == 200
+    assert b"mot de passe" in response.content.lower() or b"Mot de passe" in response.content
+
+    # Visiting another page must redirect once to the forced password page, not loop.
+    bounced = client.get(reverse("secretariat:dashboard"))
+    assert bounced.status_code == 302
+    assert reverse("accounts:change_password") in bounced.url
+    assert "forced=1" in bounced.url
+    assert client.get(bounced.url).status_code == 200
+    assert user.pk
+
+
+
+@pytest.mark.django_db
 def test_disabled_and_archived_cannot_login(rf, admin_user):
     request = rf.post("/connexion/")
     request.session = {}
