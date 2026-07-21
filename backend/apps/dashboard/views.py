@@ -2,6 +2,7 @@
 
 from django.db.models import Count, Q
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.shortcuts import redirect
 from django.views.generic import TemplateView
 
 from apps.accounts.models import Role, User
@@ -10,6 +11,12 @@ from apps.audit.models import AuditLog, LoginAttempt
 
 class DashboardView(LoginRequiredMixin, TemplateView):
     template_name = "dashboard/home.html"
+
+    def dispatch(self, request, *args, **kwargs):
+        user = request.user
+        if user.is_authenticated and user.is_secretaire():
+            return redirect("secretariat:dashboard")
+        return super().dispatch(request, *args, **kwargs)
 
     def get_template_names(self):
         if self.request.user.is_administrateur():

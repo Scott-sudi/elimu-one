@@ -39,7 +39,7 @@ from apps.accounts.services import (
     update_own_profile,
     update_staff_user,
 )
-from apps.core.mixins import AdministratorRequiredMixin
+from apps.core.mixins import AdministratorRequiredMixin, StaffActiveRequiredMixin
 from apps.core.utils import api_response
 
 
@@ -372,7 +372,7 @@ class RoleListView(AdministratorRequiredMixin, TemplateView):
         return context
 
 
-class ProfileView(AdministratorRequiredMixin, View):
+class ProfileView(StaffActiveRequiredMixin, View):
     template_name = "accounts/profile/profile.html"
 
     def get(self, request):
@@ -422,7 +422,7 @@ class ProfileView(AdministratorRequiredMixin, View):
         return redirect("accounts:profile")
 
 
-class ChangePasswordView(AdministratorRequiredMixin, View):
+class ChangePasswordView(StaffActiveRequiredMixin, View):
     template_name = "accounts/profile/change_password.html"
 
     def get(self, request):

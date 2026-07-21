@@ -182,18 +182,18 @@ def test_user_lifecycle(client, admin_user, roles):
 
 @pytest.mark.django_db
 def test_non_admin_can_login_to_personal_workspace(client, roles, admin_user):
-    role = roles[Role.CODE_SECRETAIRE]
+    role = roles[Role.CODE_COMPTABLE]
     user = User.objects.create_user(
-        username="sec.only",
+        username="compt.only",
         password="TempPass123!",
-        nom="Sec",
+        nom="Compt",
         prenom="Only",
         role=role,
     )
 
     response = client.post(
         reverse("accounts:login"),
-        {"username": "sec.only", "password": "TempPass123!"},
+        {"username": "compt.only", "password": "TempPass123!"},
     )
 
     assert response.status_code == 302
@@ -202,6 +202,43 @@ def test_non_admin_can_login_to_personal_workspace(client, roles, admin_user):
     assert response.status_code == 200
     assert b"Espace de travail" in response.content
     assert user.pk
+
+
+@pytest.mark.django_db
+def test_secretary_login_redirects_to_secretariat(client, roles, admin_user):
+    role = roles[Role.CODE_SECRETAIRE]
+    User.objects.create_user(
+        username="sec.only",
+        password="TempPass123!",
+        nom="Sec",
+        prenom="Only",
+        role=role,
+    )
+    response = client.post(
+        reverse("accounts:login"),
+        {"username": "sec.only", "password": "TempPass123!"},
+    )
+    assert response.status_code == 302
+    assert response.url == reverse("dashboard:home")
+    redirected = client.get(reverse("dashboard:home"))
+    assert redirected.status_code == 302
+    assert redirected.url == reverse("secretariat:dashboard")
+    page = client.get(reverse("secretariat:dashboard"))
+    assert page.status_code == 200
+
+
+@pytest.mark.django_db
+def test_secretary_can_access_profile(client, roles, admin_user):
+    role = roles[Role.CODE_SECRETAIRE]
+    user = User.objects.create_user(
+        username="sec.profile",
+        password="TempPass123!",
+        nom="Sec",
+        prenom="Profil",
+        role=role,
+    )
+    client.force_login(user)
+    assert client.get(reverse("accounts:profile")).status_code == 200
 
 
 @pytest.mark.django_db

@@ -3,23 +3,43 @@
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.core.exceptions import PermissionDenied
 
+from apps.accounts.models import Role
 
-class AdministratorRequiredMixin(LoginRequiredMixin, UserPassesTestMixin):
-    """Restrict access to authenticated administrators."""
+
+class RoleRequiredMixin(LoginRequiredMixin, UserPassesTestMixin):
+    """Restrict access to users with one of the allowed role codes."""
+
+    allowed_roles: tuple[str, ...] = ()
 
     def test_func(self):
         user = self.request.user
-        return (
+        if not (
             user.is_authenticated
             and user.is_active
             and not user.is_archived
-            and user.is_administrateur()
-        )
+            and not user.is_locked()
+        ):
+            return False
+        if not self.allowed_roles:
+            return True
+        return any(user.has_role(code) for code in self.allowed_roles)
 
     def handle_no_permission(self):
         if self.request.user.is_authenticated:
             raise PermissionDenied("Vous ne disposez pas de cette autorisation.")
         return super().handle_no_permission()
+
+
+class AdministratorRequiredMixin(RoleRequiredMixin):
+    """Restrict access to authenticated administrators."""
+
+    allowed_roles = (Role.CODE_ADMINISTRATEUR,)
+
+
+class SecretaryRequiredMixin(RoleRequiredMixin):
+    """Restrict access to authenticated secretaries."""
+
+    allowed_roles = (Role.CODE_SECRETAIRE,)
 
 
 class StaffActiveRequiredMixin(LoginRequiredMixin):

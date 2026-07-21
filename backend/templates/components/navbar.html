@@ -3,7 +3,7 @@
 <header class="navbar" data-navbar>
   <div class="navbar__inner">
     <div class="navbar__row">
-      <a href="{% url 'dashboard:home' %}" class="navbar__brand" title="{{ school_full_name }}">
+      <a href="{% if request.user.is_secretaire %}{% url 'secretariat:dashboard' %}{% else %}{% url 'dashboard:home' %}{% endif %}" class="navbar__brand" title="{{ school_full_name }}">
         <span class="navbar__brand-mark">
           <img
             src="{% static 'images/branding/logo.png' %}"
@@ -42,6 +42,49 @@
           Journal
         </a>
       </nav>
+      {% elif request.user.is_secretaire %}
+      <nav class="navbar__nav navbar__nav--desktop" aria-label="Navigation secrétariat">
+        <a href="{% url 'secretariat:dashboard' %}" class="navbar__link {% if ns == 'secretariat' and name == 'dashboard' %}is-active{% endif %}">
+          <span class="navbar__link-icon"><i data-lucide="layout-dashboard" width="16" height="16"></i></span>
+          Tableau de bord
+        </a>
+        <a href="{% url 'secretariat:academic-years' %}" class="navbar__link {% if name == 'academic-years' %}is-active{% endif %}">
+          <span class="navbar__link-icon"><i data-lucide="calendar-range" width="16" height="16"></i></span>
+          Années scolaires
+        </a>
+        <a href="{% url 'secretariat:organization' %}" class="navbar__link {% if name == 'organization' or name == 'levels' or name == 'sections' or name == 'options' %}is-active{% endif %}">
+          <span class="navbar__link-icon"><i data-lucide="layers" width="16" height="16"></i></span>
+          Organisation
+        </a>
+        <a href="{% url 'secretariat:classes' %}" class="navbar__link {% if name == 'classes' or name == 'class-detail' %}is-active{% endif %}">
+          <span class="navbar__link-icon"><i data-lucide="school" width="16" height="16"></i></span>
+          Classes
+        </a>
+        <a href="{% url 'secretariat:students' %}" class="navbar__link {% if name == 'students' or name == 'student-create' or name == 'student-detail' or name == 'student-update' %}is-active{% endif %}">
+          <span class="navbar__link-icon"><i data-lucide="graduation-cap" width="16" height="16"></i></span>
+          Élèves
+        </a>
+        <a href="{% url 'secretariat:guardians' %}" class="navbar__link {% if name == 'guardians' or name == 'guardian-detail' %}is-active{% endif %}">
+          <span class="navbar__link-icon"><i data-lucide="users-round" width="16" height="16"></i></span>
+          Responsables
+        </a>
+        <a href="{% url 'secretariat:enrollments' %}" class="navbar__link {% if name == 'enrollments' or name == 'enrollment-create' or name == 'reenrollments' or name == 'transfers' %}is-active{% endif %}">
+          <span class="navbar__link-icon"><i data-lucide="clipboard-list" width="16" height="16"></i></span>
+          Inscriptions
+        </a>
+        <a href="{% url 'secretariat:cards' %}" class="navbar__link {% if name == 'cards' %}is-active{% endif %}">
+          <span class="navbar__link-icon"><i data-lucide="id-card" width="16" height="16"></i></span>
+          Cartes
+        </a>
+        <a href="{% url 'secretariat:communications' %}" class="navbar__link {% if name == 'communications' or name == 'communication-create' or name == 'communication-detail' %}is-active{% endif %}">
+          <span class="navbar__link-icon"><i data-lucide="megaphone" width="16" height="16"></i></span>
+          Communications
+        </a>
+        <a href="{% url 'secretariat:documents' %}" class="navbar__link {% if name == 'documents' %}is-active{% endif %}">
+          <span class="navbar__link-icon"><i data-lucide="folder-open" width="16" height="16"></i></span>
+          Documents
+        </a>
+      </nav>
       {% else %}
       <nav class="navbar__nav navbar__nav--desktop" aria-label="Navigation principale">
         <a href="{% url 'dashboard:home' %}" class="navbar__link is-active" aria-current="page">
@@ -60,7 +103,7 @@
               {{ request.user.initials }}
             {% endif %}
           </span>
-          <span>{{ request.user.username }} | {{ request.user.role_name|default:"Administrateur" }}</span>
+          <span>{{ request.user.username }} | {{ request.user.role_name|default:"Utilisateur" }}</span>
         </a>
 
         <form method="post" action="{% url 'accounts:logout' %}" data-logout-confirm>
@@ -95,6 +138,59 @@
       <a href="{% url 'audit:actions' %}" class="navbar__link">
         <span class="navbar__link-icon"><i data-lucide="scroll-text" width="16" height="16"></i></span>
         Journal
+      </a>
+      <a href="{% url 'accounts:profile' %}" class="navbar__link">
+        <span class="navbar__link-icon"><i data-lucide="user-round" width="16" height="16"></i></span>
+        Mon profil
+      </a>
+      {% elif request.user.is_secretaire %}
+      <a href="{% url 'secretariat:dashboard' %}" class="navbar__link">
+        <span class="navbar__link-icon"><i data-lucide="layout-dashboard" width="16" height="16"></i></span>
+        Tableau de bord
+      </a>
+      <a href="{% url 'secretariat:academic-years' %}" class="navbar__link">
+        <span class="navbar__link-icon"><i data-lucide="calendar-range" width="16" height="16"></i></span>
+        Années scolaires
+      </a>
+      <a href="{% url 'secretariat:organization' %}" class="navbar__link">
+        <span class="navbar__link-icon"><i data-lucide="layers" width="16" height="16"></i></span>
+        Organisation
+      </a>
+      <a href="{% url 'secretariat:classes' %}" class="navbar__link">
+        <span class="navbar__link-icon"><i data-lucide="school" width="16" height="16"></i></span>
+        Classes
+      </a>
+      <a href="{% url 'secretariat:students' %}" class="navbar__link">
+        <span class="navbar__link-icon"><i data-lucide="graduation-cap" width="16" height="16"></i></span>
+        Élèves
+      </a>
+      <a href="{% url 'secretariat:guardians' %}" class="navbar__link">
+        <span class="navbar__link-icon"><i data-lucide="users-round" width="16" height="16"></i></span>
+        Responsables
+      </a>
+      <a href="{% url 'secretariat:enrollments' %}" class="navbar__link">
+        <span class="navbar__link-icon"><i data-lucide="clipboard-list" width="16" height="16"></i></span>
+        Inscriptions
+      </a>
+      <a href="{% url 'secretariat:reenrollments' %}" class="navbar__link">
+        <span class="navbar__link-icon"><i data-lucide="refresh-cw" width="16" height="16"></i></span>
+        Réinscriptions
+      </a>
+      <a href="{% url 'secretariat:transfers' %}" class="navbar__link">
+        <span class="navbar__link-icon"><i data-lucide="arrow-right-left" width="16" height="16"></i></span>
+        Affectations
+      </a>
+      <a href="{% url 'secretariat:cards' %}" class="navbar__link">
+        <span class="navbar__link-icon"><i data-lucide="id-card" width="16" height="16"></i></span>
+        Cartes d'élève
+      </a>
+      <a href="{% url 'secretariat:communications' %}" class="navbar__link">
+        <span class="navbar__link-icon"><i data-lucide="megaphone" width="16" height="16"></i></span>
+        Communications
+      </a>
+      <a href="{% url 'secretariat:documents' %}" class="navbar__link">
+        <span class="navbar__link-icon"><i data-lucide="folder-open" width="16" height="16"></i></span>
+        Documents
       </a>
       <a href="{% url 'accounts:profile' %}" class="navbar__link">
         <span class="navbar__link-icon"><i data-lucide="user-round" width="16" height="16"></i></span>

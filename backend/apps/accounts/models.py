@@ -151,8 +151,14 @@ class User(AbstractUser):
     def role_name(self) -> str:
         return self.role.name if self.role_id else ""
 
+    def has_role(self, code: str) -> bool:
+        return bool(self.role_id and self.role.code == code)
+
     def is_administrateur(self) -> bool:
-        return bool(self.role_id and self.role.code == Role.CODE_ADMINISTRATEUR)
+        return self.has_role(Role.CODE_ADMINISTRATEUR)
+
+    def is_secretaire(self) -> bool:
+        return self.has_role(Role.CODE_SECRETAIRE)
 
     def is_locked(self) -> bool:
         if self.locked_until and self.locked_until > timezone.now():
