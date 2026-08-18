@@ -1,13 +1,13 @@
 {
   "project_info": {
-    "project_number": "897069046002",
-    "project_id": "institut-kalunga",
-    "storage_bucket": "institut-kalunga.firebasestorage.app"
+    "project_number": "49648016490",
+    "project_id": "elimu-go",
+    "storage_bucket": "elimu-go.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:897069046002:android:783f48e8ef7405e7a3986b",
+        "mobilesdk_app_id": "1:49648016490:android:409f0bbc545e51c394fe13",
         "android_client_info": {
           "package_name": "net.institutkalunga.parents"
         }
@@ -15,7 +15,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyDhlCbF8dxBYI59CsdM8kno2flvuRqNzoY"
+          "current_key": "AIzaSyClv5QrIONW0CWjgvdT_jWZGGVOpPrSdE0"
         }
       ],
       "services": {

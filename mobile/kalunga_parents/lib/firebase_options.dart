@@ -1,4 +1,4 @@
-// Généré à partir de android/app/google-services.json (projet institut-kalunga).
+// Généré à partir de android/app/google-services.json (projet elimu-go).
 import 'package:firebase_core/firebase_core.dart' show FirebaseOptions;
 import 'package:flutter/foundation.dart'
     show defaultTargetPlatform, kIsWeb, TargetPlatform;
@@ -21,10 +21,10 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyDhlCbF8dxBYI59CsdM8kno2flvuRqNzoY',
-    appId: '1:897069046002:android:783f48e8ef7405e7a3986b',
-    messagingSenderId: '897069046002',
-    projectId: 'institut-kalunga',
-    storageBucket: 'institut-kalunga.firebasestorage.app',
+    apiKey: 'AIzaSyClv5QrIONW0CWjgvdT_jWZGGVOpPrSdE0',
+    appId: '1:49648016490:android:409f0bbc545e51c394fe13',
+    messagingSenderId: '49648016490',
+    projectId: 'elimu-go',
+    storageBucket: 'elimu-go.firebasestorage.app',
   );
 }
