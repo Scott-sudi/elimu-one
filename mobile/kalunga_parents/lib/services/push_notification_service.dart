@@ -144,7 +144,7 @@ Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
     const androidInit =
         AndroidInitializationSettings('@drawable/ic_stat_notify');
     await plugin.initialize(
-      const InitializationSettings(android: androidInit),
+      settings: const InitializationSettings(android: androidInit),
     );
     await plugin
         .resolvePlatformSpecificImplementation<
@@ -160,10 +160,10 @@ Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
       ),
     );
     await plugin.show(
-      DateTime.now().millisecondsSinceEpoch.remainder(100000),
-      title,
-      body,
-      const NotificationDetails(
+      id: DateTime.now().millisecondsSinceEpoch.remainder(100000),
+      title: title,
+      body: body,
+      notificationDetails: const NotificationDetails(
         android: AndroidNotificationDetails(
           kParentsAlertChannelId,
           kParentsAlertChannelName,
