@@ -18,7 +18,7 @@ from apps.secretariat.models import Guardian
 
 logger = logging.getLogger(__name__)
 
-ANDROID_CHANNEL_ID = "elimu_go_alerts_v1"
+ANDROID_CHANNEL_ID = "elimu_go_alerts_v2"
 FCM_SCOPE = "https://www.googleapis.com/auth/firebase.messaging"
 
 # Anti-doublon signal + hook service (même événement < 60 s).
@@ -227,15 +227,17 @@ def send_push_to_guardians(
                 "android": {
                     "priority": "HIGH",
                     "ttl": "86400s",
+                    "direct_boot_ok": True,
                     "notification": {
                         "channel_id": ANDROID_CHANNEL_ID,
                         "icon": "ic_stat_notify",
-                        "color": "#2E7D32",
+                        "color": "#002858",
                         "sound": "default",
                         "default_sound": True,
                         "default_vibrate_timings": True,
                         "notification_priority": "PRIORITY_MAX",
-                        "visibility": "PRIVATE",
+                        "visibility": "PUBLIC",
+                        "ticker": title[:40],
                     },
                 },
                 "data": payload_data,
@@ -368,8 +370,8 @@ def notify_guardians_of_attendance(*, attendance, updated: bool = False) -> int:
     )
 
 
-def notify_guardians_of_payment(*, payment, cancelled: bool = False) -> int:
-    """Push après enregistrement ou annulation d’un paiement."""
+def notify_guardians_of_payment(*, payment, cancelled: bool = False, updated: bool = False) -> int:
+    """Push après enregistrement, modification ou annulation d’un paiement."""
     from apps.finance.models import Payment
 
     if cancelled:
@@ -393,6 +395,9 @@ def notify_guardians_of_payment(*, payment, cancelled: bool = False) -> int:
         title = "Paiement annulé"
         reason = (getattr(payment, "cancellation_reason", None) or "").strip()
         body = f"{name} — {amount_txt} {currency}" + (f" ({reason})" if reason else "")
+    elif updated:
+        title = "Paiement modifié"
+        body = f"{name} — {amount_txt} {currency}"
     else:
         title = "Paiement enregistré"
         body = f"{name} — {amount_txt} {currency}"
@@ -405,6 +410,7 @@ def notify_guardians_of_payment(*, payment, cancelled: bool = False) -> int:
             "source_id": str(payment.public_id),
             "student_id": str(student.public_id),
             "cancelled": "1" if cancelled else "0",
+            "updated": "1" if updated else "0",
         },
     )
 
@@ -582,5 +588,95 @@ def notify_guardians_of_student_removed(
             "source_id": str(getattr(student, "public_id", "") or ""),
             "student_id": str(getattr(student, "public_id", "") or ""),
             "removed": "1",
+        },
+    )
+
+
+def notify_guardians_of_student_linked(*, student, guardian=None) -> int:
+    """Push quand un élève est rattaché au compte / téléphone d’un parent."""
+    name = _student_display_name(student)
+    title = "Élève lié"
+    body = f"{name} a été lié(e) à votre compte parent."
+    targets = [guardian] if guardian is not None else _guardians_for_student(student)
+    return send_push_to_guardians(
+        guardians=targets,
+        title=title,
+        body=body,
+        data={
+            "type": "student_linked",
+            "source_id": str(getattr(student, "public_id", "") or ""),
+            "student_id": str(getattr(student, "public_id", "") or ""),
+            "linked": "1",
+        },
+    )
+
+
+def notify_guardians_of_student_updated(*, student, summary: str = "") -> int:
+    """Push après modification du dossier élève (identité, etc.)."""
+    name = _student_display_name(student)
+    title = "Dossier élève modifié"
+    detail = (summary or "").strip()
+    body = f"Les informations de {name} ont été mises à jour."
+    if detail:
+        body = f"{body} {detail}"
+    if len(body) > 200:
+        body = body[:197] + "…"
+    return send_push_to_guardians(
+        guardians=_guardians_for_student(student),
+        title=title,
+        body=body,
+        data={
+            "type": "secretariat_student",
+            "source_id": str(getattr(student, "public_id", "") or ""),
+            "student_id": str(getattr(student, "public_id", "") or ""),
+            "updated": "1",
+        },
+    )
+
+
+def notify_guardians_of_enrollment(
+    *,
+    enrollment,
+    updated: bool = False,
+    class_changed: bool = False,
+) -> int:
+    """Push inscription validée, modification, ou changement de classe."""
+    student = getattr(enrollment, "student", None)
+    if student is None:
+        return 0
+    name = _student_display_name(student)
+    class_label = ""
+    school_class = getattr(enrollment, "school_class", None)
+    if school_class is not None:
+        class_label = str(school_class)
+    if class_changed:
+        title = "Changement de classe"
+        body = (
+            f"{name} a été transféré(e) vers {class_label}."
+            if class_label
+            else f"{name} a changé de classe."
+        )
+    elif updated:
+        title = "Inscription modifiée"
+        body = (
+            f"L’inscription de {name} a été mise à jour"
+            + (f" ({class_label})." if class_label else ".")
+        )
+    else:
+        title = "Inscription"
+        body = (
+            f"{name} a été inscrit(e)"
+            + (f" en {class_label}." if class_label else " à l’école.")
+        )
+    return send_push_to_guardians(
+        guardians=_guardians_for_student(student),
+        title=title,
+        body=body,
+        data={
+            "type": "secretariat_enrollment",
+            "source_id": str(getattr(enrollment, "public_id", "") or ""),
+            "student_id": str(getattr(student, "public_id", "") or ""),
+            "updated": "1" if (updated or class_changed) else "0",
+            "class_changed": "1" if class_changed else "0",
         },
     )

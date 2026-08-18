@@ -144,8 +144,16 @@ def push_on_payment(sender, instance, created, **kwargs):
 
     if instance.status != Payment.Status.VALID:
         return
-    if not created:
+    became_valid = created or (
+        bool(prev) and prev.get("status") != Payment.Status.VALID
+    )
+    amount_changed = bool(prev) and (
+        str(prev.get("amount_total") or "") != str(instance.amount_total or "")
+        or (prev.get("currency") or "") != (instance.currency or "")
+    )
+    if not became_valid and not amount_changed:
         return
+    updated = amount_changed and not became_valid
 
     def _send() -> None:
         from apps.api.parents_push import notify_guardians_of_payment
@@ -157,7 +165,7 @@ def push_on_payment(sender, instance, created, **kwargs):
             .first()
         )
         if pay is not None:
-            notify_guardians_of_payment(payment=pay)
+            notify_guardians_of_payment(payment=pay, updated=updated)
 
     _safe_on_commit(_send)
 
@@ -401,5 +409,72 @@ def push_on_communication_update(sender, instance, created, **kwargs):
         comm = C.objects.filter(pk=comm_id).first()
         if comm is not None:
             notify_guardians_of_communication(communication=comm, updated=True)
+
+    _safe_on_commit(_send)
+
+
+@receiver(pre_save, sender="secretariat.Enrollment")
+def stash_enrollment(sender, instance, **kwargs):
+    _stash_previous(instance, ("status", "school_class_id", "observation"))
+
+
+@receiver(post_save, sender="secretariat.Enrollment")
+def push_on_enrollment(sender, instance, created, **kwargs):
+    from apps.secretariat.models import Enrollment
+
+    if instance.status != Enrollment.Status.VALIDATED:
+        return
+    prev = getattr(instance, "_fcm_previous", None)
+    became_valid = created or (
+        prev is None or prev.get("status") != Enrollment.Status.VALIDATED
+    )
+    class_changed = bool(prev) and prev.get("school_class_id") != instance.school_class_id
+    obs_changed = bool(prev) and prev.get("observation") != instance.observation
+    if not became_valid and not class_changed and not obs_changed:
+        return
+
+    enrollment_id = instance.pk
+    updated = (not became_valid) and (class_changed or obs_changed)
+
+    def _send() -> None:
+        from apps.api.parents_push import notify_guardians_of_enrollment
+        from apps.secretariat.models import Enrollment as E
+
+        row = (
+            E.objects.select_related("student", "school_class")
+            .filter(pk=enrollment_id)
+            .first()
+        )
+        if row is not None:
+            notify_guardians_of_enrollment(
+                enrollment=row,
+                updated=updated and not class_changed,
+                class_changed=class_changed and not became_valid,
+            )
+
+    _safe_on_commit(_send)
+
+
+@receiver(post_save, sender="secretariat.StudentGuardian")
+def push_on_student_guardian_linked(sender, instance, created, **kwargs):
+    if not created:
+        return
+    link_id = instance.pk
+
+    def _send() -> None:
+        from apps.api.parents_push import notify_guardians_of_student_linked
+        from apps.secretariat.models import StudentGuardian
+
+        row = (
+            StudentGuardian.objects.select_related("student", "guardian")
+            .filter(pk=link_id)
+            .first()
+        )
+        if row is None:
+            return
+        notify_guardians_of_student_linked(
+            student=row.student,
+            guardian=row.guardian,
+        )
 
     _safe_on_commit(_send)

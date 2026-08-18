@@ -44,7 +44,7 @@ class KalungaParentsApplication : Application() {
     }
 
     companion object {
-        const val CHANNEL_ID = "elimu_go_alerts_v1"
+        const val CHANNEL_ID = "elimu_go_alerts_v2"
         const val CHANNEL_NAME = "Alertes ELIMU Go"
 
         @Volatile

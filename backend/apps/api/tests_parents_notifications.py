@@ -435,3 +435,72 @@ def test_push_dedupe_and_official_measure_variant(family, monkeypatch):
         == "new"
     )
 
+
+@pytest.mark.django_db
+def test_inbox_includes_validated_enrollment(family):
+    sources = [
+        item["source"]
+        for item in build_parent_notifications(
+            guardian=family["guardian"], limit=40
+        )["items"]
+    ]
+    assert "secretariat_enrollment" in sources
+
+
+@pytest.mark.django_db
+def test_push_student_linked_enrollment_and_update(family, monkeypatch):
+    import sys
+    from unittest.mock import MagicMock
+
+    sys.modules.setdefault("requests", MagicMock())
+    from apps.api import parents_push
+
+    parents_push._recent_push_keys.clear()
+    sent = []
+
+    def fake_send(*, guardians, title, body, data=None):
+        sent.append({"title": title, "body": body, "data": data or {}})
+        return 1
+
+    monkeypatch.setattr(parents_push, "send_push_to_guardians", fake_send)
+
+    student = family["student"]
+    guardian = family["guardian"]
+    enrollment = family["enrollment"]
+
+    assert (
+        parents_push.notify_guardians_of_student_linked(
+            student=student, guardian=guardian
+        )
+        == 1
+    )
+    assert sent[-1]["data"]["type"] == "student_linked"
+    assert "lié" in sent[-1]["body"].lower()
+
+    parents_push._recent_push_keys.clear()
+    assert parents_push.notify_guardians_of_enrollment(enrollment=enrollment) == 1
+    assert sent[-1]["data"]["type"] == "secretariat_enrollment"
+
+    parents_push._recent_push_keys.clear()
+    assert (
+        parents_push.notify_guardians_of_enrollment(
+            enrollment=enrollment, class_changed=True
+        )
+        == 1
+    )
+    assert sent[-1]["data"]["class_changed"] == "1"
+
+    parents_push._recent_push_keys.clear()
+    assert parents_push.notify_guardians_of_student_updated(student=student) == 1
+    assert sent[-1]["data"]["type"] == "secretariat_student"
+
+    parents_push._recent_push_keys.clear()
+    assert (
+        parents_push.notify_guardians_of_student_removed(
+            student=student, guardians=[guardian], reason="Test retrait"
+        )
+        == 1
+    )
+    assert sent[-1]["data"]["type"] == "student_removed"
+
+

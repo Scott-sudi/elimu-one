@@ -2,7 +2,8 @@
 
 .dropdown {
     position: relative;
-    display: inline-block;
+    display: inline-flex;
+    justify-content: flex-end;
 }
 
 .dropdown__menu {

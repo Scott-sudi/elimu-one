@@ -53,4 +53,7 @@ Rebuild après `google-services.json` :
 GitHub Actions → **Build ELIMU Go APK**
 `--dart-define=ELIMU_API_HOST=http://elimu.susc3383.odns.fr`
 
-Réinstallez l’APK, ouvrez l’app **une fois** (jeton FCM), fermez-la, testez un message secrétariat.
+Réinstallez l’APK, ouvrez l’app **une fois** (jeton FCM + permission notifications),
+fermez-la complètement, puis publiez un message secrétariat.
+
+Canal Android : `elimu_go_alerts_v2` (doit matcher le serveur).

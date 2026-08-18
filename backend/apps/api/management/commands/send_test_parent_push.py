@@ -60,6 +60,25 @@ class Command(BaseCommand):
         self.stdout.write(
             f"Parent={guardian} public_id={guardian.public_id} devices_actifs={count}"
         )
+        from apps.api.parents_push import _project_id, _service_account_path
+
+        sa = _service_account_path()
+        self.stdout.write(f"FCM_PROJECT_ID={_project_id()}")
+        self.stdout.write(f"FCM_SA={sa if sa else 'ABSENT'}")
+        if sa is not None:
+            try:
+                import json as _json
+
+                pid = _json.loads(sa.read_text(encoding="utf-8")).get("project_id")
+                self.stdout.write(f"FCM_SA_PROJECT={pid}")
+                if pid and pid != _project_id():
+                    self.stdout.write(
+                        self.style.WARNING(
+                            f"ÉCART: .env dit {_project_id()} mais la clé JSON est {pid}"
+                        )
+                    )
+            except Exception as exc:
+                self.stdout.write(self.style.WARNING(f"JSON illisible: {exc}"))
         if count == 0:
             raise CommandError(
                 "Aucun jeton FCM enregistré. Ouvre l’app parents (APK récent), "

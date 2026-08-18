@@ -19,7 +19,7 @@ import androidx.core.graphics.drawable.RoundedBitmapDrawableFactory
 import androidx.core.graphics.drawable.toBitmap
 
 /**
- * Notifications système avec petite icône IK + grand logo couleur (style WhatsApp).
+ * Notifications système : petite icône EL + grand logo ELIMU (style WhatsApp).
  */
 object NotificationBranding {
     const val CHANNEL_ID = KalungaParentsApplication.CHANNEL_ID
@@ -43,7 +43,7 @@ object NotificationBranding {
             vibrationPattern = longArrayOf(0, 500, 200, 500, 200, 500)
             setSound(soundUri, attrs)
             enableLights(true)
-            lightColor = ContextCompat.getColor(context, R.color.kalunga_notify)
+            lightColor = ContextCompat.getColor(context, R.color.elimu_notify)
             setShowBadge(true)
             lockscreenVisibility = NotificationCompat.VISIBILITY_PUBLIC
         }
@@ -78,7 +78,7 @@ object NotificationBranding {
 
         val builder = NotificationCompat.Builder(context, CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_stat_notify)
-            .setColor(ContextCompat.getColor(context, R.color.kalunga_notify))
+            .setColor(ContextCompat.getColor(context, R.color.elimu_notify))
             .setContentTitle(title)
             .setContentText(body)
             .setStyle(NotificationCompat.BigTextStyle().bigText(body))

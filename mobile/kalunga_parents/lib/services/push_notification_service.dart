@@ -21,7 +21,7 @@ import '../providers/home_providers.dart';
 import '../providers/notifications_providers.dart';
 
 /// Canal Android — doit matcher MainActivity.kt / KalungaParentsApplication.
-const kParentsAlertChannelId = 'elimu_go_alerts_v1';
+const kParentsAlertChannelId = 'elimu_go_alerts_v2';
 const kParentsAlertChannelName = 'Alertes ELIMU Go';
 const _kNativeAlertsChannel = 'net.institutkalunga.parents/alerts';
 
@@ -45,6 +45,12 @@ ActivityType _activityTypeForSource(String source) {
   if (source == 'discipline_summons') return ActivityType.meeting;
   if (source == 'secretariat_communication') return ActivityType.bulletin;
   if (source == 'discipline_attendance') return ActivityType.info;
+  if (source == 'student_linked' ||
+      source == 'student_removed' ||
+      source == 'secretariat_enrollment' ||
+      source == 'secretariat_student') {
+    return ActivityType.info;
+  }
   if (source == 'discipline_incident' ||
       source == 'discipline_measure' ||
       source == 'discipline_exit' ||
@@ -118,14 +124,57 @@ bool _claimAlertKey(String key) {
 
 @pragma('vm:entry-point')
 Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-  // Avec un bloc `notification` FCM, Android affiche déjà la notif système.
-  // On initialise Firebase pour les messages data-only / analytics.
+  // App tuée / arrière-plan : si FCM n’a envoyé que `data`, Android n’affiche
+  // rien tout seul — on publie une notif locale (icône EL).
   try {
     if (Firebase.apps.isEmpty) {
       await Firebase.initializeApp(
         options: DefaultFirebaseOptions.currentPlatform,
       );
     }
+  } catch (_) {}
+
+  if (message.notification != null) return;
+
+  final title = message.data['title']?.toString() ?? 'ELIMU Go';
+  final body = message.data['body']?.toString() ??
+      'Vous avez une nouvelle notification.';
+  try {
+    final plugin = FlutterLocalNotificationsPlugin();
+    const androidInit =
+        AndroidInitializationSettings('@drawable/ic_stat_notify');
+    await plugin.initialize(
+      const InitializationSettings(android: androidInit),
+    );
+    await plugin
+        .resolvePlatformSpecificImplementation<
+            AndroidFlutterLocalNotificationsPlugin>()
+        ?.createNotificationChannel(
+      const AndroidNotificationChannel(
+        kParentsAlertChannelId,
+        kParentsAlertChannelName,
+        importance: Importance.max,
+        playSound: true,
+        enableVibration: true,
+        showBadge: true,
+      ),
+    );
+    await plugin.show(
+      DateTime.now().millisecondsSinceEpoch.remainder(100000),
+      title,
+      body,
+      const NotificationDetails(
+        android: AndroidNotificationDetails(
+          kParentsAlertChannelId,
+          kParentsAlertChannelName,
+          importance: Importance.max,
+          priority: Priority.max,
+          icon: '@drawable/ic_stat_notify',
+          color: Color(0xFF002858),
+          largeIcon: DrawableResourceAndroidBitmap('@mipmap/ic_launcher'),
+        ),
+      ),
+    );
   } catch (_) {}
 }
 
@@ -308,12 +357,12 @@ class PushNotificationService {
       enableVibration: true,
       vibrationPattern: vibration,
       category: AndroidNotificationCategory.message,
-      visibility: NotificationVisibility.private,
+      visibility: NotificationVisibility.public,
       ticker: 'Alerte ELIMU Go',
       styleInformation: BigTextStyleInformation(body, contentTitle: title),
       audioAttributesUsage: AudioAttributesUsage.notificationRingtone,
       icon: icon ?? '@drawable/ic_stat_notify',
-      largeIcon: const DrawableResourceAndroidBitmap('ic_notification_large'),
+      largeIcon: const DrawableResourceAndroidBitmap('@mipmap/ic_launcher'),
       color: const Color(0xFF002858),
       channelShowBadge: true,
       onlyAlertOnce: false,

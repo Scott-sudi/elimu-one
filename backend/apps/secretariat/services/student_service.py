@@ -65,6 +65,11 @@ def update_student(student: Student, *, actor=None, request=None, **data) -> Stu
 
     student = Student.objects.select_for_update().get(pk=student.pk)
     photo_touched = False
+    identity_fields = ("nom", "prenom", "postnom", "sexe", "date_naissance")
+    identity_changed = any(
+        field in data and data[field] != getattr(student, field)
+        for field in identity_fields
+    )
     if "photo" in data:
         photo = data["photo"]
         if photo is False:
@@ -89,12 +94,34 @@ def update_student(student: Student, *, actor=None, request=None, **data) -> Stu
         from .card_service import refresh_cards_for_student
 
         refresh_cards_for_student(student, actor=actor, request=request)
+    if identity_changed:
+        student_id = student.pk
+
+        def _push_student_update() -> None:
+            from apps.api.parents_push import notify_guardians_of_student_updated
+            from apps.secretariat.models import Student as S
+
+            row = S.objects.filter(pk=student_id).first()
+            if row is not None:
+                notify_guardians_of_student_updated(student=row)
+
+        transaction.on_commit(_push_student_update)
     return student
 
 
 @transaction.atomic
 def archive_student(student: Student, *, actor=None, request=None) -> Student:
     student = Student.objects.select_for_update().get(pk=student.pk)
+    from apps.secretariat.models import StudentGuardian
+
+    guardians = [
+        link.guardian
+        for link in StudentGuardian.objects.filter(
+            student=student,
+            guardian__is_archived=False,
+            guardian__is_active=True,
+        ).select_related("guardian")
+    ]
     student.archive()
     audit_secretariat_action(
         action=AuditLog.Action.STUDENT_ARCHIVED,
@@ -103,6 +130,23 @@ def archive_student(student: Student, *, actor=None, request=None) -> Student:
         actor=actor,
         request=request,
     )
+    if guardians:
+        targets = list(guardians)
+        student_id = student.pk
+
+        def _push_archived() -> None:
+            from apps.api.parents_push import notify_guardians_of_student_removed
+            from apps.secretariat.models import Student as S
+
+            row = S.objects.filter(pk=student_id).first()
+            if row is not None:
+                notify_guardians_of_student_removed(
+                    student=row,
+                    guardians=targets,
+                    reason="Archivé",
+                )
+
+        transaction.on_commit(_push_archived)
     return student
 
 

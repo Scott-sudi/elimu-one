@@ -41,6 +41,42 @@
     background-color: #f8faf8;
 }
 
+.table th:last-child,
+.table td:last-child {
+    position: sticky;
+    right: 0;
+    z-index: 2;
+    text-align: right;
+    min-width: 3.75rem;
+    background-color: var(--color-card);
+    box-shadow: -10px 0 10px -10px rgba(15, 23, 42, 0.18);
+}
+
+.table thead th:last-child {
+    background-color: var(--color-table-head);
+}
+
+.table tbody tr:hover td:last-child {
+    background-color: #f8faf8;
+}
+
+[data-dropdown-trigger] {
+    min-width: 2.15rem;
+    min-height: 2.15rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+[data-dropdown-trigger]:not(:has(svg))::after {
+    content: "";
+    width: 4px;
+    height: 14px;
+    background-image: radial-gradient(circle, currentColor 1.55px, transparent 1.65px);
+    background-size: 4px 5px;
+    background-repeat: repeat-y;
+}
+
 .table__cell-muted { color: var(--color-text-secondary); }
 .table__cell-mono { font-variant-numeric: tabular-nums; }
 .table__empty { padding: 28px 16px; }

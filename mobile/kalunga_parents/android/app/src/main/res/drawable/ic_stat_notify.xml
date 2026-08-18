@@ -4,21 +4,13 @@
     android:height="24dp"
     android:viewportWidth="24"
     android:viewportHeight="24">
-    <!-- Silhouette blanche IK : I à gauche, K à droite (barre de statut). -->
-    <!-- I -->
+    <!-- Silhouette blanche EL (ELIMU) — barre de statut Android. -->
+    <!-- E -->
     <path
         android:fillColor="#FFFFFFFF"
-        android:pathData="M3,3.5h4v17H3z"/>
-    <!-- K : barre verticale -->
+        android:pathData="M1.5,3.2h10.2v3.1H5.2v3.3h5.6v2.9H5.2v3.2h6.5v3.1H1.5z"/>
+    <!-- L -->
     <path
         android:fillColor="#FFFFFFFF"
-        android:pathData="M10,3.5h4v17h-4z"/>
-    <!-- K : bras haut -->
-    <path
-        android:fillColor="#FFFFFFFF"
-        android:pathData="M13.2,11.2 L21,3.5 h-4.2 L10.8,11.2 z"/>
-    <!-- K : bras bas -->
-    <path
-        android:fillColor="#FFFFFFFF"
-        android:pathData="M13.2,12.8 L21,20.5 h-4.2 L10.8,12.8 z"/>
+        android:pathData="M13.4,3.2h3.7v13.4H22.5v3.2H13.4z"/>
 </vector>

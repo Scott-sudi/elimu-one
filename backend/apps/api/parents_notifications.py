@@ -37,6 +37,7 @@ from apps.secretariat.models import (
     AcademicYear,
     Communication,
     CommunicationReceipt,
+    Enrollment,
     Guardian,
     Student,
 )
@@ -216,6 +217,49 @@ def build_parent_notifications(*, guardian: Guardian, limit: int = 40) -> dict:
                         payment.created_at, getattr(payment, "updated_at", None)
                     ),
                     "student_id": str(payment.student.public_id),
+                    "student_name": student_name,
+                    "_sort": sort_dt,
+                }
+            )
+
+        enr_qs = Enrollment.objects.filter(
+            student_id__in=student_ids,
+            status=Enrollment.Status.VALIDATED,
+        ).select_related("student", "school_class")
+        if year is not None:
+            enr_qs = enr_qs.filter(academic_year=year)
+        for enrollment in enr_qs.order_by("-updated_at", "-created_at")[:limit]:
+            student_name = _student_display_name(enrollment.student)
+            class_label = str(enrollment.school_class) if enrollment.school_class_id else ""
+            sort_dt = _activity_moment(
+                created_at=enrollment.created_at,
+                updated_at=getattr(enrollment, "updated_at", None),
+            )
+            updated = _was_updated(
+                enrollment.created_at, getattr(enrollment, "updated_at", None)
+            )
+            title = "Inscription modifiée" if updated else "Inscription"
+            items.append(
+                {
+                    "id": f"enrollment:{enrollment.public_id}",
+                    "source": "secretariat_enrollment",
+                    "source_id": str(enrollment.public_id),
+                    "type": "info",
+                    "title": title,
+                    "subtitle": (
+                        f"{student_name} — {class_label}"
+                        if class_label
+                        else student_name
+                    ),
+                    "body": (
+                        f"{student_name} a été inscrit(e)"
+                        + (f" en {class_label}." if class_label else ".")
+                    ),
+                    "timestamp_label": _relative_day_label(sort_dt),
+                    "occurred_at": _iso_occurred(sort_dt),
+                    "is_read": (not updated)
+                    or is_discipline_read("secretariat_enrollment", enrollment),
+                    "student_id": str(enrollment.student.public_id),
                     "student_name": student_name,
                     "_sort": sort_dt,
                 }
@@ -746,6 +790,11 @@ def mark_parent_notifications_read(*, guardian: Guardian, limit: int = 40) -> di
             receipt_keys.add((SOURCE_BY_KIND["justification"], str(public_id)))
         for public_id in att_qs.values_list("public_id", flat=True):
             receipt_keys.add((SOURCE_BY_KIND["attendance"], str(public_id)))
+        for public_id in Enrollment.objects.filter(
+            student_id__in=student_ids,
+            status=Enrollment.Status.VALIDATED,
+        ).values_list("public_id", flat=True):
+            receipt_keys.add(("secretariat_enrollment", str(public_id)))
 
         existing_keys = set(
             ParentNotificationRead.objects.filter(guardian=guardian).values_list(
