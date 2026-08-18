@@ -1,3 +1,39 @@
-{% extends "layouts/app.html" %}{% block title %}Années scolaires{% endblock %}
-{% block content %}<div data-page="secretariat-academic-years"><div class="content__header"><div><h2 class="content__title">Années scolaires</h2><p class="content__description">Ouverture, activation et clôture des années</p></div><button class="btn btn--primary" data-modal-open="year-modal">Nouvelle année</button></div>{% include "secretariat/academic_years/_table.html" %}</div>{% endblock %}
-{% block modals %}<div class="modal-backdrop" id="year-modal" data-modal="year-modal" hidden><div class="modal" data-modal-panel><div class="modal__header"><h2>Nouvelle année scolaire</h2><button class="modal__close" data-modal-close>×</button></div><div class="modal__body">{% include "secretariat/academic_years/_form.html" %}</div></div></div>{% endblock %}
+{% extends "layouts/app.html" %}
+{% block title %}Années scolaires{% endblock %}
+{% block content %}
+<div data-page="secretariat-academic-years">
+  <div class="content__header">
+    <div>
+      <h2 class="content__title">Années scolaires</h2>
+      <p class="content__description">Ouverture, activation et clôture des années</p>
+    </div>
+    {% if can_create_year %}
+      <button class="btn btn--primary" data-modal-open="year-modal" type="button">Nouvelle année</button>
+    {% else %}
+      <button class="btn btn--secondary" type="button" disabled title="Clôturez d'abord l'année en cours">
+        Nouvelle année
+      </button>
+    {% endif %}
+  </div>
+  {% if not can_create_year and blocking_year %}
+    <p class="secretariat-year-banner" role="status">
+      Désolé, vous ne pouvez pas créer une nouvelle année scolaire tant que
+      l'année en cours ({{ blocking_year.label }}) n'est pas clôturée.
+    </p>
+  {% endif %}
+  {% include "secretariat/academic_years/_table.html" %}
+</div>
+{% endblock %}
+{% block modals %}
+{% if can_create_year %}
+<div class="modal-backdrop" id="year-modal" data-modal="year-modal" {% if not open_create_modal %}hidden{% endif %}>
+  <div class="modal" data-modal-panel>
+    <div class="modal__header">
+      <h2>Nouvelle année scolaire</h2>
+      <button class="modal__close" data-modal-close type="button">×</button>
+    </div>
+    <div class="modal__body">{% include "secretariat/academic_years/_form.html" %}</div>
+  </div>
+</div>
+{% endif %}
+{% endblock %}

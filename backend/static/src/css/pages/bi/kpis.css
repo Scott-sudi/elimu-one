@@ -1,0 +1,38 @@
+/* BI KPI strip — extends dashboard stat-cards without a second theme */
+
+.bi-page .dashboard__stats {
+  margin-bottom: 0;
+}
+
+.bi-page .stat-card {
+  border-radius: 4px;
+  border: 1px solid var(--color-border);
+  background: var(--color-card);
+  box-shadow: none;
+}
+
+.bi-page .stat-card__label {
+  color: var(--color-text-secondary);
+}
+
+.bi-page .stat-card__value {
+  color: var(--color-text-primary);
+  font-variant-numeric: tabular-nums;
+}
+
+.bi-page .stat-card__meta {
+  color: var(--color-text-secondary);
+  font-size: 0.8rem;
+}
+
+.bi-kpi--warning .stat-card__value {
+  color: var(--color-warning);
+}
+
+.bi-kpi--danger .stat-card__value {
+  color: var(--color-danger);
+}
+
+.bi-kpi--success .stat-card__value {
+  color: var(--color-success);
+}

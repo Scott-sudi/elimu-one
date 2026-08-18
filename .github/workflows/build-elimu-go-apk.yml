@@ -1,0 +1,55 @@
+name: Build ELIMU Go APK
+
+on:
+  push:
+    branches: [main, master]
+    paths:
+      - 'mobile/kalunga_parents/**'
+      - '.github/workflows/build-elimu-go-apk.yml'
+  workflow_dispatch:
+    inputs:
+      api_host:
+        description: 'URL ELIMU One (https://...)'
+        required: false
+        default: 'https://REMPLACER-PAR-VOTRE-DOMAINE-ELIMU'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: mobile/kalunga_parents
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Pub get
+        run: flutter pub get
+
+      - name: Build release APK
+        run: |
+          flutter build apk --release \
+            --dart-define=ELIMU_API_HOST=${{ github.event.inputs.api_host || 'https://REMPLACER-PAR-VOTRE-DOMAINE-ELIMU' }}
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: elimu-go-apk
+          path: mobile/kalunga_parents/build/app/outputs/flutter-apk/app-release.apk
+
+      - name: GitHub Release
+        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: elimu-go-${{ github.run_number }}
+          name: ELIMU Go APK #${{ github.run_number }}
+          files: mobile/kalunga_parents/build/app/outputs/flutter-apk/app-release.apk
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

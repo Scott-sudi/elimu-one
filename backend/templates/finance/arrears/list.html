@@ -1,0 +1,20 @@
+{% extends "layouts/app.html" %}
+{% block title %}Impayés{% endblock %}
+{% block content %}
+<div data-page="finance-arrears">
+  <div class="content__header">
+    <div>
+      <h2 class="content__title">Impayés</h2>
+      <p class="content__description">{% if selected_academic_year %}Année {{ selected_academic_year.label }}{% endif %}</p>
+    </div>
+    <div class="content__actions">
+      {% include "finance/partials/qr_scan_button.html" with btn_class="btn--secondary" label="Scanner une carte" %}
+    </div>
+  </div>
+
+  {% url 'finance:arrears' as arrears_url %}
+  {% include "finance/partials/list_filters.html" with filter_action_url=arrears_url table_target="#arrears-table" clear_url=arrears_url q_placeholder="Matricule ou nom" %}
+
+  {% include "finance/arrears/_table.html" %}
+</div>
+{% endblock %}

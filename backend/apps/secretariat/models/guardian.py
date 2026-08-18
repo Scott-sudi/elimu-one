@@ -66,6 +66,11 @@ class Guardian(TimeStampedPublicIdModel):
         self.is_archived = True
         self.save(update_fields=["is_active", "is_archived", "updated_at"])
 
+    def restore(self) -> None:
+        self.is_active = True
+        self.is_archived = False
+        self.save(update_fields=["is_active", "is_archived", "updated_at"])
+
 
 class StudentGuardian(models.Model):
     """The relationship and permissions between a student and guardian.

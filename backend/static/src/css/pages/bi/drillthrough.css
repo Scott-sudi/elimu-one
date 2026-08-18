@@ -1,0 +1,33 @@
+/* BI drill-through tables under charts */
+
+.bi-drillthrough {
+  margin-top: var(--space-4, 1rem);
+}
+
+.bi-drillthrough .table-wrap {
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  overflow: auto;
+}
+
+.bi-drillthrough .table {
+  margin: 0;
+}
+
+.bi-drillthrough .table th {
+  background: var(--color-table-head);
+  color: var(--color-text-primary);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.bi-drillthrough .table td {
+  font-variant-numeric: tabular-nums;
+}
+
+.bi-drillthrough__title {
+  margin: 0 0 0.5rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+}

@@ -1,0 +1,48 @@
+<div id="finance-classes-table">
+  {% if page_obj.object_list %}
+    <div class="entity-grid" role="list">
+      {% for item in page_obj %}
+        {% if item.section %}
+          {% with tone=item.section.code|default:"default"|lower %}
+            <a
+              href="{% url 'finance:class-situation' item.public_id %}"
+              class="entity-tile entity-tile--tone-{{ tone }} {% if not item.is_active %}entity-tile--muted{% endif %}"
+              role="listitem"
+            >
+              <span class="entity-tile__title">{{ item.name }}</span>
+              <span class="entity-tile__meta">{{ item.code }}</span>
+              <span class="entity-tile__line">
+                {{ item.level }} · {{ item.section }}{% if item.option %} · {{ item.option }}{% endif %}
+              </span>
+              <span class="entity-tile__footer">
+                <span class="entity-tile__badge">{{ item.occupied }}/{{ item.max_capacity }} élèves</span>
+                {% if item.room %}<span class="entity-tile__room">{{ item.room }}</span>{% endif %}
+              </span>
+              <span class="entity-tile__status">{% if item.is_active %}Active{% else %}Désactivée{% endif %}</span>
+            </a>
+          {% endwith %}
+        {% else %}
+          <a
+            href="{% url 'finance:class-situation' item.public_id %}"
+            class="entity-tile entity-tile--tone-tronc {% if not item.is_active %}entity-tile--muted{% endif %}"
+            role="listitem"
+          >
+            <span class="entity-tile__title">{{ item.name }}</span>
+            <span class="entity-tile__meta">{{ item.code }}</span>
+            <span class="entity-tile__line">{{ item.level }} · Tronc commun</span>
+            <span class="entity-tile__footer">
+              <span class="entity-tile__badge">{{ item.occupied }}/{{ item.max_capacity }} élèves</span>
+              {% if item.room %}<span class="entity-tile__room">{{ item.room }}</span>{% endif %}
+            </span>
+            <span class="entity-tile__status">{% if item.is_active %}Active{% else %}Désactivée{% endif %}</span>
+          </a>
+        {% endif %}
+      {% endfor %}
+    </div>
+    {% include "components/pagination.html" with page_obj=page_obj hx_target="#finance-classes-table" hx_swap="outerHTML" %}
+  {% else %}
+    <div class="entity-grid__empty">
+      {% include "components/empty_state.html" with icon="school" title="Aucune classe trouvée" description="Aucune classe active pour cette année scolaire." %}
+    </div>
+  {% endif %}
+</div>

@@ -1,1 +1,82 @@
-{% extends "layouts/app.html" %}{% block title %}{{ communication.title }}{% endblock %}{% block content %}<div data-page="secretariat-communications"><div class="content__header"><div><h2 class="content__title">{{ communication.title }}</h2><p class="content__description">{{ communication.get_category_display }} · {{ communication.get_priority_display }}</p></div><div class="content__actions"><a class="btn btn--secondary" href="{% url 'secretariat:communications' %}">Retour</a>{% if communication.status == "BROUILLON" %}<form method="post" action="{% url 'secretariat:communication-publish' communication.public_id %}">{% csrf_token %}<button class="btn btn--primary">Publier</button></form>{% endif %}</div></div><article class="card"><div class="card__body"><p><span class="badge">{{ communication.get_status_display }}</span>{% if communication.is_pinned %} <span class="badge badge--primary">Épinglée</span>{% endif %}</p><div class="secretariat-message">{{ communication.content|linebreaks }}</div>{% if communication.attachment %}<a class="btn btn--secondary" href="{{ communication.attachment.url }}">Télécharger la pièce jointe</a>{% endif %}<h3>Destinataires</h3>{% for target in communication.targets.all %}<p>{{ target.get_target_type_display }}</p>{% empty %}<p>Aucun destinataire.</p>{% endfor %}</div></article></div>{% endblock %}
+{% extends "layouts/app.html" %}
+{% block title %}{{ communication.title }}{% endblock %}
+{% block content %}
+<div data-page="secretariat-communications" data-students-url="{% url 'secretariat:communication-class-students' %}">
+  <div class="content__header">
+    <div>
+      <h2 class="content__title">{{ communication.title }}</h2>
+      <p class="content__description">{{ communication.get_category_display }} · {{ communication.get_priority_display }}</p>
+    </div>
+    <div class="content__actions">
+      <a class="btn btn--secondary" href="{% url 'secretariat:communications' %}">Retour</a>
+      {% if can_edit %}
+        <a class="btn btn--secondary" href="{% url 'secretariat:communication-update' communication.public_id %}">Modifier</a>
+      {% endif %}
+      {% if year_writable %}
+        <form method="post" action="{% url 'secretariat:communication-delete' communication.public_id %}" data-confirm-form="Supprimer définitivement cette communication ?" data-confirm-danger>
+          {% csrf_token %}<button class="btn btn--ghost" type="submit">Supprimer</button>
+        </form>
+      {% endif %}
+      {% if year_writable and communication.status != "ARCHIVEE" %}
+        {% if communication.is_pinned %}
+          <form method="post" action="{% url 'secretariat:communication-unpin' communication.public_id %}">
+            {% csrf_token %}<button class="btn btn--ghost">Désépingler</button>
+          </form>
+        {% else %}
+          <form method="post" action="{% url 'secretariat:communication-pin' communication.public_id %}">
+            {% csrf_token %}<button class="btn btn--ghost">Épingler</button>
+          </form>
+        {% endif %}
+        <form method="post" action="{% url 'secretariat:communication-archive' communication.public_id %}" data-confirm-form="Archiver cette communication ?">
+          {% csrf_token %}<button class="btn btn--ghost">Archiver</button>
+        </form>
+      {% elif year_writable and communication.status == "ARCHIVEE" %}
+        <form method="post" action="{% url 'secretariat:communication-restore' communication.public_id %}">
+          {% csrf_token %}<button class="btn btn--primary">Restaurer</button>
+        </form>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="secretariat-detail-grid">
+    <article class="card">
+      <div class="card__body">
+        <p>
+          <span class="badge {% if communication.status == 'PUBLIEE' %}badge--success{% endif %}">{{ communication.get_status_display }}</span>
+          {% if communication.is_pinned %}<span class="badge badge--primary">Épinglée</span>{% endif %}
+        </p>
+        <div class="secretariat-message">{{ communication.content|linebreaks }}</div>
+        {% if communication.attachment %}
+          <a class="btn btn--secondary" href="{{ communication.attachment.url }}">Télécharger la pièce jointe</a>
+        {% endif %}
+        <h3>Destinataires</h3>
+        {% for label in target_labels %}
+          <p>{{ label }}</p>
+        {% empty %}
+          <p>Aucun destinataire défini.</p>
+        {% endfor %}
+      </div>
+    </article>
+
+    {% if year_writable %}
+      {% if communication.status == "BROUILLON" or communication.status == "PROGRAMMEE" %}
+    <section class="card">
+      <div class="card__header"><h3>Publier</h3></div>
+      <div class="card__body">
+        <p class="content__description" style="margin-top:0;">
+          Choisissez pour qui publier : tous les parents, une classe, ou un élève seulement.
+        </p>
+        <form method="post" action="{% url 'secretariat:communication-publish' communication.public_id %}" data-communication-audience>
+          {% csrf_token %}
+          {% include "secretariat/_form_fields.html" with form=publish_form %}
+          <div class="content__actions">
+            <button class="btn btn--primary" type="submit">Publier maintenant</button>
+          </div>
+        </form>
+      </div>
+    </section>
+      {% endif %}
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

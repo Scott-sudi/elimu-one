@@ -1,0 +1,161 @@
+{% extends "layouts/app.html" %}
+{% block title %}Feuille de présence{% endblock %}
+{% block content %}
+<div data-page="discipline-attendance-sheet">
+  <div class="content__header">
+    <div class="content__header-main">
+      <h2 class="content__title">Feuille de présence</h2>
+      <p class="content__description">
+        Classe {{ school_class.name }} · {{ sheet_date|date:"l d F Y" }} · Année {{ selected_year.label }}
+      </p>
+    </div>
+    <div class="content__actions">
+      <button
+        type="button"
+        class="btn btn--primary"
+        data-modal-open="discipline-qr-scan-modal"
+        data-discipline-open-scanner
+        data-default-mode="attendance"
+        data-class-public-id="{{ school_class.public_id }}"
+        data-sheet-date="{{ sheet_date|date:'Y-m-d' }}"
+      >
+        <i data-lucide="scan-qr-code" width="16" height="16"></i>
+        Scanner pour cette feuille
+      </button>
+      <a class="btn btn--secondary" href="{% url 'discipline:class-attendance-folders' class_id=school_class.public_id %}">Dossiers</a>
+      <a class="btn btn--secondary" href="{{ print_url }}" target="_blank" rel="noopener">Imprimer</a>
+      <a class="btn btn--secondary" href="{{ export_csv_url }}">Exporter CSV</a>
+    </div>
+  </div>
+
+  <section class="card">
+    <div class="card__body">
+      <div class="secretariat-toolbar">
+        <span class="badge">Statut: {{ sheet.get_status_display }}</span>
+        <span class="table__cell-muted">Total: <strong data-sheet-total>{{ totals.total_students }}</strong></span>
+        <span class="table__cell-muted">Présents: <strong data-sheet-present>{{ totals.total_present }}</strong></span>
+        <span class="table__cell-muted">Absents: <strong data-sheet-absent>{{ totals.total_absent }}</strong></span>
+        <span class="table__cell-muted">Non pointés: <strong data-sheet-unmarked>0</strong></span>
+      </div>
+    </div>
+  </section>
+
+  <form method="post" id="attendance-sheet-form" data-discipline-sheet-form>
+    {% csrf_token %}
+    <section class="card">
+      <div class="card__header">
+        <h3>Pointage des élèves</h3>
+      </div>
+      <div class="card__body">
+        <div class="content__actions" style="margin-bottom:0.75rem;">
+          <button class="btn btn--secondary btn--sm" type="button" data-sheet-mark-all>Marquer tous présents</button>
+          <button class="btn btn--secondary btn--sm" type="button" data-sheet-reset>Réinitialiser (non pointés)</button>
+        </div>
+        <div class="table-wrap">
+          <table class="table table--dense">
+            <thead>
+              <tr>
+                <th>N°</th>
+                <th>Matricule</th>
+                <th>Nom complet</th>
+                <th>Présence</th>
+                <th>Mention</th>
+                <th>Observation</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for record in records %}
+                <tr data-sheet-row data-student-matricule="{{ record.student.matricule|upper }}">
+                  <td>{{ forloop.counter }}</td>
+                  <td>{{ record.student.matricule }}</td>
+                  <td>{{ record.student.nom }} {{ record.student.postnom }} {{ record.student.prenom }}</td>
+                  <td>
+                    <div class="btn-group">
+                      <label>
+                        <input
+                          type="radio"
+                          name="record-status-{{ record.id }}"
+                          value="PRESENT"
+                          {% if record.status == "PRESENT" %}checked{% endif %}
+                          data-sheet-status
+                        >
+                        Présent
+                      </label>
+                      <label>
+                        <input
+                          type="radio"
+                          name="record-status-{{ record.id }}"
+                          value="ABSENT"
+                          {% if record.status == "ABSENT" %}checked{% endif %}
+                          data-sheet-status
+                        >
+                        Absent
+                      </label>
+                    </div>
+                  </td>
+                  <td data-sheet-mention>
+                    {% if record.status == "PRESENT" %}
+                      OK
+                    {% elif record.status == "ABSENT" %}
+                      ABS
+                    {% else %}
+                      ABS
+                    {% endif %}
+                  </td>
+                  <td>{{ record.observation|default:"—" }}</td>
+                </tr>
+              {% empty %}
+                <tr>
+                  <td colspan="6" class="table__empty">Aucun élève actif pour cette classe à cette date.</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+    <div class="content__actions">
+      <button class="btn btn--secondary" type="submit" name="action" value="save_draft">Enregistrer le brouillon</button>
+      <button class="btn btn--primary" type="submit" name="action" value="validate">Valider la feuille</button>
+    </div>
+  </form>
+
+  {% if sheet.status == "VALIDEE" or sheet.status == "CLOTUREE" %}
+    <section class="card" style="margin-top:1rem;">
+      <div class="card__header"><h3>Correction contrôlée</h3></div>
+      <div class="card__body">
+        <form method="post">
+          {% csrf_token %}
+          <input type="hidden" name="action" value="correct">
+          <div class="form-row form-row--3">
+            <div class="form-group">
+              <label class="form-label">Ligne</label>
+              <select class="form-select" name="record_id" required>
+                <option value="">Sélectionner</option>
+                {% for record in records %}
+                  <option value="{{ record.public_id }}">{{ record.student.matricule }} — {{ record.student.nom }} {{ record.student.prenom }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Nouveau statut</label>
+              {{ correction_form.status }}
+            </div>
+            <div class="form-group">
+              <label class="form-label">Mot de passe</label>
+              {{ correction_form.password }}
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Motif obligatoire</label>
+            {{ correction_form.reason }}
+          </div>
+          <div class="content__actions">
+            <button class="btn btn--danger" type="submit">Corriger et auditer</button>
+          </div>
+        </form>
+      </div>
+    </section>
+  {% endif %}
+</div>
+{% endblock %}

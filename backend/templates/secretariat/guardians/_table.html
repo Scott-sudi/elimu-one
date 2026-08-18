@@ -1,1 +1,69 @@
-<div id="guardians-table"><div class="table-wrap"><table class="table table--dense"><thead><tr><th>Nom complet</th><th>Téléphone</th><th>E-mail</th><th>Profession</th><th>Statut</th><th></th></tr></thead><tbody>{% for guardian in page_obj %}<tr><td>{{ guardian }}</td><td>{{ guardian.telephone_principal }}</td><td>{{ guardian.email|default:"—" }}</td><td>{{ guardian.profession|default:"—" }}</td><td><span class="badge {% if guardian.is_active %}badge--success{% endif %}">{{ guardian.is_active|yesno:"Actif,Inactif" }}</span></td><td><a class="btn btn--ghost btn--sm" href="{% url 'secretariat:guardian-detail' guardian.public_id %}">Consulter</a></td></tr>{% empty %}<tr><td colspan="6" class="table__empty">{% include "components/empty_state.html" with icon="contact" title="Aucun responsable trouvé" %}</td></tr>{% endfor %}</tbody></table></div>{% include "components/pagination.html" with page_obj=page_obj hx_target="#guardians-table" hx_swap="outerHTML" %}</div>
+<div id="guardians-table">
+  <div class="table-wrap">
+    <table class="table table--dense">
+      <thead>
+        <tr>
+          <th class="table__index" scope="col">N°</th>
+          <th scope="col">N° identification</th>
+          <th>Nom complet</th>
+          <th>Téléphone</th>
+          <th>Élèves liés</th>
+          <th>E-mail</th>
+          <th>Profession</th>
+          <th>Statut</th>
+          <th style="text-align: right;">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for guardian in page_obj %}
+          <tr>
+            <td class="table__index">{{ forloop.counter0|add:page_obj.start_index }}</td>
+            <td class="table__cell-mono">
+              <strong>{{ guardian.numero_identification|default:"—" }}</strong>
+            </td>
+            <td>{{ guardian }}</td>
+            <td>{{ guardian.telephone_principal }}</td>
+            <td>
+              {% with links=guardian.student_links.all %}
+                {% if links %}
+                  {% for link in links %}
+                    <div>
+                      <a href="{% url 'secretariat:student-detail' link.student.public_id %}">{{ link.student }}</a>
+                      <span class="text-muted">({{ link.get_lien_parente_display }})</span>
+                    </div>
+                  {% endfor %}
+                {% else %}
+                  <span class="text-muted">Aucun</span>
+                {% endif %}
+              {% endwith %}
+            </td>
+            <td>{{ guardian.email|default:"—" }}</td>
+            <td>{{ guardian.profession|default:"—" }}</td>
+            <td>
+              {% if guardian.is_archived %}
+                <span class="badge badge--neutral">Archivé</span>
+              {% elif guardian.is_active %}
+                <span class="badge badge--success">Actif</span>
+              {% else %}
+                <span class="badge">Inactif</span>
+              {% endif %}
+            </td>
+            <td style="text-align: right;">
+              <a class="btn btn--ghost btn--sm" href="{% url 'secretariat:guardian-detail' guardian.public_id %}">Consulter</a>
+              {% if year_writable %}
+                <a class="btn btn--ghost btn--sm" href="{% url 'secretariat:guardian-update' guardian.public_id %}">Modifier</a>
+              {% endif %}
+            </td>
+          </tr>
+        {% empty %}
+          <tr>
+            <td colspan="9" class="table__empty">
+              {% include "components/empty_state.html" with icon="contact" title="Aucun responsable trouvé" %}
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% include "components/pagination.html" with page_obj=page_obj hx_target="#guardians-table" hx_swap="outerHTML" %}
+</div>

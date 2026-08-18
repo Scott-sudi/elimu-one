@@ -9,6 +9,28 @@
       <div class="app-shell__body">
         <main class="content" id="main-content">
           <div class="content__inner">
+            {% if messages %}
+              <div class="alert-stack" style="margin-bottom: 1rem;">
+                {% for message in messages %}
+                  <div class="alert alert--{% if 'error' in message.tags %}danger{% elif 'success' in message.tags %}success{% elif 'warning' in message.tags %}warning{% else %}info{% endif %}" role="status">
+                    <div class="alert__content">
+                      <div class="alert__message">{{ message }}</div>
+                    </div>
+                  </div>
+                {% endfor %}
+              </div>
+            {% endif %}
+            {% if request.user.is_secretaire or request.user.is_comptable or request.user.role_code == "DISCIPLINE" %}
+              {% if is_selected_year_closed and request.resolver_match.url_name != 'academic-year-select' %}
+              <div class="secretariat-year-banner" role="status">
+                {% if request.user.role_code == "DISCIPLINE" %}
+                  Cette année scolaire est clôturée. Les informations disciplinaires sont disponibles principalement en consultation.
+                {% else %}
+                  Cette année scolaire est clôturée. Les données financières sont disponibles principalement en consultation.
+                {% endif %}
+              </div>
+              {% endif %}
+            {% endif %}
             {% block content_header %}{% endblock %}
             {% block content %}{% endblock %}
           </div>
@@ -20,4 +42,10 @@
 
 {% block modal_root %}
   {% block modals %}{% endblock %}
+  {% if request.user.is_authenticated and request.user.is_comptable %}
+    {% include "finance/partials/qr_scan_modal.html" %}
+  {% endif %}
+  {% if request.user.is_authenticated and request.user.role_code == "DISCIPLINE" %}
+    {% include "discipline/partials/qr_scan_modal.html" %}
+  {% endif %}
 {% endblock %}

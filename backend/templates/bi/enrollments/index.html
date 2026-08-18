@@ -1,0 +1,75 @@
+{% extends "layouts/bi.html" %}
+{% block title %}{{ page_title }} — BI{% endblock %}
+{% block content %}
+{{ charts|json_script:"bi-charts-data" }}
+<div data-page="bi-enrollments" class="bi-page">
+  <div class="content__header">
+    <div class="content__header-main">
+      <h2 class="content__title">{{ page_title }}</h2>
+      <p class="content__description">
+        {% if selected_year %}Année {{ selected_year.label }} · {% endif %}
+        Inscriptions validées et répartition des effectifs.
+      </p>
+    </div>
+  </div>
+
+  {% include "bi/partials/filters.html" with bi_domain="enrollments" clear_url=request.path %}
+
+  <div class="dashboard__stats" aria-label="Indicateurs effectifs">
+    <div class="stat-card">
+      <div class="stat-card__label">Effectif total</div>
+      <div class="stat-card__value">{{ kpis.effectif_total|default:0 }}</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-card__label">Nouvelles inscriptions</div>
+      <div class="stat-card__value">{{ kpis.nouvelles_inscriptions|default:0 }}</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-card__label">Réinscriptions</div>
+      <div class="stat-card__value">{{ kpis.reinscriptions|default:0 }}</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-card__label">Garçons / Filles</div>
+      <div class="stat-card__value">{{ kpis.garcons|default:0 }} / {{ kpis.filles|default:0 }}</div>
+    </div>
+  </div>
+
+  <section class="card bi-section" aria-label="Évolution des effectifs">
+    <div class="card__header"><h3>Évolution des effectifs</h3></div>
+    <div class="card__body">
+      <div data-bi-chart="enrollments-trend" data-bi-chart-type="line" class="bi-chart"></div>
+    </div>
+  </section>
+
+  <section class="card bi-section" aria-label="Répartition par classe">
+    <div class="card__header"><h3>Répartition par classe</h3></div>
+    <div class="card__body">
+      <div data-bi-chart="enrollments-by-class" data-bi-chart-type="bar" class="bi-chart"></div>
+      {% if tables.occupation %}
+      <div class="bi-drillthrough">
+        <div class="table-wrap">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Classe</th><th>Capacité</th><th>Effectif</th><th>Occupation</th><th>Statut</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for row in tables.occupation %}
+              <tr>
+                <td>{{ row.name }}</td>
+                <td>{{ row.capacity }}</td>
+                <td>{{ row.effectif }}</td>
+                <td>{% if row.taux_occupation is not None %}{{ row.taux_occupation }} %{% else %}—{% endif %}</td>
+                <td>{{ row.statut }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+      {% endif %}
+    </div>
+  </section>
+</div>
+{% endblock %}

@@ -1,0 +1,40 @@
+{% extends "layouts/app.html" %}
+{% block title %}Situation élèves{% endblock %}
+{% block content %}
+<div data-page="finance-student-search">
+  <div class="content__header">
+    <div>
+      <h2 class="content__title">Situation élèves</h2>
+      <p class="content__description">
+        {% if selected_academic_year %}Année {{ selected_academic_year.label }} · {% endif %}
+        Recherchez un élève pour voir son solde, ses frais et ses paiements.
+      </p>
+    </div>
+    <div class="content__actions">
+      {% include "finance/partials/qr_scan_button.html" with btn_class="btn--primary" label="Scanner une carte" %}
+    </div>
+  </div>
+
+  <form
+    class="secretariat-toolbar"
+    method="get"
+    hx-get="{% url 'finance:student-search' %}"
+    hx-target="#student-search-results"
+    hx-trigger="keyup changed delay:300ms, search, submit"
+    hx-push-url="true"
+  >
+    <input
+      class="form-input form-input--sm"
+      type="search"
+      name="q"
+      value="{{ q }}"
+      placeholder="Matricule, nom ou n° d'inscription"
+      autofocus
+      autocomplete="off"
+    >
+    <button class="btn btn--secondary btn--sm" type="submit">Rechercher</button>
+  </form>
+
+  {% include "finance/students/_search_results.html" %}
+</div>
+{% endblock %}

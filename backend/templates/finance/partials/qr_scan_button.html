@@ -1,0 +1,10 @@
+{# Opens the shared QR scan modal (included for accountants in app layout). #}
+<button
+  type="button"
+  class="btn {{ btn_class|default:'btn--secondary' }} {{ btn_size|default:'' }}"
+  data-modal-open="finance-qr-scan-modal"
+  data-finance-qr-scan
+>
+  <i data-lucide="scan-qr-code" width="16" height="16"></i>
+  {{ label|default:"Scanner une carte" }}
+</button>

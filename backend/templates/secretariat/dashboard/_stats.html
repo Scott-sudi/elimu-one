@@ -1,6 +1,38 @@
 <div class="secretariat-stats" id="secretariat-stats">
-  <article class="card"><div class="card__body"><span class="table__cell-muted">Élèves actifs</span><h3>{{ stats.students.active }}</h3></div></article>
-  <article class="card"><div class="card__body"><span class="table__cell-muted">Inscriptions validées</span><h3>{{ stats.enrollments.total|default:0 }}</h3></div></article>
-  <article class="card"><div class="card__body"><span class="table__cell-muted">Occupation</span><h3>{{ stats.classes.occupancy_percentage }} %</h3></div></article>
-  <article class="card"><div class="card__body"><span class="table__cell-muted">Documents en attente</span><h3>{{ stats.documents_pending }}</h3></div></article>
+  <article class="card">
+    <div class="card__body">
+      <span class="table__cell-muted">Élèves inscrits</span>
+      <h3>{{ stats.enrollments.total|default:0 }}</h3>
+    </div>
+  </article>
+  <article class="card">
+    <div class="card__body">
+      <span class="table__cell-muted">Filles</span>
+      <h3>{{ stats.enrollments.girls|default:0 }}</h3>
+    </div>
+  </article>
+  <article class="card">
+    <div class="card__body">
+      <span class="table__cell-muted">Garçons</span>
+      <h3>{{ stats.enrollments.boys|default:0 }}</h3>
+    </div>
+  </article>
+  <article class="card">
+    <div class="card__body">
+      <span class="table__cell-muted">Occupation</span>
+      <h3>{{ stats.classes.occupied }}/{{ stats.classes.capacity }} · {{ stats.classes.occupancy_percentage }} %</h3>
+    </div>
+  </article>
+  <article class="card">
+    <div class="card__body">
+      <span class="table__cell-muted">Classes pleines (100 %)</span>
+      <h3>{{ stats.classes.full|default:0 }}</h3>
+    </div>
+  </article>
+  <article class="card">
+    <div class="card__body">
+      <span class="table__cell-muted">Classes avec places libres</span>
+      <h3>{{ stats.classes.with_free_places|default:0 }}</h3>
+    </div>
+  </article>
 </div>

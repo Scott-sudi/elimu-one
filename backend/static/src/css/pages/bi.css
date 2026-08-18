@@ -1,0 +1,8 @@
+/* Kalunga BI — aggregate page styles */
+
+@import url("./bi/layout.css");
+@import url("./bi/filters.css");
+@import url("./bi/charts.css");
+@import url("./bi/kpis.css");
+@import url("./bi/drillthrough.css");
+@import url("./bi/print.css");

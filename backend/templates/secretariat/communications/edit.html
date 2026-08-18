@@ -1,0 +1,24 @@
+{% extends "layouts/app.html" %}
+{% block title %}Modifier — {{ communication.title }}{% endblock %}
+{% block content %}
+<div data-page="secretariat-communications" data-students-url="{% url 'secretariat:communication-class-students' %}">
+  <div class="content__header">
+    <div>
+      <h2 class="content__title">Modifier la communication</h2>
+      <p class="content__description">Corrigez le contenu, les destinataires ou le statut (brouillon / publiée).</p>
+    </div>
+  </div>
+  <section class="card">
+    <div class="card__body">
+      <form method="post" enctype="multipart/form-data" data-communication-audience>
+        {% csrf_token %}
+        {% include "secretariat/_form_fields.html" with form=form %}
+        <div class="content__actions">
+          <a class="btn btn--secondary" href="{% url 'secretariat:communication-detail' communication.public_id %}">Annuler</a>
+          <button class="btn btn--primary" type="submit">Enregistrer les modifications</button>
+        </div>
+      </form>
+    </div>
+  </section>
+</div>
+{% endblock %}

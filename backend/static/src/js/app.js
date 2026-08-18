@@ -20,8 +20,10 @@ import { initNavbar } from './components/navbar.js';
 import { initModals, openModal, closeModal } from './components/modal.js';
 import { initDropdowns } from './components/dropdown.js';
 import { initLogoutConfirmations } from './components/logout-confirm.js';
+import { initConfirmForms } from './components/confirm-forms.js';
 import { initPasswordToggles } from './components/password-toggle.js';
 import { initDataTables } from './components/data-table.js';
+import { initAutoFilterForms } from './components/auto-filter.js';
 
 import { initLogin } from './pages/login.js';
 import { initDashboard } from './pages/dashboard.js';
@@ -37,6 +39,12 @@ import { initSecretariatClasses } from './pages/secretariat/classes.js';
 import { initSecretariatCards } from './pages/secretariat/cards.js';
 import { initSecretariatCommunications } from './pages/secretariat/communications.js';
 import { initSecretariatDocuments } from './pages/secretariat/documents.js';
+import { initFinanceFees } from './pages/finance/fees.js';
+import { initFinanceQrScan } from './pages/finance/qr-scan.js';
+import { initDisciplineAttendance } from './pages/discipline/attendance.js';
+import { initDisciplineAttendanceSheet } from './pages/discipline/attendance-sheet.js';
+import { initDisciplineIncidents } from './pages/discipline/incidents.js';
+import { initBi } from './pages/bi/bi-app.js';
 
 window.htmx = htmx;
 window.Alpine = Alpine;
@@ -59,8 +67,10 @@ function bootUi(root = document) {
   initModals(document);
   initDropdowns(root);
   initLogoutConfirmations(root);
+  initConfirmForms(root);
   initPasswordToggles(root);
   initDataTables(root);
+  initAutoFilterForms(root);
   refreshIcons(root);
 }
 
@@ -79,6 +89,12 @@ function bootPages(root = document) {
   initSecretariatCards(root);
   initSecretariatCommunications(root);
   initSecretariatDocuments(root);
+  initFinanceFees(root);
+  initFinanceQrScan(root);
+  initDisciplineAttendance(root);
+  initDisciplineAttendanceSheet(root);
+  initDisciplineIncidents(root);
+  initBi(root);
 }
 
 function onReady() {

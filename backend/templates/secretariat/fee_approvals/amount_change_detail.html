@@ -1,0 +1,100 @@
+{% extends "layouts/app.html" %}
+{% block title %}Modification de montant{% endblock %}
+{% block content %}
+<div data-page="secretariat-fee-amount-change">
+  <div class="content__header">
+    <div>
+      <h2 class="content__title">Modification — {{ period_label }}</h2>
+      <p class="content__description">{{ change.fee.code }} · {{ change.get_status_display }}</p>
+    </div>
+    <div class="content__actions">
+      <a class="btn btn--secondary" href="{% url 'secretariat:fee-approvals' %}">Retour</a>
+    </div>
+  </div>
+
+  <section class="card">
+    <div class="card__body">
+      <dl class="secretariat-dl">
+        <dt>Frais</dt><dd>{{ change.fee.label }} ({{ change.fee.code }})</dd>
+        <dt>Montant précédent</dt><dd>{{ change.previous_base_amount }} {{ change.fee.currency }}</dd>
+        <dt>Nouveau montant</dt><dd><strong>{{ change.new_amount }} {{ change.fee.currency }}</strong></dd>
+        <dt>Portée</dt><dd>{{ change.get_scope_display }}</dd>
+        <dt>Classe d'origine</dt><dd>{{ change.origin_class.name }}</dd>
+        <dt>Classes concernées</dt>
+        <dd>
+          {% for sc in target_classes %}
+            {{ sc.name }}{% if not forloop.last %}, {% endif %}
+          {% empty %}—
+          {% endfor %}
+        </dd>
+        <dt>Demandé par</dt><dd>{% if change.requested_by %}{{ change.requested_by }}{% else %}—{% endif %}</dd>
+        <dt>Commentaire</dt><dd>{{ change.comment|default:"—" }}</dd>
+        {% if change.rejection_reason %}
+          <dt>Motif de rejet</dt><dd class="form-error">{{ change.rejection_reason }}</dd>
+        {% endif %}
+      </dl>
+
+      {% if can_decide %}
+        <div class="content__actions" style="margin-top: 1rem;">
+          <button type="button" class="btn btn--primary" data-modal-open="amount-detail-approve">Approuver</button>
+          <button type="button" class="btn btn--danger" data-modal-open="amount-detail-reject">Rejeter</button>
+        </div>
+      {% endif %}
+    </div>
+  </section>
+</div>
+
+{% if can_decide %}
+<div class="modal-backdrop" id="amount-detail-approve" data-modal="amount-detail-approve" hidden>
+  <div class="modal modal--form-narrow" data-modal-panel>
+    <div class="modal__header">
+      <h2>Approuver</h2>
+      <button type="button" class="modal__close" data-modal-close aria-label="Fermer">&times;</button>
+    </div>
+    <div class="modal__body">
+      <form method="post" action="{% url 'secretariat:fee-amount-change-approve' change.public_id %}">
+        {% csrf_token %}
+        <div class="form-group">
+          <label class="form-label" for="detail_approve_comment">Commentaire</label>
+          <input class="form-input" id="detail_approve_comment" name="comment" maxlength="500">
+        </div>
+        <div class="form-group">
+          <label class="form-label form-label--required" for="detail_approve_password">Mot de passe</label>
+          <input class="form-input" id="detail_approve_password" type="password" name="password" required autocomplete="current-password">
+        </div>
+        <div class="content__actions">
+          <button type="button" class="btn btn--secondary" data-modal-close>Annuler</button>
+          <button class="btn btn--primary" type="submit">Approuver</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<div class="modal-backdrop" id="amount-detail-reject" data-modal="amount-detail-reject" hidden>
+  <div class="modal modal--form-narrow" data-modal-panel>
+    <div class="modal__header">
+      <h2>Rejeter</h2>
+      <button type="button" class="modal__close" data-modal-close aria-label="Fermer">&times;</button>
+    </div>
+    <div class="modal__body">
+      <form method="post" action="{% url 'secretariat:fee-amount-change-reject' change.public_id %}">
+        {% csrf_token %}
+        <div class="form-group">
+          <label class="form-label form-label--required" for="detail_rejection_reason">Motif</label>
+          <textarea class="form-input" id="detail_rejection_reason" name="rejection_reason" rows="3" required></textarea>
+        </div>
+        <div class="form-group">
+          <label class="form-label form-label--required" for="detail_reject_password">Mot de passe</label>
+          <input class="form-input" id="detail_reject_password" type="password" name="password" required autocomplete="current-password">
+        </div>
+        <div class="content__actions">
+          <button type="button" class="btn btn--secondary" data-modal-close>Annuler</button>
+          <button class="btn btn--danger" type="submit">Rejeter</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endif %}
+{% endblock %}

@@ -1,10 +1,10 @@
-# Kalunga – La Source du Savoir
+# ELIMU One — Système de gestion scolaire
 
-Système web de gestion scolaire — **Phase Administrateur**.
+Plateforme web **ELIMU One** (personnel Django) + application parents **ELIMU Go** (Flutter).
+Chaque établissement configure son identité (nom, adresse, logo) via les variables `SCHOOL_*`.
 
-Application métier Django destinée au personnel de l’établissement, optimisée pour les ordinateurs de l’école.
-
-> Flutter (espace parents) n’est **pas** développé dans cette phase. Le dossier `mobile/kalunga_parents` est réservé.
+En local, la base par défaut est **SQLite** (aucun MySQL / Wamp requis).
+En hébergement, passez `DB_ENGINE=django.db.backends.mysql`.
 
 ## Versions utilisées
 
@@ -12,11 +12,12 @@ Application métier Django destinée au personnel de l’établissement, optimis
 |-----------|---------|
 | Python | 3.13.12 |
 | Django | 5.2.16 (LTS) |
-| MySQL (WampServer) | 8.4.7 |
+| MySQL (hébergement) | 8.x |
+| SQLite (local) | inclus avec Python |
 | Node.js | 24.14.1 |
 | npm | 11.11.0 |
 | Vite | 6.4.x |
-| Connecteur MySQL | mysqlclient 2.2.8 |
+| Connecteur MySQL | PyMySQL 1.1+ |
 
 ## Structure
 
@@ -37,7 +38,8 @@ kalunga-school/
 cd kalunga-school
 .\.venv\Scripts\Activate.ps1
 
-# 2. Démarrer MySQL dans WampServer (icône verte)
+# 2. SQLite est utilisé automatiquement (fichier backend/db.sqlite3)
+#    Pour MySQL en local : DB_ENGINE=django.db.backends.mysql dans .env
 
 # 3. Installer les dépendances (si besoin)
 pip install -r backend\requirements\development.txt
@@ -98,6 +100,11 @@ Les tests utilisent SQLite (`config.settings.test`) pour éviter les contraintes
 
 - [docs/API.md](docs/API.md) — endpoints REST
 - [docs/RAPPORT-PHASE-ADMIN.md](docs/RAPPORT-PHASE-ADMIN.md) — rapport de phase
+- [docs/INSTALL.md](docs/INSTALL.md) - installation locale
+- [docs/ENVIRONMENT.md](docs/ENVIRONMENT.md) - variables d'environnement
+- [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) - deploiement o2switch
+- [docs/PRODUCTION.md](docs/PRODUCTION.md) - exploitation de production
+- [docs/BACKUP.md](docs/BACKUP.md) - sauvegarde et restauration
 
 ## Sécurité
 

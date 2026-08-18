@@ -1,0 +1,151 @@
+{% extends "layouts/app.html" %}
+{% block title %}Incident · {{ incident.title }} | Discipline{% endblock %}
+{% block content %}
+<div data-page="discipline-incident-detail">
+  <div class="content__header">
+    <div class="content__header-main">
+      <h2 class="content__title">{{ incident.title }}</h2>
+      <p class="content__description">
+        {{ incident.get_status_display }} · {{ incident.incident_date|date:"d/m/Y" }}
+        {% if incident.incident_time %} · {{ incident.incident_time|time:"H:i" }}{% endif %}
+        {% if selected_year %} · Année {{ selected_year.label }}{% endif %}
+      </p>
+    </div>
+    <div class="content__actions">
+      <a class="btn btn--secondary" href="{{ back_url }}">Retour aux incidents</a>
+      <a class="btn btn--secondary" href="{{ dossier_url }}">Dossier de l'élève</a>
+    </div>
+  </div>
+
+  <div class="secretariat-detail-grid">
+    <article class="card">
+      <div class="card__header"><h3>Identité</h3></div>
+      <div class="card__body">
+        <dl class="secretariat-dl">
+          <dt>Élève</dt>
+          <dd>{{ incident.student.matricule }} — {{ incident.student.nom }} {{ incident.student.postnom }} {{ incident.student.prenom }}</dd>
+          <dt>Classe</dt>
+          <dd>
+            {{ incident.school_class.name }}
+            {% if incident.school_class.level %} · {{ incident.school_class.level }}{% endif %}
+            {% if incident.school_class.option %} · {{ incident.school_class.option }}{% endif %}
+          </dd>
+          <dt>Catégorie</dt>
+          <dd>{{ incident.category.name }}</dd>
+          <dt>Gravité</dt>
+          <dd>{{ incident.get_severity_display }}</dd>
+          <dt>Statut</dt>
+          <dd>{{ incident.get_status_display }}</dd>
+          <dt>Lieu</dt>
+          <dd>{{ incident.location|default:"—" }}</dd>
+          <dt>Convocation requise</dt>
+          <dd>{{ incident.needs_summons|yesno:"Oui,Non" }}</dd>
+        </dl>
+      </div>
+    </article>
+
+    <article class="card">
+      <div class="card__header"><h3>Description</h3></div>
+      <div class="card__body">
+        <p>{{ incident.description|linebreaksbr }}</p>
+      </div>
+    </article>
+
+    <article class="card">
+      <div class="card__header"><h3>Suites immédiates</h3></div>
+      <div class="card__body">
+        <dl class="secretariat-dl">
+          <dt>Témoins</dt>
+          <dd>{{ incident.witnesses|default:"—"|linebreaksbr }}</dd>
+          <dt>Action immédiate</dt>
+          <dd>{{ incident.immediate_action|default:"—"|linebreaksbr }}</dd>
+          <dt>Observation de clôture</dt>
+          <dd>{{ incident.closure_note|default:"—"|linebreaksbr }}</dd>
+        </dl>
+      </div>
+    </article>
+
+    <article class="card">
+      <div class="card__header"><h3>Traçabilité</h3></div>
+      <div class="card__body">
+        <dl class="secretariat-dl">
+          <dt>Signalé par</dt>
+          <dd>{% if incident.reported_by %}{{ incident.reported_by }}{% else %}—{% endif %}</dd>
+          <dt>Confirmé par</dt>
+          <dd>
+            {% if incident.confirmed_by %}{{ incident.confirmed_by }}{% else %}—{% endif %}
+            {% if incident.confirmed_at %} · {{ incident.confirmed_at|date:"d/m/Y H:i" }}{% endif %}
+          </dd>
+          <dt>Clôturé par</dt>
+          <dd>
+            {% if incident.closed_by %}{{ incident.closed_by }}{% else %}—{% endif %}
+            {% if incident.closed_at %} · {{ incident.closed_at|date:"d/m/Y H:i" }}{% endif %}
+          </dd>
+          <dt>Créé le</dt>
+          <dd>{{ incident.created_at|date:"d/m/Y H:i" }}</dd>
+          <dt>Modifié le</dt>
+          <dd>{{ incident.updated_at|date:"d/m/Y H:i" }}</dd>
+        </dl>
+      </div>
+    </article>
+  </div>
+
+  <section class="card">
+    <div class="card__header"><h3>Mesures liées</h3></div>
+    <div class="table-wrap">
+      <table class="table table--dense">
+        <thead>
+          <tr>
+            <th>Type</th>
+            <th>Statut</th>
+            <th>Début</th>
+            <th>Fin</th>
+            <th>Description</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for measure in measures %}
+            <tr>
+              <td>{% if measure.measure_type %}{{ measure.measure_type }}{% else %}—{% endif %}</td>
+              <td>{{ measure.get_status_display }}</td>
+              <td>{{ measure.start_date|date:"d/m/Y"|default:"—" }}</td>
+              <td>{{ measure.end_date|date:"d/m/Y"|default:"—" }}</td>
+              <td>{{ measure.description|default:"—" }}</td>
+            </tr>
+          {% empty %}
+            <tr><td colspan="5" class="table__empty">Aucune mesure liée à cet incident.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="card__header"><h3>Convocations liées</h3></div>
+    <div class="table-wrap">
+      <table class="table table--dense">
+        <thead>
+          <tr>
+            <th>N°</th>
+            <th>Date</th>
+            <th>Statut</th>
+            <th>Motif</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for summons in summonses %}
+            <tr>
+              <td>{{ summons.summon_number|default:"—" }}</td>
+              <td>{{ summons.summon_date|date:"d/m/Y"|default:"—" }}</td>
+              <td>{{ summons.get_status_display }}</td>
+              <td>{{ summons.reason|default:"—" }}</td>
+            </tr>
+          {% empty %}
+            <tr><td colspan="4" class="table__empty">Aucune convocation liée à cet incident.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+</div>
+{% endblock %}

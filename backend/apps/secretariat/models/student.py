@@ -78,6 +78,14 @@ class Student(TimeStampedPublicIdModel):
             update_fields=["statut", "is_active", "is_archived", "updated_at"],
         )
 
+    def restore(self) -> None:
+        self.statut = self.Status.ACTIVE
+        self.is_active = True
+        self.is_archived = False
+        self.save(
+            update_fields=["statut", "is_active", "is_archived", "updated_at"],
+        )
+
     def deactivate(self) -> None:
         self.is_active = False
         self.save(update_fields=["is_active", "updated_at"])

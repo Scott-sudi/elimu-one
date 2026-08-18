@@ -1,0 +1,116 @@
+{% extends "layouts/app.html" %}
+{% block title %}Horaires | Discipline{% endblock %}
+{% block content %}
+<div data-page="discipline-schedules">
+  <div class="content__header">
+    <div>
+      <h2 class="content__title">Horaires de présence</h2>
+      <p class="content__description">
+        {% if selected_academic_year %}Année {{ selected_academic_year.label }} — {% endif %}
+        Fixez les plages avant-midi / après-midi et les classes concernées.
+        Avant la fin de tolérance = présent, après = retard, après la fin des cours = pointage refusé.
+      </p>
+    </div>
+  </div>
+
+  <div class="entity-grid" style="grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.25rem;">
+    {% with form=morning_form %}
+      <section class="card">
+        <div class="card__body">
+          <h3 class="content__title" style="font-size:1.15rem;margin-bottom:.35rem;">Avant-midi</h3>
+          <p class="content__description" style="margin-bottom:1rem;">
+            Exemple : début 07:30, présent jusqu'à 07:45, fin 12:30.
+          </p>
+          <form method="post" action="{% url 'discipline:schedules' %}">
+            {% csrf_token %}
+            <input type="hidden" name="vacation" value="AVANT_MIDI">
+            {{ form.vacation }}
+            <div class="form-group">
+              <label class="form-label form-label--required" for="{{ form.start_time.id_for_label }}">{{ form.start_time.label }}</label>
+              {{ form.start_time }}
+              {% if form.start_time.errors %}<p class="form-error">{{ form.start_time.errors|striptags }}</p>{% endif %}
+            </div>
+            <div class="form-group">
+              <label class="form-label form-label--required" for="{{ form.present_until.id_for_label }}">{{ form.present_until.label }}</label>
+              {{ form.present_until }}
+              {% if form.present_until.help_text %}<p class="table__cell-muted">{{ form.present_until.help_text }}</p>{% endif %}
+              {% if form.present_until.errors %}<p class="form-error">{{ form.present_until.errors|striptags }}</p>{% endif %}
+            </div>
+            <div class="form-group">
+              <label class="form-label form-label--required" for="{{ form.end_time.id_for_label }}">{{ form.end_time.label }}</label>
+              {{ form.end_time }}
+              {% if form.end_time.help_text %}<p class="table__cell-muted">{{ form.end_time.help_text }}</p>{% endif %}
+              {% if form.end_time.errors %}<p class="form-error">{{ form.end_time.errors|striptags }}</p>{% endif %}
+            </div>
+            <div class="form-group">
+              <span class="form-label">{{ form.school_classes.label }}</span>
+              <div style="display:grid;gap:.35rem;max-height:220px;overflow:auto;margin-top:.35rem;">
+                {% for checkbox in form.school_classes %}
+                  <label style="display:flex;gap:.5rem;align-items:center;">
+                    {{ checkbox.tag }}
+                    <span>{{ checkbox.choice_label }}</span>
+                  </label>
+                {% empty %}
+                  <p class="table__cell-muted">Aucune classe active pour cette année.</p>
+                {% endfor %}
+              </div>
+            </div>
+            {% if year_writable %}
+              <button class="btn btn--primary" type="submit">Enregistrer l'avant-midi</button>
+            {% endif %}
+          </form>
+        </div>
+      </section>
+    {% endwith %}
+
+    {% with form=afternoon_form %}
+      <section class="card">
+        <div class="card__body">
+          <h3 class="content__title" style="font-size:1.15rem;margin-bottom:.35rem;">Après-midi</h3>
+          <p class="content__description" style="margin-bottom:1rem;">
+            Exemple : début 12:30, présent jusqu'à 12:45, fin 18:00.
+          </p>
+          <form method="post" action="{% url 'discipline:schedules' %}">
+            {% csrf_token %}
+            <input type="hidden" name="vacation" value="APRES_MIDI">
+            {{ form.vacation }}
+            <div class="form-group">
+              <label class="form-label form-label--required" for="{{ form.start_time.id_for_label }}">{{ form.start_time.label }}</label>
+              {{ form.start_time }}
+              {% if form.start_time.errors %}<p class="form-error">{{ form.start_time.errors|striptags }}</p>{% endif %}
+            </div>
+            <div class="form-group">
+              <label class="form-label form-label--required" for="{{ form.present_until.id_for_label }}">{{ form.present_until.label }}</label>
+              {{ form.present_until }}
+              {% if form.present_until.help_text %}<p class="table__cell-muted">{{ form.present_until.help_text }}</p>{% endif %}
+              {% if form.present_until.errors %}<p class="form-error">{{ form.present_until.errors|striptags }}</p>{% endif %}
+            </div>
+            <div class="form-group">
+              <label class="form-label form-label--required" for="{{ form.end_time.id_for_label }}">{{ form.end_time.label }}</label>
+              {{ form.end_time }}
+              {% if form.end_time.help_text %}<p class="table__cell-muted">{{ form.end_time.help_text }}</p>{% endif %}
+              {% if form.end_time.errors %}<p class="form-error">{{ form.end_time.errors|striptags }}</p>{% endif %}
+            </div>
+            <div class="form-group">
+              <span class="form-label">{{ form.school_classes.label }}</span>
+              <div style="display:grid;gap:.35rem;max-height:220px;overflow:auto;margin-top:.35rem;">
+                {% for checkbox in form.school_classes %}
+                  <label style="display:flex;gap:.5rem;align-items:center;">
+                    {{ checkbox.tag }}
+                    <span>{{ checkbox.choice_label }}</span>
+                  </label>
+                {% empty %}
+                  <p class="table__cell-muted">Aucune classe active pour cette année.</p>
+                {% endfor %}
+              </div>
+            </div>
+            {% if year_writable %}
+              <button class="btn btn--primary" type="submit">Enregistrer l'après-midi</button>
+            {% endif %}
+          </form>
+        </div>
+      </section>
+    {% endwith %}
+  </div>
+</div>
+{% endblock %}

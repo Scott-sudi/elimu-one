@@ -1,0 +1,55 @@
+{% extends "layouts/app.html" %}
+{% block title %}Dossiers · {{ school_class.name }} | Discipline{% endblock %}
+{% block content %}
+<div data-page="discipline-followup-class">
+  <div class="content__header">
+    <div class="content__header-main">
+      <h2 class="content__title">Dossiers disciplinaires · {{ school_class.name }}</h2>
+      <p class="content__description">
+        {% if selected_year %}Année {{ selected_year.label }} · {% endif %}
+        Liste des élèves de la classe. Consultez le dossier disciplinaire de chacun.
+      </p>
+    </div>
+    <div class="content__actions">
+      <a class="btn btn--secondary" href="{{ back_url }}">Retour aux classes</a>
+      <button type="button" class="btn btn--primary" data-modal-open="discipline-qr-scan-modal" data-discipline-open-scanner data-default-mode="conduct">
+        <i data-lucide="scan-qr-code" width="16" height="16"></i>
+        Scanner un élève
+      </button>
+    </div>
+  </div>
+
+  <section class="card">
+    <div class="card__body">
+      <div class="table-wrap">
+        <table class="table table--dense">
+          <thead>
+            <tr>
+              <th>N°</th>
+              <th>Matricule</th>
+              <th>Nom complet</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in rows %}
+              <tr>
+                <td>{{ row.n }}</td>
+                <td>{{ row.student.matricule }}</td>
+                <td>{{ row.student.nom }} {{ row.student.postnom }} {{ row.student.prenom }}</td>
+                <td>
+                  <a class="btn btn--secondary btn--sm" href="{{ row.dossier_url }}">Consulter</a>
+                </td>
+              </tr>
+            {% empty %}
+              <tr>
+                <td colspan="4" class="table__empty">Aucun élève inscrit dans cette classe pour l’année sélectionnée.</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+</div>
+{% endblock %}

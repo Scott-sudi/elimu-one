@@ -1,0 +1,59 @@
+/* BI filter bars — reuse form-input / btn; no pill shapes */
+
+.bi-filters {
+  display: flex;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  gap: var(--space-2, 0.5rem);
+  margin-bottom: var(--space-4, 1rem);
+  padding: 0.75rem 0.85rem;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+}
+
+.bi-filters__field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  min-width: 9.5rem;
+}
+
+.bi-filters__field label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  letter-spacing: 0.01em;
+}
+
+.bi-filters .form-input,
+.bi-filters select.form-input {
+  max-width: 12.5rem;
+  min-width: 9.5rem;
+  height: 2.25rem;
+  border-radius: 4px;
+}
+
+.bi-filters input[type="date"].form-input {
+  max-width: 11rem;
+  min-width: 10rem;
+}
+
+.bi-filters__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2, 0.5rem);
+  margin-left: auto;
+}
+
+.bi-filters .btn {
+  border-radius: 4px;
+  height: 2.25rem;
+}
+
+@media (max-width: 720px) {
+  .bi-filters__actions {
+    margin-left: 0;
+    width: 100%;
+  }
+}

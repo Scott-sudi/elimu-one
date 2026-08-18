@@ -1,0 +1,5 @@
+# Place ici le fichier Firebase iOS : GoogleService-Info.plist
+# (Console Firebase → Ajouter une app iOS → Bundle ID net.institutkalunga.parents)
+#
+# Ne committe pas de secrets inutiles ; ce fichier est requis pour le push
+# « app fermée » sur iPhone, comme google-services.json sur Android.

@@ -61,4 +61,7 @@ def transfer_student(
         actor=actor,
         request=request,
     )
+    from apps.finance.services.obligation_service import sync_obligations_after_transfer
+
+    sync_obligations_after_transfer(enrollment=enrollment)
     return transfer

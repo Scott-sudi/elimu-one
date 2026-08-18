@@ -1,0 +1,84 @@
+{% extends "layouts/base.html" %}
+{% load static %}
+{% block title %}Choisir une année scolaire{% endblock %}
+{% block body_class %}year-select-layout{% endblock %}
+{% block body %}
+<main class="year-select-shell" data-page="secretariat-year-select">
+  <div class="year-select">
+    <div class="year-select__header">
+      <p class="year-select__school">{{ school_name }}</p>
+      <div class="year-select__logo" aria-hidden="true">
+        <img
+          src="{% static 'images/branding/logo.png' %}"
+          alt=""
+          width="88"
+          height="88"
+          onerror="this.parentElement.hidden = true;"
+        >
+      </div>
+      <p class="year-select__slogan">{{ school_slogan }}</p>
+      <h1 class="year-select__title">Choisissez une année scolaire</h1>
+      <p class="year-select__lead">
+        Les informations du module en cours seront limitées à l'année choisie.
+      </p>
+    </div>
+
+    {% if not has_years %}
+      <div class="year-select__empty" role="status">
+        <h2>Aucune année scolaire n'est disponible.</h2>
+        <p>Créez une année scolaire pour commencer.</p>
+      </div>
+    {% else %}
+      <div class="year-select__grid" role="list">
+        {% for year in academic_years %}
+          <form method="post" action="{% url 'secretariat:academic-year-choose' year.public_id %}" role="listitem">
+            {% csrf_token %}
+            <button
+              type="submit"
+              class="year-select__card {% if year.is_active and not year.is_closed %}year-select__card--active{% else %}year-select__card--closed{% endif %}"
+              {% if selected_year and selected_year.pk == year.pk %}aria-current="true"{% endif %}
+            >
+              <span class="year-select__label">{{ year.label }}</span>
+              {% if year.is_active and not year.is_closed %}
+                <span class="year-select__badge">
+                  <i data-lucide="check-circle-2" width="14" height="14" aria-hidden="true"></i>
+                  Année en cours
+                </span>
+              {% else %}
+                <span class="year-select__status">Clôturée</span>
+              {% endif %}
+              <span class="year-select__dates">
+                {{ year.start_date|date:"d/m/Y" }} — {{ year.end_date|date:"d/m/Y" }}
+              </span>
+            </button>
+          </form>
+        {% endfor %}
+      </div>
+    {% endif %}
+
+    <div class="year-select__actions">
+      {% if can_create_year %}
+        <a class="btn btn--primary" href="{% url 'secretariat:academic-years' %}?nouvelle=1">
+          Créer une année scolaire
+        </a>
+      {% else %}
+        <button type="button" class="btn btn--secondary" disabled aria-describedby="year-create-blocked">
+          Créer une année scolaire
+        </button>
+        <p id="year-create-blocked" class="year-select__blocked" role="status">
+          Désolé, vous ne pouvez pas créer une nouvelle année scolaire
+          tant que l'année en cours{% if blocking_year %} ({{ blocking_year.label }}){% endif %}
+          n'est pas clôturée.
+        </p>
+      {% endif %}
+    </div>
+
+    <div class="year-select__footer">
+      <form method="post" action="{% url 'accounts:logout' %}">
+        {% csrf_token %}
+        <button type="submit" class="btn btn--secondary">Se déconnecter</button>
+      </form>
+    </div>
+  </div>
+</main>
+{% endblock %}

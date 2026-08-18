@@ -30,3 +30,15 @@ class IsAdministrator(HasRole):
 
 class IsSecretary(HasRole):
     allowed_roles = (Role.CODE_SECRETAIRE,)
+
+
+class IsAccountant(HasRole):
+    allowed_roles = (Role.CODE_COMPTABLE,)
+
+
+class IsDiscipline(HasRole):
+    allowed_roles = (Role.CODE_DISCIPLINE,)
+
+
+class IsPrefet(HasRole):
+    allowed_roles = (Role.CODE_PREFET,)

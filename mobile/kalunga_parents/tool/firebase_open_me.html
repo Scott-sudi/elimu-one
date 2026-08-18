@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <title>Kalunga — Firebase (push app fermée)</title>
+  <style>
+    body { font-family: Segoe UI, sans-serif; max-width: 720px; margin: 32px auto; padding: 0 16px; line-height: 1.45; color: #111; }
+    h1 { font-size: 1.4rem; }
+    .box { background: #f4f6f4; border-radius: 12px; padding: 16px 18px; margin: 16px 0; }
+    .ok { background: #e8f5e9; }
+    .warn { background: #fff8e1; }
+    code { background: #eee; padding: 2px 6px; border-radius: 4px; }
+    a.btn { display: inline-block; margin: 8px 8px 8px 0; padding: 12px 16px; background: #1b5e20; color: #fff; text-decoration: none; border-radius: 8px; font-weight: 600; }
+    a.btn.secondary { background: #1565c0; }
+    ol { padding-left: 1.2rem; }
+    li { margin: 8px 0; }
+  </style>
+</head>
+<body>
+  <h1>Push app fermée — tes 3 clics seulement</h1>
+  <p>Le reste est automatisé dans Cursor. Toi : connexion Google + création projet + téléchargement.</p>
+
+  <div class="box ok">
+    <strong>Package Android (à coller tel quel) :</strong><br />
+    <code>net.institutkalunga.parents</code>
+  </div>
+
+  <p>
+    <a class="btn" href="https://console.firebase.google.com/" target="_blank" rel="noopener">1. Ouvrir Firebase Console</a>
+    <a class="btn secondary" href="https://console.firebase.google.com/project/_/settings/general" target="_blank" rel="noopener">2. Paramètres projet</a>
+    <a class="btn secondary" href="https://console.firebase.google.com/project/_/settings/cloudmessaging" target="_blank" rel="noopener">3. Cloud Messaging (clé)</a>
+  </p>
+
+  <div class="box">
+    <strong>Étapes (2–5 minutes)</strong>
+    <ol>
+      <li>Connecte-toi avec ton compte Google de l’école.</li>
+      <li>Crée un projet nommé <strong>Institut Kalunga</strong> (Google Analytics : tu peux désactiver).</li>
+      <li>Ajoute une app <strong>Android</strong> → package : <code>net.institutkalunga.parents</code> → Enregistrer.</li>
+      <li>Télécharge <code>google-services.json</code> (dossier Téléchargements).</li>
+      <li>Cursor le détecte et le copie tout seul dans l’app.</li>
+      <li>Dans <strong>Paramètres du projet → Cloud Messaging</strong>, copie la <strong>Clé serveur</strong> (Server key) et colle-la dans le chat Cursor.</li>
+    </ol>
+  </div>
+
+  <div class="box warn">
+    <strong>Important :</strong> sans ce fichier Firebase, Android ne peut pas recevoir de notif si l’app est fermée (même règle que WhatsApp : ça passe par Google).
+  </div>
+</body>
+</html>

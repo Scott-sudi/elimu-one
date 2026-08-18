@@ -27,10 +27,15 @@ def create_enrollment(
     force_over_capacity: bool = False,
     actor=None,
     request=None,
+    skip_reenrollment_guard: bool = False,
     **data,
 ) -> Enrollment:
     student = Student.objects.select_for_update().get(pk=student.pk)
-    school_class = SchoolClass.objects.select_for_update().select_related("academic_year").get(pk=school_class.pk)
+    school_class = (
+        SchoolClass.objects.select_for_update()
+        .select_related("academic_year", "level")
+        .get(pk=school_class.pk)
+    )
     if student.is_archived or not student.is_active:
         raise SecretariatError("Cet élève est inactif ou archivé.")
     if not school_class.is_active or school_class.academic_year.is_closed:
@@ -41,12 +46,30 @@ def create_enrollment(
         status__in=ACTIVE_STATUSES,
     ).exists():
         raise SecretariatError("L'élève possède déjà une inscription active pour cette année.")
+
+    # Continuity last year → must use réinscription, not a plain inscription.
+    if (
+        not skip_reenrollment_guard
+        and enrollment_type == Enrollment.EnrollmentType.NEW
+    ):
+        from .reenrollment_service import find_reenrollment_source
+
+        source = find_reenrollment_source(student, school_class)
+        if source is not None:
+            raise SecretariatError(
+                "Cet élève a terminé l'année précédente dans le niveau immédiatement inférieur. "
+                "Utilisez la réinscription pour cette classe."
+            )
+
     current_count = Enrollment.objects.filter(
         school_class=school_class,
         status=Enrollment.Status.VALIDATED,
     ).count()
     if current_count >= school_class.max_capacity and not force_over_capacity:
-        raise SecretariatError("La classe a atteint sa capacité maximale.")
+        raise SecretariatError(
+            "La classe a atteint sa capacité maximale. "
+            "Élargissez le nombre de places (mot de passe + description) avant d'inscrire."
+        )
 
     enrollment = Enrollment(
         student=student,
@@ -71,4 +94,8 @@ def create_enrollment(
         actor=actor,
         request=request,
     )
+    if status == Enrollment.Status.VALIDATED:
+        from apps.finance.services.obligation_service import create_obligations_for_enrollment
+
+        create_obligations_for_enrollment(enrollment=enrollment)
     return enrollment

@@ -1,0 +1,28 @@
+{% extends "layouts/app.html" %}
+{% block title %}Classes{% endblock %}
+{% block content %}
+<div data-page="finance-classes">
+  <div class="content__header">
+    <div>
+      <h2 class="content__title">Classes</h2>
+      <p class="content__description">
+        {% if selected_academic_year %}Année {{ selected_academic_year.label }} — choisissez une classe{% endif %}
+      </p>
+    </div>
+    <div class="content__actions">
+      {% include "finance/partials/qr_scan_button.html" with btn_class="btn--secondary" label="Scanner une carte" %}
+    </div>
+  </div>
+  <form
+    class="secretariat-toolbar secretariat-toolbar--filters"
+    method="get"
+    hx-get="{% url 'finance:classes' %}"
+    hx-target="#finance-classes-table"
+    hx-push-url="true"
+  >
+    <input class="form-input form-input--sm" type="search" name="q" value="{{ current_filters.q }}" placeholder="Nom ou code de classe">
+    <button class="btn btn--secondary btn--sm" type="submit">Rechercher</button>
+  </form>
+  {% include "finance/classes/_table.html" %}
+</div>
+{% endblock %}

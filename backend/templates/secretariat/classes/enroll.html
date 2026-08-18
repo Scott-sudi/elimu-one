@@ -1,0 +1,119 @@
+{% extends "layouts/app.html" %}
+{% block title %}Inscription — {{ school_class.name }}{% endblock %}
+{% block content %}
+<div data-page="secretariat-enrollment" data-guardian-lookup-url="{{ guardian_lookup_url|default:'' }}" data-class-id="{{ school_class.public_id }}">
+  <div class="content__header">
+    <div>
+      <h2 class="content__title">Inscription</h2>
+      <p class="content__description">
+        Classe {{ school_class.name }} · {{ school_class.academic_year }}
+      </p>
+    </div>
+    <a class="btn btn--secondary" href="{% url 'secretariat:class-detail' school_class.public_id %}">Retour à la classe</a>
+  </div>
+
+  {% if not year_writable %}
+    <div class="alert alert--warning">Cette année scolaire est clôturée : inscription impossible.</div>
+  {% else %}
+    {% if class_is_full %}
+      <div class="alert alert--warning">
+        Cette classe est pleine ({{ occupied }}/{{ school_class.max_capacity }}).
+        L’inscription est refusée. Élargissez d’abord le nombre de places.
+        <button class="btn btn--secondary btn--sm" type="button" data-modal-open="class-expand-capacity-modal" style="margin-left:.5rem;">
+          Élargir les places
+        </button>
+      </div>
+    {% endif %}
+    <div class="secretariat-form-narrow">
+      <section class="card">
+        <div class="card__body">
+          <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            {% include "secretariat/_form_fields.html" with form=form %}
+            <div class="content__actions">
+              <button class="btn btn--primary" type="submit" {% if class_is_full %}disabled{% endif %}>Inscrire</button>
+            </div>
+          </form>
+        </div>
+      </section>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}
+
+{% block modals %}
+{% if year_writable and class_is_full %}
+  {% url 'secretariat:class-enroll' school_class.public_id as expand_next %}
+  {% include "secretariat/classes/_expand_capacity_modal.html" with next_url=expand_next %}
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<style>
+.guardian-phone-hint {
+  display: block;
+  margin-top: 0.35rem;
+  font-size: 0.85rem;
+}
+.guardian-phone-hint--error { color: #b42318; }
+.guardian-phone-hint--ok { color: #2f6b3a; }
+</style>
+<script>
+(function () {
+  const page = document.querySelector('[data-page="secretariat-enrollment"]');
+  if (!page || page.dataset.phoneCheckBound === '1') return;
+  page.dataset.phoneCheckBound = '1';
+  const lookupUrl = page.dataset.guardianLookupUrl || '';
+  const phoneInput = page.querySelector('[data-guardian-phone]');
+  if (!phoneInput || !lookupUrl) return;
+
+  const group = phoneInput.closest('.form-group') || phoneInput.parentElement;
+  let hint = group && group.querySelector('.guardian-phone-hint');
+  if (!hint && group) {
+    hint = document.createElement('small');
+    hint.className = 'guardian-phone-hint';
+    group.appendChild(hint);
+  }
+  const setHint = (text, kind) => {
+    if (!hint) return;
+    hint.textContent = text || '';
+    hint.classList.toggle('guardian-phone-hint--error', kind === 'error');
+    hint.classList.toggle('guardian-phone-hint--ok', kind === 'ok');
+  };
+  const digits = (v) => String(v || '').replace(/\D/g, '').length;
+  let timer = null;
+  const check = async () => {
+    const phone = phoneInput.value.trim();
+    if (digits(phone) < 8) {
+      setHint('');
+      return;
+    }
+    try {
+      const params = new URLSearchParams({ phone: phone });
+      const classId = page.dataset.classId || '';
+      if (classId) params.set('class_id', classId);
+      const res = await fetch(lookupUrl + '?' + params.toString(), {
+        headers: { Accept: 'application/json' },
+        credentials: 'same-origin',
+      });
+      if (!res.ok) return;
+      const data = await res.json();
+      if (data.found) {
+        // Numéro connu : rien d'affiché (liaison auto à l'enregistrement)
+        setHint('');
+      } else {
+        setHint(
+          "Aucun responsable avec ce numéro. Créez-le d'abord dans Responsables.",
+          'error'
+        );
+      }
+    } catch (_e) {}
+  };
+  phoneInput.addEventListener('input', () => {
+    window.clearTimeout(timer);
+    timer = window.setTimeout(check, 250);
+  });
+  phoneInput.addEventListener('blur', check);
+})();
+</script>
+{% endblock %}

@@ -1,0 +1,21 @@
+{% extends "layouts/app.html" %}
+{% load static %}
+{% block title %}Dossier disciplinaire — {{ dossier.student.matricule }}{% endblock %}
+{% block content %}
+<div data-page="discipline-disciplinary-file">
+  <div class="content__header no-print">
+    <div class="content__header-main">
+      <h2 class="content__title">Dossier disciplinaire</h2>
+      <p class="content__description">{{ dossier.reference }} · Année {{ dossier.academic_year.label }}</p>
+    </div>
+    <div class="content__actions">
+      <a class="btn btn--secondary" href="{{ back_url|default:dossier.scanner_url }}">{% if request.GET.class %}Retour à la classe{% else %}Retour au scanner{% endif %}</a>
+      <a class="btn btn--secondary" href="{{ dossier.scanner_url }}">Scanner un autre élève</a>
+      <a class="btn btn--secondary" href="{{ dossier.print_url }}" target="_blank" rel="noopener">Imprimer</a>
+      <a class="btn btn--primary" href="{{ dossier.pdf_url }}">Télécharger le PDF</a>
+    </div>
+  </div>
+
+  {% include "discipline/students/_dossier_document.html" %}
+</div>
+{% endblock %}

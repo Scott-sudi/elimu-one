@@ -15,7 +15,29 @@ class DashboardView(LoginRequiredMixin, TemplateView):
     def dispatch(self, request, *args, **kwargs):
         user = request.user
         if user.is_authenticated and user.is_secretaire():
+            from apps.secretariat.services.year_context import year_context_service
+
+            if not year_context_service.has_session_year(request):
+                return redirect("secretariat:academic-year-select")
             return redirect("secretariat:dashboard")
+        if user.is_authenticated and user.is_comptable():
+            from apps.secretariat.services.year_context import year_context_service
+
+            if not year_context_service.has_session_year(request):
+                return redirect("secretariat:academic-year-select")
+            return redirect("finance:dashboard")
+        if user.is_authenticated and user.has_role(Role.CODE_DISCIPLINE):
+            from apps.secretariat.services.year_context import year_context_service
+
+            if not year_context_service.has_session_year(request):
+                return redirect("secretariat:academic-year-select")
+            return redirect("discipline:dashboard")
+        if user.is_authenticated and user.is_prefet():
+            from apps.secretariat.services.year_context import year_context_service
+
+            if not year_context_service.has_session_year(request):
+                return redirect("secretariat:academic-year-select")
+            return redirect("bi:overview")
         return super().dispatch(request, *args, **kwargs)
 
     def get_template_names(self):
@@ -51,6 +73,13 @@ class DashboardView(LoginRequiredMixin, TemplateView):
                     "secretaries": role_counts.get(Role.CODE_SECRETAIRE, 0),
                     "accountants": role_counts.get(Role.CODE_COMPTABLE, 0),
                     "discipline": role_counts.get(Role.CODE_DISCIPLINE, 0),
+                    "prefets": role_counts.get(Role.CODE_PREFET, 0),
+                    "prefets_active": users.filter(
+                        role__code=Role.CODE_PREFET, is_active=True, is_archived=False
+                    ).count(),
+                    "prefets_inactive": users.filter(
+                        role__code=Role.CODE_PREFET, is_active=False, is_archived=False
+                    ).count(),
                 },
                 "recent_users": users.order_by("-date_joined")[:8],
                 "recent_logins": LoginAttempt.objects.select_related("user").order_by("-created_at")[:8],

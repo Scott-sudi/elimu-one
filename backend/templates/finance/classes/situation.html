@@ -1,0 +1,325 @@
+{% extends "layouts/app.html" %}
+{% block title %}{{ school_class.name }} — Comptabilité{% endblock %}
+{% block content %}
+<style>
+  .finance-board-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+    align-items: center;
+  }
+  .finance-board-tabs .btn.is-active {
+    background: var(--color-primary, #002858);
+    color: #fff;
+    border-color: transparent;
+  }
+  .finance-matrix-wrap { overflow: auto; max-height: 70vh; }
+  .finance-matrix th.finance-matrix__sticky,
+  .finance-matrix td.finance-matrix__sticky {
+    position: sticky;
+    left: 0;
+    z-index: 1;
+    background: var(--color-surface, #fff);
+  }
+  .finance-matrix th.finance-matrix__sticky--n,
+  .finance-matrix td.finance-matrix__sticky--n {
+    left: 3.25rem;
+  }
+  .finance-matrix th.finance-matrix__sticky--name,
+  .finance-matrix td.finance-matrix__sticky--name {
+    left: 16.5rem;
+    min-width: 12rem;
+  }
+  .finance-matrix thead th { position: sticky; top: 0; z-index: 2; background: var(--color-surface, #fff); }
+  .finance-matrix thead th.finance-matrix__sticky { z-index: 3; }
+  .finance-matrix th.finance-matrix__fee {
+    white-space: nowrap;
+    font-size: 0.8rem;
+    line-height: 1.25;
+    min-width: 7.5rem;
+  }
+  .finance-pending-hint {
+    font-size: 0.875rem;
+    color: var(--color-muted, #667);
+    margin: 0 0 1rem;
+  }
+  .finance-month-list {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.35rem 0.75rem;
+  }
+  .finance-matrix__fee-btn {
+    appearance: none;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    font-weight: 600;
+    padding: 0.15rem 0.25rem;
+    margin: 0;
+    cursor: pointer;
+    text-decoration: underline;
+    text-underline-offset: 0.15em;
+    text-align: left;
+  }
+  .finance-matrix__fee-btn:hover { color: var(--color-primary, #002858); }
+  .finance-matrix__fee-btn:disabled {
+    cursor: not-allowed;
+    text-decoration: none;
+    opacity: 0.75;
+  }
+  .finance-matrix__fee-btn.is-pending { color: #9a6b00; }
+  .finance-class-check-list {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.35rem 0.75rem;
+    max-height: 12rem;
+    overflow: auto;
+  }
+</style>
+<div data-page="finance-class-situation">
+  <div class="content__header">
+    <div>
+      <h2 class="content__title">{{ school_class.name }}</h2>
+      <p class="content__description">
+        {% if selected_academic_year %}Année {{ selected_academic_year.label }} · {% endif %}
+        {{ school_class.level }}{% if school_class.section %} · {{ school_class.section }}{% endif %}
+      </p>
+    </div>
+    <div class="content__actions">
+      {% include "finance/partials/qr_scan_button.html" with btn_class="btn--secondary" label="Scanner une carte" %}
+      <a class="btn btn--primary" href="{% url 'finance:payment-create' %}?classe={{ school_class.public_id }}">Paiement</a>
+      <a class="btn btn--secondary" href="{% url 'finance:classes' %}">Classes</a>
+    </div>
+  </div>
+
+  <nav class="finance-board-tabs" aria-label="Tableaux de frais">
+    {% for group in custom_fee_tabs %}
+      <a
+        class="btn btn--secondary btn--sm {% if selected_custom_group and selected_custom_group.key == group.key %}is-active{% endif %}"
+        href="{% url 'finance:class-situation' school_class.public_id %}?tableau=fee:{{ group.key }}"
+      >{{ group.label }}</a>
+    {% endfor %}
+    {% if year_writable %}
+      <button type="button" class="btn btn--primary btn--sm" data-modal-open="create-fee-modal">
+        Créer frais
+      </button>
+    {% endif %}
+  </nav>
+
+  {% if pending_custom_fees %}
+    <p class="finance-pending-hint">
+      En attente de validation secrétariat :
+      {% for label in pending_custom_fees %}
+        « {{ label }} »{% if not forloop.last %}, {% endif %}
+      {% endfor %}
+    </p>
+  {% endif %}
+
+  <section class="card">
+    <div class="card__header">
+      <h3>
+        {% if selected_custom_group %}{{ selected_custom_group.label }}
+        {% else %}Aucun frais — utilisez « Créer frais »{% endif %}
+      </h3>
+    </div>
+    <div class="finance-matrix-wrap table-wrap">
+      <table class="table table--dense finance-matrix">
+        <thead>
+          <tr>
+            <th class="finance-matrix__sticky" scope="col">N°</th>
+            <th class="finance-matrix__sticky finance-matrix__sticky--n" scope="col">Matricule</th>
+            <th class="finance-matrix__sticky finance-matrix__sticky--name" scope="col">Nom complet</th>
+            {% for col in fee_columns %}
+              <th class="finance-matrix__fee" scope="col">
+                {% if year_writable %}
+                  <button
+                    type="button"
+                    class="finance-matrix__fee-btn {% if col.pending_change %}is-pending{% endif %}"
+                    {% if col.pending_change %}disabled title="Modification déjà en attente"{% else %}
+                      data-modal-open="amount-change-modal"
+                      data-fee-id="{{ col.fee.public_id }}"
+                      data-fee-label="{{ col.period_label }}"
+                      data-fee-amount="{{ col.amount_value }}"
+                    {% endif %}
+                  >{{ col.header }}</button>
+                {% else %}
+                  {{ col.header }}
+                {% endif %}
+              </th>
+            {% endfor %}
+            <th scope="col">Reste</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in matrix.rows %}
+            <tr>
+              <td class="finance-matrix__sticky">{{ forloop.counter }}</td>
+              <td class="finance-matrix__sticky finance-matrix__sticky--n">
+                <a href="{% url 'finance:student-situation' row.student.public_id %}">{{ row.student.matricule }}</a>
+              </td>
+              <td class="finance-matrix__sticky finance-matrix__sticky--name">
+                <span class="finance-name--{{ row.row_tone }}">
+                  {{ row.student.nom }}{% if row.student.postnom %} {{ row.student.postnom }}{% endif %} {{ row.student.prenom }}
+                </span>
+              </td>
+              {% for cell in row.cells %}
+                <td>
+                  {% if cell.obligation %}
+                    <span class="finance-pay--{{ cell.obligation.payment_tone }}">
+                      {{ cell.amount_paid|default_if_none:0|floatformat:0 }}
+                    </span>
+                  {% else %}
+                    0
+                  {% endif %}
+                </td>
+              {% empty %}
+              {% endfor %}
+              <td>
+                <strong class="finance-pay--{{ row.row_tone }}">
+                  {{ row.totals.amount_remaining|floatformat:0 }}
+                </strong>
+              </td>
+            </tr>
+          {% empty %}
+            <tr>
+              <td colspan="{{ fee_columns|length|add:4 }}" class="table__empty">Aucun élève inscrit dans cette classe</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+        {% if matrix.rows and fee_columns %}
+        <tfoot>
+          <tr>
+            <td class="finance-matrix__sticky" colspan="3"><strong>Totaux</strong></td>
+            {% for col in matrix.column_totals %}
+              <td>{{ col.amount_paid|floatformat:0 }}</td>
+            {% endfor %}
+            <td><strong>{{ matrix.grand_totals.amount_remaining|floatformat:0 }}</strong></td>
+          </tr>
+        </tfoot>
+        {% endif %}
+      </table>
+    </div>
+    <p class="finance-matrix__legend" aria-label="Légende des couleurs">
+      <span class="is-unpaid">Rien payé</span>
+      <span class="is-partial">Paiement partiel</span>
+      <span class="is-paid">Soldé</span>
+    </p>
+  </section>
+</div>
+
+{% if year_writable %}
+<div class="modal-backdrop" id="amount-change-modal" data-modal="amount-change-modal" hidden>
+  <div class="modal modal--form-narrow" data-modal-panel>
+    <div class="modal__header">
+      <h2>Modifier le montant</h2>
+      <button type="button" class="modal__close" data-modal-close aria-label="Fermer">&times;</button>
+    </div>
+    <div class="modal__body" data-page="finance-amount-change">
+      <p class="form-hint" data-amount-change-title>Période sélectionnée</p>
+      <form method="post" action="{% url 'finance:class-fee-amount-change' school_class.public_id %}">
+        {% csrf_token %}
+        <input type="hidden" name="tableau" value="{{ board }}">
+        <input type="hidden" name="fee_id" id="amount-change-fee-id" value="">
+        <div class="form-group">
+          <label class="form-label" for="id_new_amount">Nouveau montant</label>
+          <input class="form-input" type="number" step="0.01" min="0.01" name="new_amount" id="id_new_amount" required>
+        </div>
+        <fieldset class="form-group">
+          <legend class="form-label">Portée</legend>
+          <label class="form-check">
+            <input type="radio" name="scope" value="CETTE_CLASSE" checked data-amount-scope>
+            Cette classe uniquement ({{ school_class.name }})
+          </label>
+          <label class="form-check">
+            <input type="radio" name="scope" value="CLASSES_SELECTIONNEES" data-amount-scope>
+            Classes spécifiques
+          </label>
+          <label class="form-check">
+            <input type="radio" name="scope" value="TOUTES_LES_CLASSES" data-amount-scope>
+            Toutes les classes
+          </label>
+        </fieldset>
+        <div class="form-group" data-amount-class-selection hidden>
+          <span class="form-label">Classes concernées</span>
+          <div class="finance-class-check-list">
+            {% for sc in year_classes %}
+              <label class="form-check">
+                <input type="checkbox" name="target_classes" value="{{ sc.pk }}" {% if sc.pk == school_class.pk %}checked{% endif %}>
+                {{ sc.name }}
+              </label>
+            {% endfor %}
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="id_amount_comment">Commentaire</label>
+          <textarea class="form-input" name="comment" id="id_amount_comment" rows="2"></textarea>
+        </div>
+        <p class="form-hint">La modification sera appliquée après validation du secrétariat.</p>
+        <div class="content__actions">
+          <button type="button" class="btn btn--secondary" data-modal-close>Annuler</button>
+          <button class="btn btn--primary" type="submit">Envoyer au secrétariat</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<div class="modal-backdrop" id="create-fee-modal" data-modal="create-fee-modal" hidden>
+  <div class="modal modal--form-narrow" data-modal-panel>
+    <div class="modal__header">
+      <h2>Créer un frais</h2>
+      <button type="button" class="modal__close" data-modal-close aria-label="Fermer">&times;</button>
+    </div>
+    <div class="modal__body" data-page="finance-class-fee-create">
+      <form method="post" action="{% url 'finance:class-other-fee-create' school_class.public_id %}">
+        {% csrf_token %}
+        {% with form=other_fee_form %}
+          <div class="form-group">
+            <label class="form-label" for="{{ form.code.id_for_label }}">{{ form.code.label }}</label>
+            {{ form.code }}
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="{{ form.label.id_for_label }}">{{ form.label.label }}</label>
+            {{ form.label }}
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="{{ form.amount.id_for_label }}">{{ form.amount.label }}</label>
+            {{ form.amount }}
+            {% if form.amount.help_text %}<p class="form-hint">{{ form.amount.help_text }}</p>{% endif %}
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="{{ form.description.id_for_label }}">{{ form.description.label }}</label>
+            {{ form.description }}
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="{{ form.schedule_mode.id_for_label }}">{{ form.schedule_mode.label }}</label>
+            {{ form.schedule_mode }}
+          </div>
+          <div class="form-group" data-fee-schedule="TRANCHES" hidden>
+            <label class="form-label" for="{{ form.tranche_count.id_for_label }}">{{ form.tranche_count.label }}</label>
+            {{ form.tranche_count }}
+          </div>
+          <div class="form-group" data-fee-schedule="MOIS" hidden>
+            <label class="form-label" for="{{ form.month_scope.id_for_label }}">{{ form.month_scope.label }}</label>
+            {{ form.month_scope }}
+          </div>
+          <div class="form-group" data-fee-schedule="MOIS" data-fee-month-selection hidden>
+            <span class="form-label">{{ form.months.label }}</span>
+            <div class="finance-month-list">{{ form.months }}</div>
+          </div>
+        {% endwith %}
+        <p class="form-hint">
+          Après validation du secrétariat, un onglet portant le nom du frais apparaîtra sur cette ligne.
+        </p>
+        <div class="content__actions">
+          <button type="button" class="btn btn--secondary" data-modal-close>Annuler</button>
+          <button class="btn btn--primary" type="submit">Envoyer au secrétariat</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endif %}
+{% endblock %}

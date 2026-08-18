@@ -1,43 +1,45 @@
-/* Kalunga School — Color Tokens
-   Light notebook UI inspired by school exercise book */
+/* ELIMU One — Color tokens from the official logo (navy + green) */
 
 :root {
-    --color-primary: #0d5a22;
-    --color-primary-dark: #073c16;
-    --color-primary-hover: #167033;
-    --color-primary-soft: #e6f2e8;
-    --color-primary-muted: #c7dfcb;
+    --color-primary: #002858;
+    --color-primary-dark: #001a3a;
+    --color-primary-hover: #1058a0;
+    --color-primary-soft: #e8eef6;
+    --color-primary-muted: #c5d3e8;
     --color-primary-on: #ffffff;
 
-    --color-background: #f7f7f5;
-    --color-grid-line: #e4e4e0;
+    --color-accent: #40a040;
+    --color-accent-dark: #2d7a2d;
+
+    --color-background: #f5f7fa;
+    --color-grid-line: #e4e7ee;
     --color-navbar: #ffffff;
     --color-surface: #ffffff;
     --color-surface-elevated: #ffffff;
     --color-card: #ffffff;
     --color-input: #ffffff;
     --color-input-dark: #ffffff;
-    --color-table-head: #eaf5ef;
+    --color-table-head: #e8eef6;
 
-    --color-border: #dcdfd9;
-    --color-divider: #eceeea;
+    --color-border: #d5dbe6;
+    --color-divider: #e8ebf0;
 
-    --color-text-primary: #1a1f1c;
-    --color-text-secondary: #6b736e;
-    --color-text-disabled: #9aa39c;
+    --color-text-primary: #12151c;
+    --color-text-secondary: #5c6573;
+    --color-text-disabled: #93a0b0;
     --color-text-inverse: #ffffff;
 
-    --color-success: #167033;
+    --color-success: #2d7a2d;
     --color-warning: #c4922e;
     --color-danger: #c0392b;
     --color-danger-hover: #a93226;
-    --color-information: #3f76b5;
+    --color-information: #1058a0;
 
-    --color-focus-ring: rgba(13, 90, 34, 0.22);
-    --color-overlay: rgba(26, 31, 28, 0.4);
-    --color-scrollbar-track: #efefec;
-    --color-scrollbar-thumb: #c9cbc6;
-    --color-scrollbar-thumb-hover: #b0b3ad;
+    --color-focus-ring: rgba(0, 40, 88, 0.22);
+    --color-overlay: rgba(18, 21, 28, 0.4);
+    --color-scrollbar-track: #eef1f6;
+    --color-scrollbar-thumb: #c5cdd8;
+    --color-scrollbar-thumb-hover: #aeb6c2;
 
     --navbar-height: 64px;
 }

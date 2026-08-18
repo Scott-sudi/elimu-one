@@ -208,6 +208,7 @@ class UserCreateView(AdministratorRequiredMixin, View):
             {
                 "form": form,
                 "mode": "create",
+                "user_obj": None,
                 "roles": Role.objects.filter(is_active=True),
                 "page_title": "Nouvel utilisateur",
                 "breadcrumb": [("Utilisateurs", reverse("accounts:users")), ("Nouvel utilisateur", None)],
@@ -233,6 +234,7 @@ class UserCreateView(AdministratorRequiredMixin, View):
                 {
                     "form": form,
                     "mode": "create",
+                    "user_obj": None,
                     "roles": Role.objects.filter(is_active=True),
                     "page_title": "Nouvel utilisateur",
                     "breadcrumb": [("Utilisateurs", reverse("accounts:users")), ("Nouvel utilisateur", None)],
@@ -248,7 +250,22 @@ class UserCreateView(AdministratorRequiredMixin, View):
                 },
             )
         except AuthenticationError as exc:
-            return api_response(success=False, message=exc.message, status=400)
+            if request.headers.get("HX-Request") or "application/json" in request.headers.get("Accept", ""):
+                return api_response(success=False, message=exc.message, status=400)
+            form.add_error(None, exc.message)
+            return render(
+                request,
+                "accounts/users/create.html",
+                {
+                    "form": form,
+                    "mode": "create",
+                    "user_obj": None,
+                    "roles": Role.objects.filter(is_active=True),
+                    "page_title": "Nouvel utilisateur",
+                    "breadcrumb": [("Utilisateurs", reverse("accounts:users")), ("Nouvel utilisateur", None)],
+                },
+                status=400,
+            )
         if request.headers.get("HX-Request") or "application/json" in request.headers.get("Accept", ""):
             return api_response(
                 success=True,

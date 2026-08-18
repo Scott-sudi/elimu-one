@@ -1,0 +1,123 @@
+{% extends "layouts/app.html" %}
+{% block title %}Nouveau paiement{% endblock %}
+{% block content %}
+<style>
+  .matricule-input {
+    display: flex;
+    align-items: stretch;
+    gap: 0;
+  }
+  .matricule-input__prefix {
+    display: inline-flex;
+    align-items: center;
+    padding: 0 0.75rem;
+    border: 1px solid var(--color-border, #cfd6d2);
+    border-right: 0;
+    border-radius: 0.4rem 0 0 0.4rem;
+    background: var(--color-muted-bg, #f3f5f4);
+    color: var(--color-muted, #556);
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  .matricule-input .form-input {
+    border-radius: 0 0.4rem 0.4rem 0;
+  }
+  .form-select:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+    background: var(--color-muted-bg, #f3f5f4);
+  }
+  .payment-student-hint {
+    margin: 0.35rem 0 0;
+    font-size: 0.875rem;
+    color: var(--color-muted, #556);
+  }
+  .payment-student-hint.is-ok { color: #2e7d32; }
+  .payment-student-hint.is-error { color: #c62828; }
+</style>
+<div
+  data-page="finance-payments"
+  data-matricule-lookup-url="{{ matricule_lookup_url }}"
+  data-matricule-stem="{{ matricule_stem }}"
+  {% if school_class %}data-classe="{{ school_class.public_id }}"{% endif %}
+>
+  {{ fee_groups_payload|json_script:"payment-fee-groups-data" }}
+  <div class="content__header">
+    <div>
+      <h2 class="content__title">Nouveau paiement</h2>
+      {% if school_class %}
+        <p class="content__description">Classe {{ school_class.name }}</p>
+      {% endif %}
+    </div>
+    <div class="content__actions">
+      <a class="btn btn--secondary" href="{{ back_url }}">Retour</a>
+    </div>
+  </div>
+
+  <div class="secretariat-form-narrow">
+    <section class="card">
+      <div class="card__body">
+        <form method="post">
+          {% csrf_token %}
+          {% if school_class %}
+            <input type="hidden" name="classe" value="{{ school_class.public_id }}">
+          {% endif %}
+
+          {% if form.non_field_errors %}
+            <div class="form-error">{{ form.non_field_errors|striptags }}</div>
+          {% endif %}
+
+          <div class="form-group">
+            <label class="form-label" for="{{ form.matricule_suffix.id_for_label }}">Matricule</label>
+            <div class="matricule-input">
+              <span class="matricule-input__prefix">{{ matricule_stem }}</span>
+              {{ form.matricule_suffix }}
+            </div>
+            <p class="form-hint">Saisissez la fin du matricule — les frais de la classe de l’élève s’affichent ensuite.</p>
+            <p class="payment-student-hint" data-payment-student-hint hidden></p>
+            {% if form.matricule_suffix.errors %}<div class="form-error">{{ form.matricule_suffix.errors|striptags }}</div>{% endif %}
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="{{ form.fee_group.id_for_label }}">{{ form.fee_group.label }}</label>
+            {{ form.fee_group }}
+            {% if form.fee_group.errors %}<div class="form-error">{{ form.fee_group.errors|striptags }}</div>{% endif %}
+            <p class="table__empty" data-payment-fees-empty {% if payable_fees %}hidden{% endif %}>
+              Complétez le matricule pour charger les frais de la classe.
+            </p>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="{{ form.fee.id_for_label }}">{{ form.fee.label }}</label>
+            {{ form.fee }}
+            <p class="form-hint" data-payment-period-hint>
+              Choisissez le mois ou la tranche. Les périodes antérieures non soldées restent prioritaires.
+            </p>
+            {% if form.fee.errors %}<div class="form-error">{{ form.fee.errors|striptags }}</div>{% endif %}
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="{{ form.amount.id_for_label }}">{{ form.amount.label }}</label>
+            {{ form.amount }}
+            {% if form.amount.help_text %}<p class="form-hint">{{ form.amount.help_text }}</p>{% endif %}
+            {% if form.amount.errors %}<div class="form-error">{{ form.amount.errors|striptags }}</div>{% endif %}
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="{{ form.payment_method.id_for_label }}">{{ form.payment_method.label }}</label>
+            {{ form.payment_method }}
+            {% if form.payment_method.errors %}<div class="form-error">{{ form.payment_method.errors|striptags }}</div>{% endif %}
+          </div>
+
+          <div class="content__actions">
+            <a class="btn btn--secondary" href="{{ back_url }}">Annuler</a>
+            <button class="btn btn--primary" type="submit" data-payment-submit {% if not payable_fees %}disabled{% endif %}>
+              Enregistrer et générer le reçu
+            </button>
+          </div>
+        </form>
+      </div>
+    </section>
+  </div>
+</div>
+{% endblock %}

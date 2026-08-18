@@ -1,0 +1,54 @@
+{% extends "layouts/app.html" %}
+{% block title %}Dossiers de présence{% endblock %}
+{% block content %}
+<div data-page="discipline-attendance-folders">
+  <div class="content__header">
+    <div class="content__header-main">
+      <h2 class="content__title">Dossiers journaliers · {{ school_class.name }}</h2>
+      <p class="content__description">
+        Classe {{ school_class.name }}{% if selected_year %} · Année {{ selected_year.label }}{% endif %}
+      </p>
+    </div>
+    <div class="content__actions">
+      <a class="btn btn--secondary" href="{% url 'discipline:classes' %}">Retour aux classes</a>
+      <a class="btn btn--primary" href="{{ today_url }}">Ouvrir la feuille du jour</a>
+    </div>
+  </div>
+
+  <form method="get" class="secretariat-toolbar secretariat-toolbar--filters" data-auto-filter>
+    <input class="form-input form-input--sm" type="date" name="q_date" value="{{ filters.q_date }}">
+    <input class="form-input form-input--sm" type="month" name="month" value="{{ filters.month }}">
+    <select class="form-input form-input--sm" name="status">
+      <option value="">Tous les statuts</option>
+      <option value="NON_SAISIE" {% if filters.status == "NON_SAISIE" %}selected{% endif %}>Non saisie</option>
+      <option value="BROUILLON" {% if filters.status == "BROUILLON" %}selected{% endif %}>Brouillon</option>
+      <option value="VALIDEE" {% if filters.status == "VALIDEE" %}selected{% endif %}>Validée</option>
+      <option value="CLOTUREE" {% if filters.status == "CLOTUREE" %}selected{% endif %}>Clôturée</option>
+    </select>
+    <button class="btn btn--secondary btn--sm" type="submit">Filtrer</button>
+  </form>
+
+  {% if folders %}
+    <div class="entity-grid" role="list">
+      {% for row in folders %}
+        <a href="{{ row.url }}" class="entity-tile entity-tile--tone-tronc" role="listitem">
+          <span class="entity-tile__title">{{ row.sheet.date|date:"l d F Y" }}</span>
+          <span class="entity-tile__meta">
+            {{ row.sheet.get_status_display }}
+            {% if row.sheet.status == "CLOTUREE" and row.sheet.date < today %}
+              · Archive auto
+            {% endif %}
+          </span>
+          <span class="entity-tile__line">Total: {{ row.sheet.total_students }} · Présents: {{ row.sheet.total_present }}</span>
+          <span class="entity-tile__line">Absents: {{ row.sheet.total_absent }} · Non pointés: {{ row.sheet.total_unmarked }}</span>
+          <span class="entity-tile__status">
+            {% if row.sheet.validation_at %}Validée le {{ row.sheet.validation_at|date:"d/m/Y H:i" }}{% else %}Ouvrir la feuille{% endif %}
+          </span>
+        </a>
+      {% endfor %}
+    </div>
+  {% else %}
+    {% include "components/empty_state.html" with icon="folder-search" title="Aucun dossier trouvé" description="Utilisez les filtres, ou ouvrez la feuille du jour." %}
+  {% endif %}
+</div>
+{% endblock %}

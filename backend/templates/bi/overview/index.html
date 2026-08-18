@@ -1,0 +1,29 @@
+{% extends "layouts/bi.html" %}
+{% block title %}{{ page_title }} — BI{% endblock %}
+{% block content %}
+<div data-page="bi-overview" class="bi-page bi-overview" data-bi-classes-url="{% url 'bi:classes' %}">
+  <header class="bi-page-head">
+    <div><span class="bi-eyebrow">CENTRE DE PILOTAGE</span><h1>Situation de l'école</h1><p data-bi-context-title>Lecture consolidée de l'année {{ selected_year.label }}.</p></div>
+    <div class="bi-page-head__status"><span></span>Données consolidées <time data-bi-generated-at>{{ generated_at|date:"d/m/Y H:i" }}</time></div>
+  </header>
+  <section class="bi-kpi-grid" aria-label="Indicateurs clés">
+    <a class="bi-kpi bi-kpi--green" href="{% url 'bi:enrollments' %}" data-bi-kpi-link="enrollments"><span class="bi-kpi__icon"><i data-lucide="users-round"></i></span><span class="bi-kpi__label">Effectif</span><strong data-bi-kpi="effectif_total">{{ kpis.effectif_total|default:0 }}</strong><span class="bi-kpi__detail">Inscriptions validées</span><span class="bi-sparkline"><i></i><i></i><i></i><i></i><i></i><i></i></span></a>
+    <a class="bi-kpi bi-kpi--blue" href="{% url 'bi:finance' %}" data-bi-kpi-link="finance"><span class="bi-kpi__icon"><i data-lucide="landmark"></i></span><span class="bi-kpi__label">Recouvrement</span><strong><span data-bi-kpi="taux_recouvrement">{% if kpis.taux_recouvrement is not None %}{{ kpis.taux_recouvrement }}{% else %}—{% endif %}</span><small>%</small></strong><span class="bi-kpi__detail">Objectif : 90 %</span><span class="bi-sparkline"><i></i><i></i><i></i><i></i><i></i><i></i></span></a>
+    <a class="bi-kpi bi-kpi--orange" href="{% url 'bi:attendance' %}" data-bi-kpi-link="attendance"><span class="bi-kpi__icon"><i data-lucide="calendar-check-2"></i></span><span class="bi-kpi__label">Présence</span><strong><span data-bi-kpi="taux_presence">{% if kpis.taux_presence is not None %}{{ kpis.taux_presence }}{% else %}—{% endif %}</span><small>%</small></strong><span class="bi-kpi__detail">Suivi journalier</span><span class="bi-sparkline"><i></i><i></i><i></i><i></i><i></i><i></i></span></a>
+    <a class="bi-kpi bi-kpi--red" href="{% url 'bi:discipline' %}" data-bi-kpi-link="discipline"><span class="bi-kpi__icon"><i data-lucide="shield-alert"></i></span><span class="bi-kpi__label">Incidents ouverts</span><strong data-bi-kpi="incidents_ouverts">{{ kpis.incidents_ouverts|default:0 }}</strong><span class="bi-kpi__detail">À traiter en priorité</span><span class="bi-sparkline"><i></i><i></i><i></i><i></i><i></i><i></i></span></a>
+  </section>
+  <section class="bi-grid bi-grid--main" aria-label="Tendances prioritaires">
+    <article class="bi-panel bi-panel--wide"><header><div><span>FINANCES</span><h2>Rythme des encaissements</h2></div><button class="bi-panel__action" type="button" data-bi-chart-expand="finance-collections" title="Agrandir"><i data-lucide="maximize-2"></i></button></header><div class="bi-chart" data-bi-chart="finance-collections" data-bi-chart-type="line"></div></article>
+    <article class="bi-panel"><header><div><span>ASSIDUITÉ</span><h2>Présences et absences</h2></div></header><div class="bi-chart" data-bi-chart="attendance-status" data-bi-chart-type="donut"></div></article>
+  </section>
+  <section class="bi-grid bi-grid--secondary" aria-label="Analyses par classe">
+    <article class="bi-panel"><header><div><span>EFFECTIFS</span><h2>Répartition par classe</h2></div><a href="{% url 'bi:enrollments' %}">Détail <i data-lucide="arrow-up-right"></i></a></header><div class="bi-chart" data-bi-chart="enrollments-by-class" data-bi-chart-type="bar"></div></article>
+    <article class="bi-panel"><header><div><span>DISCIPLINE</span><h2>Classes sous attention</h2></div><a href="{% url 'bi:discipline' %}">Détail <i data-lucide="arrow-up-right"></i></a></header><div class="bi-chart" data-bi-chart="discipline-by-class" data-bi-chart-type="hbar"></div></article>
+    <article class="bi-panel"><header><div><span>PRÉSENCES</span><h2>Performance des classes</h2></div><a href="{% url 'bi:attendance' %}">Détail <i data-lucide="arrow-up-right"></i></a></header><div class="bi-chart" data-bi-chart="attendance-by-class" data-bi-chart-type="bar"></div></article>
+  </section>
+  <section class="bi-grid bi-grid--bottom" aria-label="Alertes et tableau de pilotage">
+    <article class="bi-panel bi-attention"><header><div><span>POINTS D'ATTENTION</span><h2>Décisions à prendre</h2></div></header><div class="bi-attention__list" data-bi-alerts>{% for alert in alerts %}<div class="bi-attention__item bi-attention__item--{{ alert.level }}"><i data-lucide="{% if alert.level == 'danger' %}circle-alert{% else %}triangle-alert{% endif %}"></i><div><strong>{{ alert.title }}</strong><p>{{ alert.detail }}</p></div></div>{% empty %}<div class="bi-attention__empty"><i data-lucide="circle-check"></i>Aucune alerte pour la période sélectionnée.</div>{% endfor %}</div></article>
+    <article class="bi-panel bi-panel--table"><header><div><span>VUE CROISÉE</span><h2>Priorités par classe</h2></div><a href="{% url 'bi:classes' %}">Analyse complète <i data-lucide="arrow-up-right"></i></a></header><div class="bi-table-wrap"><table class="bi-table"><thead><tr><th>Classe</th><th>Effectif</th><th>Occupation</th><th>Présence</th><th>Incidents</th></tr></thead><tbody data-bi-class-table><tr><td colspan="5">Chargement de l'analyse des classes...</td></tr></tbody></table></div></article>
+  </section>
+</div>
+{% endblock %}

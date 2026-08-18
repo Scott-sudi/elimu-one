@@ -1,0 +1,88 @@
+{% comment %}
+Shared finance list filters (Impayés / Paiements).
+Expects: filter_action_url, table_target, current_filters, filter_options,
+filter_fee_groups, selected_fee_group, filters_active, clear_url
+{% endcomment %}
+{{ filter_fee_groups|json_script:"finance-fee-groups-data" }}
+{{ filter_levels|json_script:"finance-levels-data" }}
+<form
+  class="finance-filters"
+  method="get"
+  action="{{ filter_action_url }}"
+  hx-get="{{ filter_action_url }}"
+  hx-target="{{ table_target }}"
+  hx-push-url="true"
+  hx-trigger="change delay:20ms from:select, keyup changed delay:350ms from:input[name='q'], search from:input[name='q']"
+  data-finance-filters
+>
+  <div class="form-group">
+    <label class="form-label" for="finance-filter-q">Élève</label>
+    <input
+      class="form-input form-input--sm"
+      id="finance-filter-q"
+      type="search"
+      name="q"
+      value="{{ current_filters.q }}"
+      placeholder="{{ q_placeholder|default:'Matricule ou nom' }}"
+      autocomplete="off"
+    >
+  </div>
+
+  <div class="form-group">
+    <label class="form-label" for="finance-filter-option">Option</label>
+    <select class="form-select" id="finance-filter-option" name="option" data-finance-option>
+      <option value="">Toutes les options</option>
+      {% for opt in filter_options %}
+        <option value="{{ opt.public_id }}" {% if current_filters.option == opt.public_id|stringformat:"s" %}selected{% endif %}>
+          {{ opt.name }}
+        </option>
+      {% endfor %}
+    </select>
+  </div>
+
+  <div class="form-group">
+    <label class="form-label" for="finance-filter-niveau">Niveau</label>
+    <select
+      class="form-select"
+      id="finance-filter-niveau"
+      name="niveau"
+      data-finance-niveau
+      data-initial="{{ current_filters.niveau }}"
+    >
+      <option value="">Tous les niveaux</option>
+    </select>
+  </div>
+
+  <div class="form-group">
+    <label class="form-label" for="finance-filter-frais">Frais</label>
+    <select class="form-select" id="finance-filter-frais" name="frais" data-finance-frais>
+      <option value="">Tous les frais</option>
+      {% for group in filter_fee_groups %}
+        <option value="{{ group.key }}" {% if current_filters.frais == group.key %}selected{% endif %}>
+          {{ group.label }}
+        </option>
+      {% endfor %}
+    </select>
+  </div>
+
+  <div class="form-group" data-finance-period-wrap {% if not selected_fee_group or selected_fee_group.schedule_mode == "UNE_FOIS" %}hidden{% endif %}>
+    <label class="form-label" for="finance-filter-periode" data-finance-period-label>
+      {% if selected_fee_group.schedule_mode == "TRANCHES" %}Tranche{% else %}Mois{% endif %}
+    </label>
+    <select
+      class="form-select"
+      id="finance-filter-periode"
+      name="periode"
+      data-finance-periode
+      data-initial="{{ current_filters.periode }}"
+      {% if not selected_fee_group or selected_fee_group.schedule_mode == "UNE_FOIS" %}disabled{% endif %}
+    >
+      <option value="">Toutes</option>
+    </select>
+  </div>
+
+  <div class="form-group" data-finance-clear-wrap {% if not filters_active %}hidden{% endif %}>
+    <label class="form-label">&nbsp;</label>
+    <a class="btn btn--secondary btn--sm" href="{{ clear_url }}" data-finance-clear>Annuler les filtres</a>
+  </div>
+</form>

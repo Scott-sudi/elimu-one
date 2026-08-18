@@ -1,0 +1,59 @@
+{% extends "layouts/app.html" %}
+{% block title %}Présences du jour{% endblock %}
+{% block content %}
+<div
+  data-page="discipline-attendance-daily"
+  data-default-scanner-mode="{{ default_scanner_mode|default:'attendance' }}"
+  {% if auto_open_scanner %}data-auto-open-scanner="1"{% endif %}
+>
+  <div class="content__header">
+    <div class="content__header-main">
+      <h2 class="content__title">Présences du jour</h2>
+      <p class="content__description">
+        {% if selected_year %}Année {{ selected_year.label }}{% elif selected_academic_year %}Année {{ selected_academic_year.label }}{% endif %}
+      </p>
+    </div>
+    <div class="content__actions">
+      <button
+        type="button"
+        class="btn btn--primary"
+        data-modal-open="discipline-qr-scan-modal"
+        data-discipline-open-scanner
+        data-default-mode="{{ default_scanner_mode|default:'attendance' }}"
+      >
+        <i data-lucide="scan-qr-code" width="16" height="16"></i>
+        Pointage
+      </button>
+    </div>
+  </div>
+
+  {% if not has_attendance_schedules %}
+    <div class="alert alert--warning" role="status">
+      Aucun horaire de pointage n'est configuré pour cette année.
+      <a href="{% url 'discipline:schedules' %}">Configurer les horaires</a>
+      avant le scan QR (plages présent / retard / fin de cours).
+    </div>
+  {% endif %}
+
+  <form method="get" class="secretariat-toolbar secretariat-toolbar--filters" action="{% url 'discipline:attendance-daily' %}" data-auto-filter>
+    <input class="form-input form-input--sm" type="search" name="q" value="{{ filters.q }}" placeholder="Matricule ou nom" aria-label="Élève">
+    <select class="form-input form-input--sm" name="school_class" aria-label="Classe">
+      <option value="">Toutes les classes</option>
+      {% for school_class in classes %}
+        <option value="{{ school_class.public_id }}" {% if filters.school_class == school_class.public_id|stringformat:'s' %}selected{% endif %}>{{ school_class.name }}</option>
+      {% endfor %}
+    </select>
+    <select class="form-input form-input--sm" name="status" aria-label="Statut">
+      <option value="">Tous les statuts</option>
+      {% for value, label in attendances.model.Status.choices %}
+        <option value="{{ value }}" {% if filters.status == value %}selected{% endif %}>{{ label }}</option>
+      {% endfor %}
+    </select>
+    <input class="form-input form-input--sm" type="date" name="date" value="{{ filters.date }}" aria-label="Date">
+    <button class="btn btn--secondary btn--sm" type="submit">Filtrer</button>
+    <a class="btn btn--secondary btn--sm secretariat-toolbar__clear" href="{% url 'discipline:attendance-daily' %}" title="Annuler les filtres">Annuler les filtres</a>
+  </form>
+
+  {% include "discipline/attendance/_table.html" %}
+</div>
+{% endblock %}

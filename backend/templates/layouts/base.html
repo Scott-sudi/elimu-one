@@ -5,8 +5,14 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="csrf-token" content="{{ csrf_token }}">
-  <meta name="description" content="{{ school_full_name|default:'Kalunga – La Source du Savoir' }} — Administration">
-  <title>{% block title %}{{ page_title|default:"Administration" }}{% endblock %} · {{ school_name|default:"Kalunga" }}</title>
+  <meta name="description" content="{{ app_full_name }} — Administration">
+  <title>{% block title %}{{ page_title|default:"Administration" }}{% endblock %} · {{ platform_name }}</title>
+  <link rel="icon" href="{% static 'images/branding/favicon.ico' %}" sizes="any">
+  <link rel="icon" type="image/png" sizes="32x32" href="{% static 'images/branding/favicon-32x32.png' %}">
+  <link rel="icon" type="image/png" sizes="16x16" href="{% static 'images/branding/favicon-16x16.png' %}">
+  <link rel="apple-touch-icon" href="{% static 'images/branding/apple-touch-icon.png' %}">
+  <link rel="manifest" href="{% static 'images/branding/site.webmanifest' %}">
+  <meta name="theme-color" content="#002858">
   {% block extra_head %}{% endblock %}
   {% block assets %}
     {# Vite build preferred; fallback to static source paths #}
@@ -16,6 +22,8 @@
       <link rel="stylesheet" href="{% static 'css/main.css' %}">
       <script type="module" src="{% static 'js/app.js' %}"></script>
     {% endif %}
+    {# Tokens source after the bundle so a stale Vite CSS cannot keep the old palette. #}
+    <link rel="stylesheet" href="{% static 'css/tokens/colors.css' %}">
   {% endblock %}
 </head>
 <body class="{% block body_class %}{% endblock %}" {% block body_attrs %}{% endblock %}>

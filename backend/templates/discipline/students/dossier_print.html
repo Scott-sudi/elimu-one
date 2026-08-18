@@ -1,0 +1,14 @@
+{% extends "layouts/app.html" %}
+{% block title %}Impression — Dossier disciplinaire{% endblock %}
+{% block content %}
+<div class="no-print content__actions" style="margin-bottom:1rem;">
+  <button type="button" class="btn btn--primary" onclick="window.print()">Imprimer</button>
+  <a class="btn btn--secondary" href="{{ dossier.dossier_url }}">Retour au dossier</a>
+</div>
+{% include "discipline/students/_dossier_document.html" %}
+<script>
+  window.addEventListener('load', () => {
+    window.setTimeout(() => window.print(), 350);
+  });
+</script>
+{% endblock %}

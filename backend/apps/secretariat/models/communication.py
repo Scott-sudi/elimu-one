@@ -72,6 +72,16 @@ class Communication(TimeStampedPublicIdModel):
         blank=True,
     )
     is_pinned = models.BooleanField("Épinglée", default=False, db_index=True)
+    pinned_at = models.DateTimeField("Épinglée le", null=True, blank=True)
+    pinned_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        related_name="pinned_communications",
+        null=True,
+        blank=True,
+        db_constraint=False,
+        verbose_name="Épinglée par",
+    )
 
     class Meta:
         ordering = ["-is_pinned", "-published_at", "-created_at"]
@@ -80,6 +90,7 @@ class Communication(TimeStampedPublicIdModel):
         indexes = [
             models.Index(fields=["status", "published_at"]),
             models.Index(fields=["category", "priority"]),
+            models.Index(fields=["is_pinned", "pinned_at"]),
         ]
 
     def __str__(self) -> str:

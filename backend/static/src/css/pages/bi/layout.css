@@ -1,0 +1,79 @@
+/* BI layout — analytical pages within the existing Kalunga shell */
+
+.bi-page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4, 1rem);
+}
+
+.bi-page .content__header {
+  margin-bottom: 0;
+}
+
+.bi-section {
+  margin-top: var(--space-4, 1rem);
+}
+
+.bi-section__header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-3, 0.75rem);
+  flex-wrap: wrap;
+}
+
+.bi-meta {
+  margin-top: var(--space-3, 0.75rem);
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+}
+
+.bi-alert-list {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.bi-alert {
+  padding: 0.75rem 0.85rem;
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  background: var(--color-surface);
+}
+
+.bi-alert--warning {
+  border-color: var(--color-warning);
+  background: #fbf6eb;
+}
+
+.bi-alert--danger {
+  border-color: var(--color-danger);
+  background: #fbf0ee;
+}
+
+.bi-alert__title {
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.bi-alert__level {
+  color: var(--color-text-secondary);
+  font-weight: 400;
+}
+
+.bi-alert__detail {
+  margin-top: 0.25rem;
+  color: var(--color-text-primary);
+  font-size: 0.9rem;
+}
+
+@media (max-width: 720px) {
+  .bi-page .dashboard__stats {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .bi-page .dashboard__stats {
+    grid-template-columns: 1fr;
+  }
+}

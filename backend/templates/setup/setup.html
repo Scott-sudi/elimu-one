@@ -9,7 +9,7 @@
     <div class="card__header">
       <div>
         <h1 class="card__title">Configuration initiale</h1>
-        <p class="card__subtitle">Création du premier administrateur — {{ school_full_name|default:"Kalunga – La Source du Savoir" }}</p>
+        <p class="card__subtitle">Création du premier administrateur — {{ platform_name }}</p>
       </div>
     </div>
     <div class="card__body">
@@ -91,5 +91,5 @@
       </form>
     </div>
   </div>
-  <p class="auth-footer">{{ school_name|default:"Kalunga" }} · v{{ app_version|default:"1.0.0-admin" }}</p>
+  <p class="auth-footer">{{ platform_name }} · v{{ app_version|default:"1.0.0" }}</p>
 {% endblock %}

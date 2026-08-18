@@ -1,0 +1,65 @@
+{% extends "layouts/app.html" %}
+{% block title %}Comptabilité{% endblock %}
+{% block content %}
+<div data-page="finance-dashboard">
+  <div class="content__header">
+    <div class="content__header-main">
+      <h2 class="content__title">Tableau de bord comptable</h2>
+      <p class="content__description">
+        {% if stats.academic_year %}Année {{ stats.academic_year.label }}{% else %}Aucune année sélectionnée{% endif %}
+      </p>
+    </div>
+    <div class="content__actions">
+      {% include "finance/partials/qr_scan_button.html" with btn_class="btn--secondary" label="Scanner une carte" %}
+      {% if year_writable %}
+        <a class="btn btn--secondary" href="{% url 'finance:fee-create' %}">Nouveau frais</a>
+        <a class="btn btn--primary" href="{% url 'finance:payment-create' %}">Enregistrer un paiement</a>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="finance-stat-grid" aria-label="Indicateurs financiers">
+    <div class="finance-stat">
+      <span class="finance-stat__label">Montant dû</span>
+      <span class="finance-stat__value">{{ stats.totals.amount_due }} CDF</span>
+    </div>
+    <div class="finance-stat">
+      <span class="finance-stat__label">Montant encaissé</span>
+      <span class="finance-stat__value">{{ stats.totals.amount_paid }} CDF</span>
+    </div>
+    <div class="finance-stat">
+      <span class="finance-stat__label">Reste</span>
+      <span class="finance-stat__value">{{ stats.totals.amount_remaining }} CDF</span>
+    </div>
+    <div class="finance-stat">
+      <span class="finance-stat__label">Impayés</span>
+      <span class="finance-stat__value">{{ stats.arrears_count }}</span>
+      <span class="finance-stat__sub">{{ stats.totals.arrears_total }} CDF</span>
+    </div>
+  </div>
+
+  <div class="secretariat-dashboard-tables">
+    <section class="card secretariat-section">
+      <div class="card__header"><h3>Frais</h3></div>
+      <div class="card__body">
+        <p>Brouillons : {{ stats.fees.draft_count }} · En attente : {{ stats.fees.pending_count }} · Approuvés : {{ stats.fees.approved_count }} · Rejetés : {{ stats.fees.rejected_count }}</p>
+        <div class="content__actions">
+          <a class="btn btn--secondary btn--sm" href="{% url 'finance:fees' %}">Voir les frais</a>
+          <a class="btn btn--secondary btn--sm" href="{% url 'finance:fee-requests' %}">Demandes en attente</a>
+        </div>
+      </div>
+    </section>
+    <section class="card secretariat-section">
+      <div class="card__header"><h3>Paiements</h3></div>
+      <div class="card__body">
+        <p>{{ stats.payments.count }} paiement(s) · Total {{ stats.payments.total }} CDF</p>
+        <div class="content__actions">
+          <a class="btn btn--secondary btn--sm" href="{% url 'finance:payments' %}">Voir les paiements</a>
+          <a class="btn btn--secondary btn--sm" href="{% url 'finance:arrears' %}">Impayés</a>
+          <a class="btn btn--secondary btn--sm" href="{% url 'finance:reports' %}">Rapports</a>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>
+{% endblock %}

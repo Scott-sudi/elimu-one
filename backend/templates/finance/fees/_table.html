@@ -1,0 +1,35 @@
+<div id="fees-table">
+  <div class="table-wrap">
+    <table class="table table--dense">
+      <thead>
+        <tr>
+          <th class="table__index" scope="col">N°</th>
+          <th>Code</th>
+          <th>Libellé</th>
+          <th>Catégorie</th>
+          <th>Montant</th>
+          <th>Statut</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for fee in page_obj %}
+          <tr>
+            <td class="table__index">{{ forloop.counter0|add:page_obj.start_index }}</td>
+            <td><a href="{% url 'finance:fee-detail' fee.public_id %}">{{ fee.code }}</a></td>
+            <td>{{ fee.label }}</td>
+            <td>{{ fee.category.name }}</td>
+            <td>{{ fee.amount }} {{ fee.currency }}</td>
+            <td><span class="badge">{{ fee.get_status_display }}</span></td>
+          </tr>
+        {% empty %}
+          <tr>
+            <td colspan="6" class="table__empty">
+              {% include "components/empty_state.html" with icon="wallet" title="Aucun frais pour cette année" description="Utilisez « Créer un frais » pour en ajouter un. Le secrétariat l’approuvera ensuite." %}
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% include "components/pagination.html" with page_obj=page_obj hx_target="#fees-table" hx_swap="outerHTML" %}
+</div>

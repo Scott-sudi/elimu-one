@@ -191,6 +191,7 @@ class SchoolClassListSerializer(serializers.ModelSerializer):
             "public_id",
             "name",
             "code",
+            "letter",
             "academic_year",
             "level",
             "section",
@@ -232,6 +233,7 @@ class SchoolClassWriteSerializer(serializers.ModelSerializer):
             "level",
             "section",
             "option",
+            "letter",
             "name",
             "code",
             "max_capacity",
@@ -383,7 +385,6 @@ class GuardianWriteSerializer(serializers.ModelSerializer):
             "email",
             "adresse",
             "profession",
-            "numero_identification",
             "is_active",
         )
 
@@ -638,6 +639,8 @@ class CardResolveSerializer(serializers.ModelSerializer):
     matricule = serializers.CharField(source="student.matricule")
     full_name = serializers.SerializerMethodField()
     class_name = serializers.CharField(source="enrollment.school_class.name")
+    section = serializers.SerializerMethodField()
+    option = serializers.SerializerMethodField()
     academic_year = serializers.CharField(source="enrollment.academic_year.label")
     card_status = serializers.SerializerMethodField()
 
@@ -647,9 +650,12 @@ class CardResolveSerializer(serializers.ModelSerializer):
             "matricule",
             "full_name",
             "class_name",
+            "section",
+            "option",
             "academic_year",
             "is_active",
             "is_blocked",
+            "block_reason",
             "card_status",
         )
 
@@ -658,6 +664,14 @@ class CardResolveSerializer(serializers.ModelSerializer):
         return " ".join(
             part for part in (student.nom, student.postnom, student.prenom) if part
         )
+
+    def get_section(self, obj):
+        section = obj.enrollment.school_class.section
+        return section.name if section else "Tronc commun"
+
+    def get_option(self, obj):
+        option = obj.enrollment.school_class.option
+        return option.name if option else None
 
     def get_card_status(self, obj):
         if obj.is_blocked:

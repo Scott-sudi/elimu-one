@@ -20,6 +20,24 @@ from apps.api.views import (
     UserStatusAPIView,
     UserViewSet,
 )
+from apps.api.parents_auth import ParentPhoneVerifyAPIView
+from apps.api.parents_children import ParentChildrenListAPIView
+from apps.api.parents_child_modules import (
+    ParentChildAttendanceAPIView,
+    ParentChildDisciplineAPIView,
+    ParentChildFinanceAPIView,
+)
+from apps.api.parents_child_card import ParentChildCardAPIView
+from apps.api.parents_home import ParentHomeOverviewAPIView
+from apps.api.parents_notifications import ParentNotificationsAPIView
+from apps.api.parents_devices import ParentDeviceRegisterAPIView
+from apps.api.parents_profile import ParentProfileAPIView
+from apps.api.parents_notification_details import (
+    ParentCommunicationDetailAPIView,
+    ParentDisciplineDetailAPIView,
+    ParentPaymentReceiptAPIView,
+    ParentPaymentReceiptPdfAPIView,
+)
 from apps.secretariat.api.views import CardResolveAPIView
 
 app_name = "api"
@@ -39,6 +57,76 @@ urlpatterns = [
     path("auth/logout/", LogoutAPIView.as_view(), name="logout"),
     path("auth/me/", MeAPIView.as_view(), name="me"),
     path("auth/change-password/", ChangePasswordAPIView.as_view(), name="change-password"),
+    path(
+        "parents/auth/verify-phone/",
+        ParentPhoneVerifyAPIView.as_view(),
+        name="parents-verify-phone",
+    ),
+    path(
+        "parents/children/",
+        ParentChildrenListAPIView.as_view(),
+        name="parents-children",
+    ),
+    path(
+        "parents/home/overview/",
+        ParentHomeOverviewAPIView.as_view(),
+        name="parents-home-overview",
+    ),
+    path(
+        "parents/notifications/",
+        ParentNotificationsAPIView.as_view(),
+        name="parents-notifications",
+    ),
+    path(
+        "parents/devices/register/",
+        ParentDeviceRegisterAPIView.as_view(),
+        name="parents-device-register",
+    ),
+    path(
+        "parents/communications/<uuid:public_id>/",
+        ParentCommunicationDetailAPIView.as_view(),
+        name="parents-communication-detail",
+    ),
+    path(
+        "parents/payments/<uuid:public_id>/",
+        ParentPaymentReceiptAPIView.as_view(),
+        name="parents-payment-receipt",
+    ),
+    path(
+        "parents/payments/<uuid:public_id>/receipt.pdf",
+        ParentPaymentReceiptPdfAPIView.as_view(),
+        name="parents-payment-receipt-pdf",
+    ),
+    path(
+        "parents/discipline/<str:kind>/<uuid:public_id>/",
+        ParentDisciplineDetailAPIView.as_view(),
+        name="parents-discipline-detail",
+    ),
+    path(
+        "parents/profile/",
+        ParentProfileAPIView.as_view(),
+        name="parents-profile",
+    ),
+    path(
+        "parents/children/<uuid:student_public_id>/attendance/",
+        ParentChildAttendanceAPIView.as_view(),
+        name="parents-child-attendance",
+    ),
+    path(
+        "parents/children/<uuid:student_public_id>/discipline/",
+        ParentChildDisciplineAPIView.as_view(),
+        name="parents-child-discipline",
+    ),
+    path(
+        "parents/children/<uuid:student_public_id>/finance/",
+        ParentChildFinanceAPIView.as_view(),
+        name="parents-child-finance",
+    ),
+    path(
+        "parents/children/<uuid:student_public_id>/card/",
+        ParentChildCardAPIView.as_view(),
+        name="parents-child-card",
+    ),
     path("admin/dashboard/", DashboardAPIView.as_view(), name="admin-dashboard"),
     path("users/<uuid:public_id>/status/", UserStatusAPIView.as_view(), name="user-status"),
     path(
@@ -49,6 +137,14 @@ urlpatterns = [
     path(
         "secretariat/",
         include(("apps.secretariat.api.urls", "secretariat-api")),
+    ),
+    path(
+        "finance/",
+        include(("apps.finance.api.urls", "finance-api")),
+    ),
+    path(
+        "bi/",
+        include(("apps.bi.api.urls", "bi-api")),
     ),
     path(
         "cards/resolve/<str:qr_identifier>/",

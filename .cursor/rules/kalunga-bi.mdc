@@ -1,0 +1,44 @@
+---
+description: Règles du module Business Intelligence (Préfet) Kalunga
+globs:
+  - "backend/apps/bi/**"
+  - "backend/templates/bi/**"
+  - "backend/static/src/js/pages/bi/**"
+  - "backend/static/src/js/components/bi/**"
+  - "backend/static/src/css/pages/bi*"
+  - "docs/BI_*.md"
+alwaysApply: false
+---
+
+# Module Business Intelligence (Préfet)
+
+## Portée
+- Module décisionnel intégré à Django (`apps.bi`), pas une application séparée
+- Le rôle décisionnel est `PREFET` — travail principalement en lecture seule
+- Consolider Secrétariat, Comptabilité et Discipline ; ne pas recréer Élève, Classe, Paiement, Présence ou Incident
+- Ne pas analyser les résultats scolaires (notes, moyennes, proclamations, taux de réussite) — absents du système
+
+## Visualisations
+- Bibliothèque principale : Plotly.js (`plotly.js-dist-min`) via Vite
+- Configuration partagée : `static/src/js/components/bi/plotly-config.js`
+- Chart.js peut rester ailleurs ; ne pas l’introduire comme seconde lib BI
+- Pas de CDN obligatoire pour Plotly (réseau local école)
+
+## UI
+- Réutiliser `layouts/app.html`, navbar, sidebar, tokens CSS, boutons, tables, empty states
+- Aucun second thème, aucun dégradé, pas de boutons pilule, faibles border-radius
+- Interface en français
+- Couleurs de graphiques dérivées de `tokens/colors.css`
+
+## Données et calculs
+- Tous les calculs restent côté serveur (services / sélecteurs)
+- Le JavaScript sert uniquement à l’affichage (Plotly, filtres, resize)
+- Aucune donnée fictive dans les graphiques ou KPI
+- Indicateurs documentés dans `docs/BI_METRICS.md`
+- Filtres GET : actualiser KPI, graphiques et tableaux ensemble
+
+## Technique
+- Pages sous `/bi/` ; API sous `/api/v1/bi/`
+- Année scolaire via le contexte Secrétariat existant (années clôturées lisibles)
+- Exports CSV / XLSX via services existants
+- Tests de non-régression obligatoires après changements partagés

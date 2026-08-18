@@ -1,0 +1,46 @@
+{% extends "layouts/app.html" %}
+{% block title %}Rapports{% endblock %}
+{% block content %}
+<div data-page="finance-reports">
+  <div class="content__header">
+    <div>
+      <h2 class="content__title">Rapports</h2>
+      <p class="content__description">{% if selected_academic_year %}Année {{ selected_academic_year.label }}{% endif %}</p>
+    </div>
+  </div>
+
+  <div class="secretariat-form-narrow">
+    <section class="card">
+      <div class="card__header"><h3>Export paiements</h3></div>
+      <div class="card__body">
+        <form method="get" action="{% url 'finance:reports-payments-csv' %}" id="payments-export-form">
+          <div class="form-group">
+            <label class="form-label" for="date_from">Du</label>
+            <input class="form-input" type="date" id="date_from" name="date_from">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="date_to">Au</label>
+            <input class="form-input" type="date" id="date_to" name="date_to">
+          </div>
+          <div class="content__actions">
+            <button class="btn btn--primary" type="submit" formaction="{% url 'finance:reports-payments-csv' %}">CSV</button>
+            <button class="btn btn--secondary" type="submit" formaction="{% url 'finance:reports-payments-xlsx' %}?format=xlsx">XLSX</button>
+            <button class="btn btn--secondary" type="submit" formaction="{% url 'finance:reports-payments-pdf' %}?format=pdf">PDF</button>
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <section class="card" style="margin-top: 1.25rem;">
+      <div class="card__header"><h3>Export impayés</h3></div>
+      <div class="card__body">
+        <div class="content__actions">
+          <a class="btn btn--primary" href="{% url 'finance:reports-arrears-export' %}?format=csv">CSV</a>
+          <a class="btn btn--secondary" href="{% url 'finance:reports-arrears-export' %}?format=xlsx">XLSX</a>
+          <a class="btn btn--secondary" href="{% url 'finance:reports-arrears-export' %}?format=pdf">PDF</a>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>
+{% endblock %}

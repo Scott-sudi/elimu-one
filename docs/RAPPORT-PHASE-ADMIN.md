@@ -7,11 +7,11 @@
 - **MySQL** : 8.4.7 (WampServer)
 - **Node.js** : 24.14.1 / **npm** : 11.11.0
 - **Vite** : 6.4.3
-- **mysqlclient** : 2.2.8 (installé avec succès sous Windows — PyMySQL non nécessaire)
+- **PyMySQL** : connecteur MySQL Python compatible avec les environnements mutualisés
 
 ## Dépendances Python principales
 
-Django, djangorestframework, djangorestframework-simplejwt, django-environ, django-cors-headers, django-filter, mysqlclient, Pillow, whitenoise, python-dateutil, pytest, pytest-django, factory-boy, coverage, ruff, black.
+Django, djangorestframework, djangorestframework-simplejwt, django-environ, django-cors-headers, django-filter, PyMySQL, Pillow, whitenoise, python-dateutil, pytest, pytest-django, factory-boy, coverage, ruff, black.
 
 Voir `backend/requirements/` et `backend/requirements/freeze.txt`.
 

@@ -1,0 +1,86 @@
+{% extends "layouts/app.html" %}
+{% block title %}Discipline{% endblock %}
+{% block content %}
+<div data-page="discipline-dashboard">
+  <div class="content__header">
+    <div class="content__header-main">
+      <h2 class="content__title">Tableau de bord discipline</h2>
+      <p class="content__description">
+        {% if selected_academic_year %}Année {{ selected_academic_year.label }}{% endif %}
+      </p>
+    </div>
+    <div class="content__actions">
+      <a class="btn btn--primary" href="{% url 'discipline:attendance-daily' %}?open=1">Pointage</a>
+      <a class="btn btn--secondary" href="{% url 'discipline:schedules' %}">Horaires</a>
+      <a class="btn btn--secondary" href="{% url 'discipline:incidents' %}">Incidents</a>
+    </div>
+  </div>
+
+  <div class="secretariat-stats" aria-label="Indicateurs discipline">
+    <article class="card">
+      <div class="card__body">
+        <span class="table__cell-muted">Présents aujourd'hui</span>
+        <h3>{{ stats.present|default:0 }}</h3>
+      </div>
+    </article>
+    <article class="card">
+      <div class="card__body">
+        <span class="table__cell-muted">Absents aujourd'hui</span>
+        <h3>{{ stats.absent|default:0 }}</h3>
+      </div>
+    </article>
+    <article class="card">
+      <div class="card__body">
+        <span class="table__cell-muted">Retards aujourd'hui</span>
+        <h3>{{ stats.late|default:0 }}</h3>
+      </div>
+    </article>
+    <article class="card">
+      <div class="card__body">
+        <span class="table__cell-muted">Sorties autorisées (jour)</span>
+        <h3>{{ stats.authorized_exit|default:0 }}</h3>
+      </div>
+    </article>
+    <article class="card">
+      <div class="card__body">
+        <span class="table__cell-muted">Scans réussis (jour)</span>
+        <h3>{{ stats.scan_events_today|default:0 }}</h3>
+      </div>
+    </article>
+  </div>
+
+  <div class="secretariat-dashboard-tables">
+    <section class="card secretariat-section">
+      <div class="card__header"><h3>Derniers pointages</h3></div>
+      <div class="table-wrap">
+        <table class="table table--dense">
+          <thead>
+            <tr><th>Moment</th><th>Élève</th><th>Classe</th><th>Type</th><th>Résultat</th></tr>
+          </thead>
+          <tbody>
+            {% for event in recent_scans %}
+              <tr>
+                <td>{{ event.scanned_at|date:"d/m/Y H:i" }}</td>
+                <td>{% if event.student %}{{ event.student.matricule }} — {{ event.student.nom }} {{ event.student.prenom }}{% else %}—{% endif %}</td>
+                <td>{% if event.enrollment %}{{ event.enrollment.school_class.name }}{% else %}—{% endif %}</td>
+                <td>{{ event.get_event_type_display }}</td>
+                <td>{{ event.get_result_display }}</td>
+              </tr>
+            {% empty %}
+              <tr><td colspan="5" class="table__empty">Aucun pointage enregistré.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="card secretariat-section">
+      <div class="card__header"><h3>Activité discipline</h3></div>
+      <div class="card__body">
+        {% include "components/empty_state.html" with icon="clipboard-list" title="Aucun autre indicateur disponible" description="Les prochains blocs (incidents, convocations, suivi) s'afficheront ici dès que les données correspondantes seront exposées par le backend." %}
+      </div>
+    </section>
+  </div>
+</div>
+{% endblock %}
+

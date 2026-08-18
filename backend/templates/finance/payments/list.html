@@ -1,0 +1,23 @@
+{% extends "layouts/app.html" %}
+{% block title %}Paiements{% endblock %}
+{% block content %}
+<div data-page="finance-payments-list">
+  <div class="content__header">
+    <div>
+      <h2 class="content__title">Paiements</h2>
+      <p class="content__description">{% if selected_academic_year %}Année {{ selected_academic_year.label }}{% endif %}</p>
+    </div>
+    <div class="content__actions">
+      {% include "finance/partials/qr_scan_button.html" with btn_class="btn--secondary" label="Scanner une carte" %}
+      {% if year_writable %}
+        <a class="btn btn--primary" href="{% url 'finance:payment-create' %}">Nouveau paiement</a>
+      {% endif %}
+    </div>
+  </div>
+
+  {% url 'finance:payments' as payments_url %}
+  {% include "finance/partials/list_filters.html" with filter_action_url=payments_url table_target="#payments-table" clear_url=payments_url q_placeholder="Reçu, matricule ou nom" %}
+
+  {% include "finance/payments/_table.html" %}
+</div>
+{% endblock %}

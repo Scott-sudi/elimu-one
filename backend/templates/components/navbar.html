@@ -1,9 +1,9 @@
 {% load static %}
 {% with ns=request.resolver_match.namespace|default:'' name=request.resolver_match.url_name|default:'' %}
-<header class="navbar" data-navbar>
+<header class="navbar {% if request.user.is_secretaire or request.user.is_comptable or request.user.role_code == 'DISCIPLINE' %}navbar--menu-only{% endif %}" data-navbar>
   <div class="navbar__inner">
     <div class="navbar__row">
-      <a href="{% if request.user.is_secretaire %}{% url 'secretariat:dashboard' %}{% else %}{% url 'dashboard:home' %}{% endif %}" class="navbar__brand" title="{{ school_full_name }}">
+      <a href="{% if request.user.is_secretaire %}{% url 'secretariat:dashboard' %}{% elif request.user.is_comptable %}{% url 'finance:dashboard' %}{% elif request.user.role_code == 'DISCIPLINE' %}{% url 'discipline:dashboard' %}{% else %}{% url 'dashboard:home' %}{% endif %}" class="navbar__brand" title="{{ school_full_name }}">
         <span class="navbar__brand-mark">
           <img
             src="{% static 'images/branding/logo.png' %}"
@@ -42,50 +42,22 @@
           Journal
         </a>
       </nav>
-      {% elif request.user.is_secretaire %}
-      <nav class="navbar__nav navbar__nav--desktop" aria-label="Navigation secrétariat">
-        <a href="{% url 'secretariat:dashboard' %}" class="navbar__link {% if ns == 'secretariat' and name == 'dashboard' %}is-active{% endif %}">
-          <span class="navbar__link-icon"><i data-lucide="layout-dashboard" width="16" height="16"></i></span>
-          Tableau de bord
+      {% elif request.user.role_code == "DISCIPLINE" %}
+      <nav class="navbar__nav navbar__nav--desktop" aria-label="Navigation principale">
+        <a href="{% url 'discipline:dashboard' %}" class="navbar__link {% if ns == 'discipline' and name == 'dashboard' %}is-active{% endif %}" {% if name == 'dashboard' %}aria-current="page"{% endif %}>
+          <span class="navbar__link-icon"><i data-lucide="shield-alert" width="16" height="16"></i></span>
+          Discipline
         </a>
-        <a href="{% url 'secretariat:academic-years' %}" class="navbar__link {% if name == 'academic-years' %}is-active{% endif %}">
-          <span class="navbar__link-icon"><i data-lucide="calendar-range" width="16" height="16"></i></span>
-          Années scolaires
+        <a href="{% url 'discipline:schedules' %}" class="navbar__link {% if name == 'schedules' %}is-active{% endif %}" {% if name == 'schedules' %}aria-current="page"{% endif %}>
+          <span class="navbar__link-icon"><i data-lucide="clock-3" width="16" height="16"></i></span>
+          Horaires
         </a>
-        <a href="{% url 'secretariat:organization' %}" class="navbar__link {% if name == 'organization' or name == 'levels' or name == 'sections' or name == 'options' %}is-active{% endif %}">
-          <span class="navbar__link-icon"><i data-lucide="layers" width="16" height="16"></i></span>
-          Organisation
-        </a>
-        <a href="{% url 'secretariat:classes' %}" class="navbar__link {% if name == 'classes' or name == 'class-detail' %}is-active{% endif %}">
-          <span class="navbar__link-icon"><i data-lucide="school" width="16" height="16"></i></span>
-          Classes
-        </a>
-        <a href="{% url 'secretariat:students' %}" class="navbar__link {% if name == 'students' or name == 'student-create' or name == 'student-detail' or name == 'student-update' %}is-active{% endif %}">
-          <span class="navbar__link-icon"><i data-lucide="graduation-cap" width="16" height="16"></i></span>
-          Élèves
-        </a>
-        <a href="{% url 'secretariat:guardians' %}" class="navbar__link {% if name == 'guardians' or name == 'guardian-detail' %}is-active{% endif %}">
-          <span class="navbar__link-icon"><i data-lucide="users-round" width="16" height="16"></i></span>
-          Responsables
-        </a>
-        <a href="{% url 'secretariat:enrollments' %}" class="navbar__link {% if name == 'enrollments' or name == 'enrollment-create' or name == 'reenrollments' or name == 'transfers' %}is-active{% endif %}">
-          <span class="navbar__link-icon"><i data-lucide="clipboard-list" width="16" height="16"></i></span>
-          Inscriptions
-        </a>
-        <a href="{% url 'secretariat:cards' %}" class="navbar__link {% if name == 'cards' %}is-active{% endif %}">
-          <span class="navbar__link-icon"><i data-lucide="id-card" width="16" height="16"></i></span>
-          Cartes
-        </a>
-        <a href="{% url 'secretariat:communications' %}" class="navbar__link {% if name == 'communications' or name == 'communication-create' or name == 'communication-detail' %}is-active{% endif %}">
-          <span class="navbar__link-icon"><i data-lucide="megaphone" width="16" height="16"></i></span>
-          Communications
-        </a>
-        <a href="{% url 'secretariat:documents' %}" class="navbar__link {% if name == 'documents' %}is-active{% endif %}">
-          <span class="navbar__link-icon"><i data-lucide="folder-open" width="16" height="16"></i></span>
-          Documents
+        <a href="{% url 'discipline:attendance-daily' %}" class="navbar__link {% if name == 'attendance-daily' or name == 'attendance-scan' %}is-active{% endif %}">
+          <span class="navbar__link-icon"><i data-lucide="calendar-check" width="16" height="16"></i></span>
+          Présences
         </a>
       </nav>
-      {% else %}
+      {% elif not request.user.is_secretaire and not request.user.is_comptable %}
       <nav class="navbar__nav navbar__nav--desktop" aria-label="Navigation principale">
         <a href="{% url 'dashboard:home' %}" class="navbar__link is-active" aria-current="page">
           <span class="navbar__link-icon"><i data-lucide="briefcase-business" width="16" height="16"></i></span>
@@ -95,6 +67,19 @@
       {% endif %}
 
       <div class="navbar__user">
+        {% if request.user.is_secretaire or request.user.is_comptable or request.user.role_code == "DISCIPLINE" %}
+          {% if selected_academic_year %}
+          <a
+            href="{% url 'secretariat:academic-year-select' %}"
+            class="navbar__year {% if is_selected_year_closed %}navbar__year--closed{% endif %}"
+            title="Changer d'année scolaire"
+          >
+            <i data-lucide="calendar-range" width="14" height="14" aria-hidden="true"></i>
+            <span class="navbar__year-label">Année scolaire :</span>
+            <strong class="navbar__year-value">{{ selected_academic_year.label }}</strong>
+          </a>
+          {% endif %}
+        {% endif %}
         <a href="{% url 'accounts:profile' %}" class="navbar__user-chip" title="Mon profil">
           <span class="navbar__user-avatar" aria-hidden="true">
             {% if request.user.profile_photo %}
@@ -111,13 +96,28 @@
           <button type="submit" class="navbar__logout">Déconnexion</button>
         </form>
 
-        <button type="button" class="navbar__menu-toggle" data-navbar-toggle aria-label="Ouvrir le menu" aria-expanded="false">
+        <button type="button" class="navbar__menu-toggle" data-navbar-toggle aria-label="Ouvrir le menu" aria-expanded="false" aria-controls="navbar-side-panel">
           <i data-lucide="menu" width="18" height="18"></i>
         </button>
       </div>
     </div>
+  </div>
 
-    <div class="navbar__drawer" data-navbar-drawer hidden>
+  <div class="navbar__scrim" data-navbar-scrim hidden></div>
+  <nav
+    id="navbar-side-panel"
+    class="navbar__panel"
+    data-navbar-drawer
+    hidden
+    aria-label="Menu de navigation"
+  >
+    <div class="navbar__panel-head">
+      <span class="navbar__panel-title">Menu</span>
+      <button type="button" class="navbar__panel-close" data-navbar-close aria-label="Fermer le menu">
+        <i data-lucide="x" width="18" height="18"></i>
+      </button>
+    </div>
+    <div class="navbar__panel-body">
       {% if request.user.is_administrateur %}
       <a href="{% url 'dashboard:home' %}" class="navbar__link {% if ns == 'dashboard' %}is-active{% endif %}">
         <span class="navbar__link-icon"><i data-lucide="layout-dashboard" width="16" height="16"></i></span>
@@ -139,61 +139,191 @@
         <span class="navbar__link-icon"><i data-lucide="scroll-text" width="16" height="16"></i></span>
         Journal
       </a>
-      <a href="{% url 'accounts:profile' %}" class="navbar__link">
-        <span class="navbar__link-icon"><i data-lucide="user-round" width="16" height="16"></i></span>
+      <a href="{% url 'accounts:profile' %}" class="navbar__link navbar__link--profile">
+        <span class="navbar__link-icon"><i data-lucide="user-round" width="18" height="18"></i></span>
         Mon profil
       </a>
       {% elif request.user.is_secretaire %}
-      <a href="{% url 'secretariat:dashboard' %}" class="navbar__link">
-        <span class="navbar__link-icon"><i data-lucide="layout-dashboard" width="16" height="16"></i></span>
+      <a href="{% url 'secretariat:academic-year-select' %}" class="navbar__link {% if name == 'academic-year-select' %}is-active{% endif %}">
+        <span class="navbar__link-icon"><i data-lucide="calendar-range" width="18" height="18"></i></span>
+        {% if selected_academic_year %}Changer d'année ({{ selected_academic_year.label }}){% else %}Choisir une année{% endif %}
+      </a>
+      <a href="{% url 'secretariat:dashboard' %}" class="navbar__link {% if ns == 'secretariat' and name == 'dashboard' %}is-active{% endif %}">
+        <span class="navbar__link-icon"><i data-lucide="layout-dashboard" width="18" height="18"></i></span>
         Tableau de bord
       </a>
-      <a href="{% url 'secretariat:academic-years' %}" class="navbar__link">
-        <span class="navbar__link-icon"><i data-lucide="calendar-range" width="16" height="16"></i></span>
-        Années scolaires
-      </a>
-      <a href="{% url 'secretariat:organization' %}" class="navbar__link">
-        <span class="navbar__link-icon"><i data-lucide="layers" width="16" height="16"></i></span>
+      <a href="{% url 'secretariat:organization' %}" class="navbar__link {% if name == 'organization' or name == 'levels' or name == 'sections' or name == 'options' %}is-active{% endif %}">
+        <span class="navbar__link-icon"><i data-lucide="layers" width="18" height="18"></i></span>
         Organisation
       </a>
-      <a href="{% url 'secretariat:classes' %}" class="navbar__link">
-        <span class="navbar__link-icon"><i data-lucide="school" width="16" height="16"></i></span>
+      <a href="{% url 'secretariat:classes' %}" class="navbar__link {% if name == 'classes' or name == 'class-detail' or name == 'class-update' or name == 'class-enroll' or name == 'class-reenroll' or name == 'class-reenroll-bulk' %}is-active{% endif %}">
+        <span class="navbar__link-icon"><i data-lucide="school" width="18" height="18"></i></span>
         Classes
       </a>
-      <a href="{% url 'secretariat:students' %}" class="navbar__link">
-        <span class="navbar__link-icon"><i data-lucide="graduation-cap" width="16" height="16"></i></span>
-        Élèves
-      </a>
-      <a href="{% url 'secretariat:guardians' %}" class="navbar__link">
-        <span class="navbar__link-icon"><i data-lucide="users-round" width="16" height="16"></i></span>
+      <a href="{% url 'secretariat:guardians' %}" class="navbar__link {% if name == 'guardians' or name == 'guardian-detail' or name == 'guardian-update' %}is-active{% endif %}">
+        <span class="navbar__link-icon"><i data-lucide="users-round" width="18" height="18"></i></span>
         Responsables
       </a>
-      <a href="{% url 'secretariat:enrollments' %}" class="navbar__link">
-        <span class="navbar__link-icon"><i data-lucide="clipboard-list" width="16" height="16"></i></span>
-        Inscriptions
-      </a>
-      <a href="{% url 'secretariat:reenrollments' %}" class="navbar__link">
-        <span class="navbar__link-icon"><i data-lucide="refresh-cw" width="16" height="16"></i></span>
-        Réinscriptions
-      </a>
-      <a href="{% url 'secretariat:transfers' %}" class="navbar__link">
-        <span class="navbar__link-icon"><i data-lucide="arrow-right-left" width="16" height="16"></i></span>
-        Affectations
-      </a>
-      <a href="{% url 'secretariat:cards' %}" class="navbar__link">
-        <span class="navbar__link-icon"><i data-lucide="id-card" width="16" height="16"></i></span>
-        Cartes d'élève
-      </a>
-      <a href="{% url 'secretariat:communications' %}" class="navbar__link">
-        <span class="navbar__link-icon"><i data-lucide="megaphone" width="16" height="16"></i></span>
+      <a href="{% url 'secretariat:communications' %}" class="navbar__link {% if name == 'communications' or name == 'communication-create' or name == 'communication-detail' %}is-active{% endif %}">
+        <span class="navbar__link-icon"><i data-lucide="megaphone" width="18" height="18"></i></span>
         Communications
       </a>
-      <a href="{% url 'secretariat:documents' %}" class="navbar__link">
-        <span class="navbar__link-icon"><i data-lucide="folder-open" width="16" height="16"></i></span>
-        Documents
+      <a href="{% url 'secretariat:fee-approvals' %}" class="navbar__link {% if name == 'fee-approvals' or name == 'fee-approval-detail' or name == 'fee-approve' or name == 'fee-reject' or name == 'fee-amount-change-detail' or name == 'fee-amount-change-approve' or name == 'fee-amount-change-reject' %}is-active{% endif %}">
+        <span class="navbar__link-icon"><i data-lucide="badge-check" width="18" height="18"></i></span>
+        Validation des frais
       </a>
-      <a href="{% url 'accounts:profile' %}" class="navbar__link">
-        <span class="navbar__link-icon"><i data-lucide="user-round" width="16" height="16"></i></span>
+      {% if selected_academic_year and not selected_academic_year.is_closed %}
+      <button
+        type="button"
+        class="navbar__link navbar__link--danger"
+        data-modal-open="year-close-modal"
+        data-navbar-close
+      >
+        <span class="navbar__link-icon"><i data-lucide="flag" width="18" height="18"></i></span>
+        Déclarer fin d'année
+      </button>
+      {% endif %}
+      <a href="{% url 'accounts:profile' %}" class="navbar__link navbar__link--profile {% if name == 'profile' or name == 'change_password' %}is-active{% endif %}">
+        <span class="navbar__link-icon"><i data-lucide="user-round" width="18" height="18"></i></span>
+        Mon profil
+      </a>
+      {% elif request.user.is_comptable %}
+      <a href="{% url 'secretariat:academic-year-select' %}" class="navbar__link {% if name == 'academic-year-select' %}is-active{% endif %}">
+        <span class="navbar__link-icon"><i data-lucide="calendar-range" width="18" height="18"></i></span>
+        {% if selected_academic_year %}Changer d'année ({{ selected_academic_year.label }}){% else %}Choisir une année{% endif %}
+      </a>
+      <a href="{% url 'finance:dashboard' %}" class="navbar__link {% if ns == 'finance' and name == 'dashboard' %}is-active{% endif %}">
+        <span class="navbar__link-icon"><i data-lucide="layout-dashboard" width="18" height="18"></i></span>
+        Tableau de bord
+      </a>
+      <a href="{% url 'finance:fees' %}" class="navbar__link {% if name == 'fees' or name == 'fee-create' or name == 'fee-detail' %}is-active{% endif %}">
+        <span class="navbar__link-icon"><i data-lucide="wallet" width="18" height="18"></i></span>
+        Frais scolaires
+      </a>
+      <a href="{% url 'finance:fee-requests' %}" class="navbar__link {% if name == 'fee-requests' %}is-active{% endif %}">
+        <span class="navbar__link-icon"><i data-lucide="inbox" width="18" height="18"></i></span>
+        Demandes
+      </a>
+      <a href="{% url 'finance:classes' %}" class="navbar__link {% if name == 'classes' or name == 'class-situation' %}is-active{% endif %}">
+        <span class="navbar__link-icon"><i data-lucide="school" width="18" height="18"></i></span>
+        Classes
+      </a>
+      <a href="{% url 'finance:student-search' %}" class="navbar__link {% if name == 'student-search' or name == 'student-situation' %}is-active{% endif %}">
+        <span class="navbar__link-icon"><i data-lucide="users" width="18" height="18"></i></span>
+        Situation élèves
+      </a>
+      <button type="button" class="navbar__link" data-modal-open="finance-qr-scan-modal" data-finance-qr-scan>
+        <span class="navbar__link-icon"><i data-lucide="scan-qr-code" width="18" height="18"></i></span>
+        Scanner carte
+      </button>
+      <a href="{% url 'finance:payment-create' %}" class="navbar__link {% if name == 'payment-create' %}is-active{% endif %}">
+        <span class="navbar__link-icon"><i data-lucide="banknote" width="18" height="18"></i></span>
+        Enregistrer un paiement
+      </a>
+      <a href="{% url 'finance:payments' %}" class="navbar__link {% if name == 'payments' or name == 'payment-detail' %}is-active{% endif %}">
+        <span class="navbar__link-icon"><i data-lucide="list" width="18" height="18"></i></span>
+        Paiements
+      </a>
+      <a href="{% url 'finance:receipts' %}" class="navbar__link {% if name == 'receipts' or name == 'receipt-detail' or name == 'receipt-pdf' %}is-active{% endif %}">
+        <span class="navbar__link-icon"><i data-lucide="receipt" width="18" height="18"></i></span>
+        Reçus
+      </a>
+      <a href="{% url 'finance:arrears' %}" class="navbar__link {% if name == 'arrears' %}is-active{% endif %}">
+        <span class="navbar__link-icon"><i data-lucide="alert-circle" width="18" height="18"></i></span>
+        Impayés
+      </a>
+      <a href="{% url 'finance:reports' %}" class="navbar__link {% if name == 'reports' or name == 'reports-payments-csv' or name == 'reports-arrears-export' %}is-active{% endif %}">
+        <span class="navbar__link-icon"><i data-lucide="file-bar-chart" width="18" height="18"></i></span>
+        Rapports
+      </a>
+      <a href="{% url 'accounts:profile' %}" class="navbar__link navbar__link--profile {% if name == 'profile' or name == 'change_password' %}is-active{% endif %}">
+        <span class="navbar__link-icon"><i data-lucide="user-round" width="18" height="18"></i></span>
+        Mon profil
+      </a>
+      {% elif request.user.role_code == "DISCIPLINE" %}
+      <a href="{% url 'secretariat:academic-year-select' %}" class="navbar__link {% if name == 'academic-year-select' %}is-active{% endif %}">
+        <span class="navbar__link-icon"><i data-lucide="calendar-range" width="18" height="18"></i></span>
+        {% if selected_academic_year %}Changer d'année ({{ selected_academic_year.label }}){% else %}Choisir une année{% endif %}
+      </a>
+      <a href="{% url 'discipline:dashboard' %}" class="navbar__link {% if ns == 'discipline' and name == 'dashboard' %}is-active{% endif %}">
+        <span class="navbar__link-icon"><i data-lucide="layout-dashboard" width="18" height="18"></i></span>
+        Tableau de bord
+      </a>
+      <a href="{% url 'discipline:attendance-daily' %}" class="navbar__link {% if name == 'attendance-daily' or name == 'attendance-scan' %}is-active{% endif %}">
+        <span class="navbar__link-icon"><i data-lucide="calendar-check" width="18" height="18"></i></span>
+        Présences du jour
+      </a>
+      <a href="{% url 'discipline:schedules' %}" class="navbar__link {% if name == 'schedules' %}is-active{% endif %}">
+        <span class="navbar__link-icon"><i data-lucide="clock-3" width="18" height="18"></i></span>
+        Horaires
+      </a>
+      <a href="{% url 'discipline:classes' %}" class="navbar__link {% if name == 'classes' %}is-active{% endif %}">
+        <span class="navbar__link-icon"><i data-lucide="school" width="18" height="18"></i></span>
+        Classes
+      </a>
+      <a href="{% url 'discipline:students' %}" class="navbar__link {% if name == 'students' %}is-active{% endif %}">
+        <span class="navbar__link-icon"><i data-lucide="users" width="18" height="18"></i></span>
+        Élèves
+      </a>
+      <a href="{% url 'discipline:incidents' %}" class="navbar__link {% if name == 'incidents' or name == 'incident-detail' or name == 'summons' %}is-active{% endif %}">
+        <span class="navbar__link-icon"><i data-lucide="triangle-alert" width="18" height="18"></i></span>
+        Incidents
+      </a>
+      <a href="{% url 'discipline:exits' %}" class="navbar__link {% if name == 'exits' or name == 'exit-detail' %}is-active{% endif %}">
+        <span class="navbar__link-icon"><i data-lucide="door-open" width="18" height="18"></i></span>
+        Sorties autorisées
+      </a>
+      <a href="{% url 'discipline:justifications' %}" class="navbar__link {% if name == 'justifications' %}is-active{% endif %}">
+        <span class="navbar__link-icon"><i data-lucide="file-check-2" width="18" height="18"></i></span>
+        Justificatifs d'absence
+      </a>
+      <a href="{% url 'discipline:followup' %}" class="navbar__link {% if name == 'followup' or name == 'followup-class' %}is-active{% endif %}">
+        <span class="navbar__link-icon"><i data-lucide="list-checks" width="18" height="18"></i></span>
+        Suivi des dossiers
+      </a>
+      <a href="{% url 'accounts:profile' %}" class="navbar__link navbar__link--profile {% if name == 'profile' or name == 'change_password' %}is-active{% endif %}">
+        <span class="navbar__link-icon"><i data-lucide="user-round" width="18" height="18"></i></span>
+        Mon profil
+      </a>
+      {% elif request.user.role_code == "PREFET" %}
+      <a href="{% url 'secretariat:academic-year-select' %}" class="navbar__link {% if name == 'academic-year-select' %}is-active{% endif %}">
+        <span class="navbar__link-icon"><i data-lucide="calendar-range" width="18" height="18"></i></span>
+        {% if selected_academic_year %}Changer d'année ({{ selected_academic_year.label }}){% else %}Choisir une année{% endif %}
+      </a>
+      <a href="{% url 'bi:overview' %}" class="navbar__link {% if ns == 'bi' and name == 'overview' %}is-active{% endif %}">
+        <span class="navbar__link-icon"><i data-lucide="layout-dashboard" width="18" height="18"></i></span>
+        Vue générale
+      </a>
+      <a href="{% url 'bi:enrollments' %}" class="navbar__link {% if name == 'enrollments' %}is-active{% endif %}">
+        <span class="navbar__link-icon"><i data-lucide="users" width="18" height="18"></i></span>
+        Effectifs et inscriptions
+      </a>
+      <a href="{% url 'bi:finance' %}" class="navbar__link {% if name == 'finance' %}is-active{% endif %}">
+        <span class="navbar__link-icon"><i data-lucide="wallet" width="18" height="18"></i></span>
+        Situation financière
+      </a>
+      <a href="{% url 'bi:attendance' %}" class="navbar__link {% if name == 'attendance' %}is-active{% endif %}">
+        <span class="navbar__link-icon"><i data-lucide="calendar-check" width="18" height="18"></i></span>
+        Assiduité
+      </a>
+      <a href="{% url 'bi:discipline' %}" class="navbar__link {% if name == 'discipline' %}is-active{% endif %}">
+        <span class="navbar__link-icon"><i data-lucide="gavel" width="18" height="18"></i></span>
+        Discipline
+      </a>
+      <a href="{% url 'bi:classes' %}" class="navbar__link {% if name == 'classes' %}is-active{% endif %}">
+        <span class="navbar__link-icon"><i data-lucide="school" width="18" height="18"></i></span>
+        Analyse des classes
+      </a>
+      <a href="{% url 'bi:comparisons' %}" class="navbar__link {% if name == 'comparisons' %}is-active{% endif %}">
+        <span class="navbar__link-icon"><i data-lucide="git-compare" width="18" height="18"></i></span>
+        Comparaisons annuelles
+      </a>
+      <a href="{% url 'bi:reports' %}" class="navbar__link {% if name == 'reports' %}is-active{% endif %}">
+        <span class="navbar__link-icon"><i data-lucide="file-bar-chart" width="18" height="18"></i></span>
+        Rapports et exports
+      </a>
+      <a href="{% url 'accounts:profile' %}" class="navbar__link navbar__link--profile {% if name == 'profile' or name == 'change_password' %}is-active{% endif %}">
+        <span class="navbar__link-icon"><i data-lucide="user-round" width="18" height="18"></i></span>
         Mon profil
       </a>
       {% else %}
@@ -201,12 +331,59 @@
         <span class="navbar__link-icon"><i data-lucide="briefcase-business" width="16" height="16"></i></span>
         Mon espace de travail
       </a>
-      <a href="{% url 'accounts:profile' %}" class="navbar__link">
-        <span class="navbar__link-icon"><i data-lucide="user-round" width="16" height="16"></i></span>
+      <a href="{% url 'accounts:profile' %}" class="navbar__link navbar__link--profile">
+        <span class="navbar__link-icon"><i data-lucide="user-round" width="18" height="18"></i></span>
         Mon profil
       </a>
       {% endif %}
     </div>
-  </div>
+  </nav>
 </header>
+{% if request.user.is_secretaire and selected_academic_year and not selected_academic_year.is_closed %}
+<div class="modal-backdrop" id="year-close-modal" data-modal="year-close-modal" hidden>
+  <div class="modal modal--sm" data-modal-panel>
+    <div class="modal__header">
+      <h2>Fin d'année académique</h2>
+      <button class="modal__close" data-modal-close type="button" aria-label="Fermer">×</button>
+    </div>
+    <div class="modal__body">
+      <p class="form-hint" style="margin-top:0;">
+        Vous allez clôturer l'année <strong>{{ selected_academic_year.label }}</strong>.
+        Ajoutez une courte observation, puis confirmez avec votre mot de passe.
+      </p>
+      <form method="post" action="{% url 'secretariat:academic-year-declare-close' %}" autocomplete="off">
+        {% csrf_token %}
+        <div class="form-group">
+          <label class="form-label form-label--required" for="closure_notes">Observation / bilan de l'année</label>
+          <textarea
+            class="form-input"
+            id="closure_notes"
+            name="closure_notes"
+            rows="4"
+            required
+            placeholder="Ex. : année terminée sans incident majeur, effectifs stables…"
+          ></textarea>
+        </div>
+        <div class="form-group">
+          <label class="form-label form-label--required" for="year_close_password">Mot de passe</label>
+          <input
+            class="form-input"
+            id="year_close_password"
+            type="password"
+            name="password"
+            required
+            autocomplete="current-password"
+            placeholder="Votre mot de passe secrétaire"
+          >
+          <small class="form-hint">Obligatoire pour confirmer la clôture de l'année.</small>
+        </div>
+        <div class="content__actions" style="margin-top:1rem;">
+          <button class="btn btn--ghost" type="button" data-modal-close>Annuler</button>
+          <button class="btn btn--danger" type="submit">Clôturer l'année</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endif %}
 {% endwith %}

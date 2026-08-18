@@ -1,0 +1,68 @@
+{% extends "layouts/app.html" %}
+{% block title %}Nouveau frais{% endblock %}
+{% block content %}
+<div data-page="finance-fees">
+  <div class="content__header">
+    <div><h2 class="content__title">Nouveau frais</h2></div>
+  </div>
+  <div class="secretariat-form-narrow">
+    <section class="card">
+      <div class="card__body">
+        <form method="post">
+          {% csrf_token %}
+          {% for field in form %}
+            {% if field.name == "application_type" %}
+              <div class="form-group" data-fee-specific hidden>
+                <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                {{ field }}
+                {% if field.errors %}<div class="form-error">{{ field.errors|striptags }}</div>{% endif %}
+              </div>
+            {% elif field.name == "school_classes" %}
+              <div class="form-group" data-fee-specific data-fee-target="CLASSES_SELECTIONNEES" hidden>
+                <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                {{ field }}
+                {% if field.errors %}<div class="form-error">{{ field.errors|striptags }}</div>{% endif %}
+              </div>
+            {% elif field.name == "levels" %}
+              <div class="form-group" data-fee-specific data-fee-target="NIVEAU" hidden>
+                <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                {{ field }}
+                {% if field.errors %}<div class="form-error">{{ field.errors|striptags }}</div>{% endif %}
+              </div>
+            {% elif field.name == "sections" %}
+              <div class="form-group" data-fee-specific data-fee-target="SECTION" hidden>
+                <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                {{ field }}
+                {% if field.errors %}<div class="form-error">{{ field.errors|striptags }}</div>{% endif %}
+              </div>
+            {% elif field.name == "options" %}
+              <div class="form-group" data-fee-specific data-fee-target="OPTION" hidden>
+                <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                {{ field }}
+                {% if field.errors %}<div class="form-error">{{ field.errors|striptags }}</div>{% endif %}
+              </div>
+            {% else %}
+              <div class="form-group">
+                {% if field.field.widget.input_type == "checkbox" %}
+                  <label class="form-check">
+                    {{ field }}
+                    <span>{{ field.label }}</span>
+                  </label>
+                {% else %}
+                  <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                  {{ field }}
+                {% endif %}
+                {% if field.errors %}<div class="form-error">{{ field.errors|striptags }}</div>{% endif %}
+              </div>
+            {% endif %}
+          {% endfor %}
+          <div class="content__actions">
+            <a class="btn btn--secondary" href="{% url 'finance:fees' %}">Annuler</a>
+            <button class="btn btn--primary" type="submit">Enregistrer le brouillon</button>
+          </div>
+        </form>
+      </div>
+    </section>
+  </div>
+</div>
+{% endblock %}

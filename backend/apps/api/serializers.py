@@ -142,6 +142,10 @@ class ChangePasswordSerializer(serializers.Serializer):
         return attrs
 
 
+class LogoutSerializer(serializers.Serializer):
+    refresh = serializers.CharField(write_only=True)
+
+
 class SetupSerializer(serializers.Serializer):
     nom = serializers.CharField(max_length=100)
     postnom = serializers.CharField(max_length=100, required=False, allow_blank=True)

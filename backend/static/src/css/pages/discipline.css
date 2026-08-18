@@ -1,0 +1,241 @@
+/* Discipline — student disciplinary file (A4-like document) */
+
+.dossier-sheet {
+  max-width: 920px;
+  margin: 0 auto 2rem;
+  padding: 1.5rem 1.75rem 2rem;
+  background: #ffffff;
+  color: #1a1a1a;
+  border: 1px solid #d0d0d0;
+  border-radius: 4px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+}
+
+.dossier-sheet__header {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-bottom: 0.85rem;
+  border-bottom: 2px solid #222;
+}
+
+.dossier-sheet__brand {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.dossier-sheet__logo {
+  width: 56px;
+  height: 56px;
+  object-fit: contain;
+}
+
+.dossier-sheet__school {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.dossier-sheet__slogan,
+.dossier-sheet__meta,
+.dossier-sheet__contacts p {
+  margin: 0.15rem 0 0;
+  font-size: 0.82rem;
+  color: #444;
+}
+
+.dossier-sheet__contacts {
+  text-align: right;
+  max-width: 42%;
+}
+
+.dossier-sheet__title-block {
+  text-align: center;
+  margin: 1.1rem 0 1.25rem;
+}
+
+.dossier-sheet__title {
+  margin: 0 0 0.45rem;
+  font-size: 1.25rem;
+  letter-spacing: 0.04em;
+}
+
+.dossier-sheet__identity {
+  display: grid;
+  grid-template-columns: 1fr 150px;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+}
+
+.dossier-sheet__section-title {
+  margin: 0 0 0.65rem;
+  font-size: 0.95rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  border-bottom: 1px solid #bbb;
+  padding-bottom: 0.25rem;
+}
+
+.dossier-sheet__subsection {
+  margin: 1rem 0 0.5rem;
+  font-size: 0.88rem;
+}
+
+.dossier-sheet__grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.45rem 1rem;
+  margin: 0;
+}
+
+.dossier-sheet__grid dt {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  color: #666;
+  margin: 0;
+}
+
+.dossier-sheet__grid dd {
+  margin: 0.05rem 0 0;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.dossier-sheet__span-2 {
+  grid-column: 1 / -1;
+}
+
+.dossier-sheet__photo-wrap {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.dossier-sheet__photo {
+  width: 140px;
+  height: 170px;
+  object-fit: cover;
+  border: 1px solid #888;
+  background: #ddd;
+}
+
+.dossier-sheet__photo--empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 0.5rem;
+  font-size: 0.75rem;
+  color: #555;
+}
+
+.dossier-sheet__section {
+  margin-top: 1.25rem;
+}
+
+.dossier-sheet__stats {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 0.45rem;
+}
+
+.dossier-sheet__stats--compact {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  max-width: 28rem;
+}
+
+.dossier-sheet__stat {
+  border: 1px solid #d0d0d0;
+  background: #ffffff;
+  border-radius: 3px;
+  padding: 0.45rem 0.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.dossier-sheet__stat span {
+  font-size: 0.7rem;
+  color: #555;
+  text-transform: uppercase;
+}
+
+.dossier-sheet__stat strong {
+  font-size: 1.05rem;
+}
+
+.dossier-sheet__empty {
+  margin: 0.35rem 0 0;
+  font-size: 0.88rem;
+  color: #555;
+  font-style: italic;
+}
+
+.dossier-sheet__timeline {
+  margin: 0;
+  padding-left: 1.1rem;
+}
+
+.dossier-sheet__timeline li {
+  margin: 0.35rem 0;
+  font-size: 0.88rem;
+}
+
+.dossier-sheet__signatures {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  margin-top: 2rem;
+  padding-top: 1rem;
+  border-top: 1px solid #bbb;
+  text-align: center;
+  font-size: 0.85rem;
+}
+
+.dossier-sheet__sign-line {
+  margin: 1.6rem 0 0.35rem;
+}
+
+@media (max-width: 760px) {
+  .dossier-sheet {
+    padding: 1rem;
+  }
+
+  .dossier-sheet__header,
+  .dossier-sheet__identity {
+    grid-template-columns: 1fr;
+    display: grid;
+  }
+
+  .dossier-sheet__contacts {
+    text-align: left;
+    max-width: none;
+  }
+
+  .dossier-sheet__stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .dossier-sheet__signatures {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media print {
+  .no-print,
+  .content__header,
+  .navbar,
+  .app-shell__nav,
+  .modal-backdrop {
+    display: none !important;
+  }
+
+  .dossier-sheet {
+    box-shadow: none;
+    border-color: #999;
+    max-width: none;
+    margin: 0;
+  }
+}

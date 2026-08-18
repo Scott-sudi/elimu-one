@@ -1,0 +1,291 @@
+<div id="fee-approvals-table">
+  {% if amount_changes %}
+  <section class="card" style="margin-bottom: 1.25rem;">
+    <div class="card__header"><h3>Modifications de montants</h3></div>
+    <div class="table-wrap">
+      <table class="table table--dense">
+        <thead>
+          <tr>
+            <th>Période / frais</th>
+            <th>Ancien</th>
+            <th>Nouveau</th>
+            <th>Portée</th>
+            <th>Classe d'origine</th>
+            <th>Soumis le</th>
+            <th class="table__actions" scope="col"><span class="sr-only">Actions</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for change in amount_changes %}
+            <tr>
+              <td>
+                <a href="{% url 'secretariat:fee-amount-change-detail' change.public_id %}">
+                  {{ change.fee.code }} — {{ change.fee.label }}
+                </a>
+              </td>
+              <td>{{ change.previous_base_amount }} {{ change.fee.currency }}</td>
+              <td><strong>{{ change.new_amount }} {{ change.fee.currency }}</strong></td>
+              <td>{{ change.get_scope_display }}</td>
+              <td>{{ change.origin_class.name }}</td>
+              <td>{% if change.submitted_at %}{{ change.submitted_at|date:"d/m/Y H:i" }}{% else %}—{% endif %}</td>
+              <td>
+                <div class="dropdown" data-dropdown style="display: flex; justify-content: flex-end;">
+                  <button type="button" class="btn btn--ghost btn--sm" data-dropdown-trigger aria-label="Actions" aria-haspopup="menu">
+                    <i data-lucide="ellipsis-vertical" width="16" height="16"></i>
+                  </button>
+                  <div class="dropdown__menu dropdown__menu--right" data-dropdown-menu hidden role="menu">
+                    <a class="dropdown__item" href="{% url 'secretariat:fee-amount-change-detail' change.public_id %}" data-dropdown-item role="menuitem">
+                      <span class="dropdown__icon"><i data-lucide="eye" width="16" height="16"></i></span>
+                      Voir
+                    </a>
+                    {% if year_writable %}
+                      <div class="dropdown__divider"></div>
+                      <button type="button" class="dropdown__item" data-dropdown-item data-modal-open="amount-approve-{{ change.public_id }}" role="menuitem">
+                        <span class="dropdown__icon"><i data-lucide="check-circle" width="16" height="16"></i></span>
+                        Approuver
+                      </button>
+                      <button type="button" class="dropdown__item dropdown__item--danger" data-dropdown-item data-modal-open="amount-reject-{{ change.public_id }}" role="menuitem">
+                        <span class="dropdown__icon"><i data-lucide="x-circle" width="16" height="16"></i></span>
+                        Rejeter
+                      </button>
+                    {% endif %}
+                  </div>
+                </div>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+  {% endif %}
+
+  <section class="card">
+    <div class="card__header"><h3>Nouveaux frais</h3></div>
+    <div class="table-wrap">
+      <table class="table table--dense">
+        <thead>
+          <tr>
+            <th class="table__index" scope="col">N°</th>
+            <th>Code</th>
+            <th>Libellé</th>
+            <th>Catégorie</th>
+            <th>Montant</th>
+            <th>Soumis le</th>
+            <th class="table__actions" scope="col"><span class="sr-only">Actions</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for fee in page_obj %}
+            <tr>
+              <td class="table__index">{{ forloop.counter0|add:page_obj.start_index }}</td>
+              <td><a href="{% url 'secretariat:fee-approval-detail' fee.public_id %}">{{ fee.code }}</a></td>
+              <td>{{ fee.label }}</td>
+              <td>{{ fee.category.name }}</td>
+              <td>{{ fee.amount }} {{ fee.currency }}</td>
+              <td>{% if fee.submitted_at %}{{ fee.submitted_at|date:"d/m/Y H:i" }}{% else %}—{% endif %}</td>
+              <td>
+                <div class="dropdown" data-dropdown style="display: flex; justify-content: flex-end;">
+                  <button
+                    type="button"
+                    class="btn btn--ghost btn--sm"
+                    data-dropdown-trigger
+                    aria-label="Actions"
+                    aria-haspopup="menu"
+                  >
+                    <i data-lucide="ellipsis-vertical" width="16" height="16"></i>
+                  </button>
+                  <div class="dropdown__menu dropdown__menu--right" data-dropdown-menu hidden role="menu">
+                    <a
+                      class="dropdown__item"
+                      href="{% url 'secretariat:fee-approval-detail' fee.public_id %}"
+                      data-dropdown-item
+                      role="menuitem"
+                    >
+                      <span class="dropdown__icon"><i data-lucide="eye" width="16" height="16"></i></span>
+                      Voir
+                    </a>
+                    {% if year_writable %}
+                      <div class="dropdown__divider"></div>
+                      <button
+                        type="button"
+                        class="dropdown__item"
+                        data-dropdown-item
+                        data-modal-open="fee-approve-{{ fee.public_id }}"
+                        role="menuitem"
+                      >
+                        <span class="dropdown__icon"><i data-lucide="check-circle" width="16" height="16"></i></span>
+                        Approuver
+                      </button>
+                      <button
+                        type="button"
+                        class="dropdown__item dropdown__item--danger"
+                        data-dropdown-item
+                        data-modal-open="fee-reject-{{ fee.public_id }}"
+                        role="menuitem"
+                      >
+                        <span class="dropdown__icon"><i data-lucide="x-circle" width="16" height="16"></i></span>
+                        Rejeter
+                      </button>
+                    {% endif %}
+                  </div>
+                </div>
+              </td>
+            </tr>
+          {% empty %}
+            <tr>
+              <td colspan="7" class="table__empty">
+                {% if not amount_changes %}
+                  {% include "components/empty_state.html" with icon="check-circle" title="Aucune demande en attente" %}
+                {% else %}
+                  Aucun nouveau frais en attente
+                {% endif %}
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% include "components/pagination.html" with page_obj=page_obj hx_target="#fee-approvals-table" hx_swap="outerHTML" %}
+  </section>
+
+  {% for fee in page_obj %}
+    {% if year_writable %}
+      <div class="modal-backdrop" id="fee-approve-{{ fee.public_id }}" data-modal="fee-approve-{{ fee.public_id }}" hidden>
+        <div class="modal modal--form-narrow" data-modal-panel>
+          <div class="modal__header">
+            <h2>Approuver le frais</h2>
+            <button type="button" class="modal__close" data-modal-close aria-label="Fermer">&times;</button>
+          </div>
+          <div class="modal__body">
+            <p><strong>{{ fee.code }}</strong> — {{ fee.label }} ({{ fee.amount }} {{ fee.currency }})</p>
+            <form method="post" action="{% url 'secretariat:fee-approve' fee.public_id %}">
+              {% csrf_token %}
+              <div class="form-group">
+                <label class="form-label" for="approve_comment_{{ fee.public_id }}">Commentaire</label>
+                <input class="form-input" id="approve_comment_{{ fee.public_id }}" name="comment" maxlength="500">
+              </div>
+              <div class="form-group">
+                <label class="form-label form-label--required" for="approve_password_{{ fee.public_id }}">Mot de passe</label>
+                <input
+                  class="form-input"
+                  id="approve_password_{{ fee.public_id }}"
+                  type="password"
+                  name="password"
+                  required
+                  autocomplete="current-password"
+                >
+              </div>
+              <div class="content__actions">
+                <button type="button" class="btn btn--secondary" data-modal-close>Annuler</button>
+                <button class="btn btn--primary" type="submit">Approuver</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-backdrop" id="fee-reject-{{ fee.public_id }}" data-modal="fee-reject-{{ fee.public_id }}" hidden>
+        <div class="modal modal--form-narrow" data-modal-panel>
+          <div class="modal__header">
+            <h2>Rejeter le frais</h2>
+            <button type="button" class="modal__close" data-modal-close aria-label="Fermer">&times;</button>
+          </div>
+          <div class="modal__body">
+            <p><strong>{{ fee.code }}</strong> — {{ fee.label }}</p>
+            <form method="post" action="{% url 'secretariat:fee-reject' fee.public_id %}">
+              {% csrf_token %}
+              <div class="form-group">
+                <label class="form-label form-label--required" for="rejection_reason_{{ fee.public_id }}">Motif de rejet</label>
+                <textarea
+                  class="form-input"
+                  id="rejection_reason_{{ fee.public_id }}"
+                  name="rejection_reason"
+                  rows="3"
+                  required
+                ></textarea>
+              </div>
+              <div class="form-group">
+                <label class="form-label form-label--required" for="reject_password_{{ fee.public_id }}">Mot de passe</label>
+                <input
+                  class="form-input"
+                  id="reject_password_{{ fee.public_id }}"
+                  type="password"
+                  name="password"
+                  required
+                  autocomplete="current-password"
+                >
+              </div>
+              <div class="content__actions">
+                <button type="button" class="btn btn--secondary" data-modal-close>Annuler</button>
+                <button class="btn btn--danger" type="submit">Rejeter</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    {% endif %}
+  {% endfor %}
+
+  {% for change in amount_changes %}
+    {% if year_writable %}
+      <div class="modal-backdrop" id="amount-approve-{{ change.public_id }}" data-modal="amount-approve-{{ change.public_id }}" hidden>
+        <div class="modal modal--form-narrow" data-modal-panel>
+          <div class="modal__header">
+            <h2>Approuver la modification</h2>
+            <button type="button" class="modal__close" data-modal-close aria-label="Fermer">&times;</button>
+          </div>
+          <div class="modal__body">
+            <p>
+              <strong>{{ change.fee.code }}</strong> —
+              {{ change.previous_base_amount }} → <strong>{{ change.new_amount }} {{ change.fee.currency }}</strong>
+              ({{ change.get_scope_display }})
+            </p>
+            <form method="post" action="{% url 'secretariat:fee-amount-change-approve' change.public_id %}">
+              {% csrf_token %}
+              <div class="form-group">
+                <label class="form-label" for="amount_approve_comment_{{ change.public_id }}">Commentaire</label>
+                <input class="form-input" id="amount_approve_comment_{{ change.public_id }}" name="comment" maxlength="500">
+              </div>
+              <div class="form-group">
+                <label class="form-label form-label--required" for="amount_approve_password_{{ change.public_id }}">Mot de passe</label>
+                <input class="form-input" id="amount_approve_password_{{ change.public_id }}" type="password" name="password" required autocomplete="current-password">
+              </div>
+              <div class="content__actions">
+                <button type="button" class="btn btn--secondary" data-modal-close>Annuler</button>
+                <button class="btn btn--primary" type="submit">Approuver</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-backdrop" id="amount-reject-{{ change.public_id }}" data-modal="amount-reject-{{ change.public_id }}" hidden>
+        <div class="modal modal--form-narrow" data-modal-panel>
+          <div class="modal__header">
+            <h2>Rejeter la modification</h2>
+            <button type="button" class="modal__close" data-modal-close aria-label="Fermer">&times;</button>
+          </div>
+          <div class="modal__body">
+            <p><strong>{{ change.fee.code }}</strong> — {{ change.new_amount }} {{ change.fee.currency }}</p>
+            <form method="post" action="{% url 'secretariat:fee-amount-change-reject' change.public_id %}">
+              {% csrf_token %}
+              <div class="form-group">
+                <label class="form-label form-label--required" for="amount_rejection_reason_{{ change.public_id }}">Motif de rejet</label>
+                <textarea class="form-input" id="amount_rejection_reason_{{ change.public_id }}" name="rejection_reason" rows="3" required></textarea>
+              </div>
+              <div class="form-group">
+                <label class="form-label form-label--required" for="amount_reject_password_{{ change.public_id }}">Mot de passe</label>
+                <input class="form-input" id="amount_reject_password_{{ change.public_id }}" type="password" name="password" required autocomplete="current-password">
+              </div>
+              <div class="content__actions">
+                <button type="button" class="btn btn--secondary" data-modal-close>Annuler</button>
+                <button class="btn btn--danger" type="submit">Rejeter</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    {% endif %}
+  {% endfor %}
+</div>

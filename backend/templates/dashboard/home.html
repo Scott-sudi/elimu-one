@@ -9,7 +9,7 @@
         Bonjour{% if request.user.prenom %}, {{ request.user.prenom }}{% endif %}
       </h2>
       <p class="dashboard__welcome-text">
-        Vue d'ensemble des comptes et des accès — {{ school_full_name|default:"Kalunga – La Source du Savoir" }}.
+        Vue d'ensemble des comptes et des accès — {{ platform_name }}.
       </p>
     </div>
 
@@ -55,6 +55,14 @@
         <div class="stat-card__label">Discipline</div>
         <div class="stat-card__value">{{ stats.discipline|default:0 }}</div>
         <div class="stat-card__meta">Agents de discipline</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card__icon"><i data-lucide="bar-chart-3" width="18" height="18"></i></div>
+        <div class="stat-card__label">Préfets</div>
+        <div class="stat-card__value">{{ stats.prefets|default:0 }}</div>
+        <div class="stat-card__meta">
+          {{ stats.prefets_active|default:0 }} actifs · {{ stats.prefets_inactive|default:0 }} désactivés
+        </div>
       </div>
     </div>
 

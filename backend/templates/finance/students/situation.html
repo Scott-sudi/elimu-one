@@ -1,0 +1,102 @@
+{% extends "layouts/app.html" %}
+{% block title %}Situation — {{ student.matricule }}{% endblock %}
+{% block content %}
+<div data-page="finance-student-situation">
+  <div class="content__header">
+    <div>
+      <h2 class="content__title finance-pay--{{ situation.totals.tone|default:'unpaid' }}">
+        {{ student.nom }}{% if student.postnom %} {{ student.postnom }}{% endif %} {{ student.prenom }}
+      </h2>
+      <p class="content__description">
+        {{ student.matricule }}
+        {% if situation.school_class %} · {{ situation.school_class.name }}{% endif %}
+      </p>
+    </div>
+    <div class="content__actions">
+      <a class="btn btn--secondary" href="{% url 'finance:student-search' %}">Retour</a>
+      {% if year_writable and situation.enrollment %}
+        <a class="btn btn--primary" href="{% url 'finance:payment-create' %}?classe={{ situation.school_class.public_id }}">Paiement</a>
+      {% endif %}
+    </div>
+  </div>
+
+  {% if not situation.enrollment %}
+    <section class="card">
+      <div class="card__body">
+        {% include "components/empty_state.html" with icon="user" title="Aucune inscription validée pour cette année" %}
+      </div>
+    </section>
+  {% else %}
+    <div class="entity-grid" style="margin-bottom:1rem;">
+      <div class="entity-tile"><span class="entity-tile__meta">Dû</span><span class="entity-tile__title">{{ situation.totals.amount_due }}</span></div>
+      <div class="entity-tile"><span class="entity-tile__meta">Payé</span><span class="entity-tile__title">{{ situation.totals.amount_paid }}</span></div>
+      <div class="entity-tile">
+        <span class="entity-tile__meta">Reste</span>
+        <span class="entity-tile__title finance-pay--{{ situation.totals.tone }}">
+          {{ situation.totals.amount_remaining }}
+        </span>
+      </div>
+    </div>
+
+    <section class="card">
+      <div class="card__header"><h3>Obligations</h3></div>
+      <div class="table-wrap">
+        <table class="table table--dense">
+          <thead>
+            <tr><th>Frais</th><th>Dû</th><th>Payé</th><th>Reste</th><th>Statut</th></tr>
+          </thead>
+          <tbody>
+            {% for row in situation.obligations %}
+              <tr>
+                <td class="finance-pay--{{ row.tone }}">{{ row.fee.label }}</td>
+                <td>{{ row.amount_due }}</td>
+                <td>{{ row.amount_paid }}</td>
+                <td class="finance-pay--{{ row.tone }}">{{ row.amount_remaining }}</td>
+                <td>
+                  <span class="badge {% if row.tone == 'paid' %}badge--success{% elif row.tone == 'partial' %}badge--warning{% else %}badge--danger{% endif %}">
+                    {{ row.obligation.get_status_display }}
+                  </span>
+                </td>
+              </tr>
+            {% empty %}
+              <tr><td colspan="5" class="table__empty">Aucune obligation</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      <p class="finance-matrix__legend" aria-label="Légende des couleurs" style="padding:0 1rem 1rem;">
+        <span class="is-unpaid">Rien payé</span>
+        <span class="is-partial">Paiement partiel</span>
+        <span class="is-paid">Soldé</span>
+      </p>
+    </section>
+
+    <section class="card" style="margin-top:1rem;">
+      <div class="card__header"><h3>Paiements</h3></div>
+      <div class="table-wrap">
+        <table class="table table--dense">
+          <thead>
+            <tr><th>Reçu</th><th>Date</th><th>Montant</th><th>Statut</th></tr>
+          </thead>
+          <tbody>
+            {% for payment in situation.payments %}
+              <tr>
+                <td><a href="{% url 'finance:payment-detail' payment.public_id %}">{{ payment.receipt_number }}</a></td>
+                <td>{{ payment.payment_date|date:"d/m/Y" }}</td>
+                <td>{{ payment.amount_total }} {{ payment.currency }}</td>
+                <td>
+                  <span class="badge {% if payment.status == 'ANNULE' %}badge--danger{% else %}badge--success{% endif %}">
+                    {{ payment.get_status_display }}
+                  </span>
+                </td>
+              </tr>
+            {% empty %}
+              <tr><td colspan="4" class="table__empty">Aucun paiement</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </section>
+  {% endif %}
+</div>
+{% endblock %}

@@ -6,3 +6,7 @@ class ApiConfig(AppConfig):
     name = "apps.api"
     label = "api"
     verbose_name = "API"
+
+    def ready(self) -> None:
+        # Enregistre les signaux push (présence, paiement, incident, convocation).
+        from apps.api import parents_push_signals  # noqa: F401

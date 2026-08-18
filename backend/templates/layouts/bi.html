@@ -1,0 +1,57 @@
+{% extends "layouts/base.html" %}
+{% load static %}
+
+{% block body_class %}bi-workspace{% endblock %}
+
+{% block body %}
+{% with name=request.resolver_match.url_name|default:'' %}
+<div class="bi-shell">
+  <aside class="bi-sidebar" aria-label="Navigation Business Intelligence">
+    <a href="{% url 'bi:overview' %}" class="bi-brand" aria-label="Kalunga Business Intelligence">
+      <span class="bi-brand__mark"><img src="{% static 'images/branding/logo.png' %}" alt="" onerror="this.hidden = true;"></span>
+      <span><strong>KALUNGA</strong><small>Intelligence</small></span>
+    </a>
+
+    <nav class="bi-nav">
+      <a href="{% url 'bi:overview' %}" class="bi-nav__item {% if name == 'overview' %}is-active{% endif %}"><i data-lucide="layout-dashboard"></i><span>Vue générale</span></a>
+      <a href="{% url 'bi:enrollments' %}" class="bi-nav__item {% if name == 'enrollments' %}is-active{% endif %}"><i data-lucide="users-round"></i><span>Effectifs</span></a>
+      <a href="{% url 'bi:finance' %}" class="bi-nav__item {% if name == 'finance' %}is-active{% endif %}"><i data-lucide="landmark"></i><span>Finances</span></a>
+      <a href="{% url 'bi:attendance' %}" class="bi-nav__item {% if name == 'attendance' %}is-active{% endif %}"><i data-lucide="calendar-check-2"></i><span>Présences</span></a>
+      <a href="{% url 'bi:discipline' %}" class="bi-nav__item {% if name == 'discipline' %}is-active{% endif %}"><i data-lucide="shield-alert"></i><span>Discipline</span></a>
+      <a href="{% url 'bi:classes' %}" class="bi-nav__item {% if name == 'classes' %}is-active{% endif %}"><i data-lucide="chart-no-axes-combined"></i><span>Analyse des classes</span></a>
+      <a href="{% url 'bi:comparisons' %}" class="bi-nav__item {% if name == 'comparisons' %}is-active{% endif %}"><i data-lucide="git-compare-arrows"></i><span>Comparaisons</span></a>
+      <a href="{% url 'bi:reports' %}" class="bi-nav__item {% if name == 'reports' %}is-active{% endif %}"><i data-lucide="file-chart-column"></i><span>Rapports</span></a>
+    </nav>
+
+    <div class="bi-sidebar__footer">
+      <a href="{% url 'accounts:profile' %}" class="bi-nav__item"><i data-lucide="settings-2"></i><span>Paramètres BI</span></a>
+      <a href="{% url 'accounts:profile' %}" class="bi-user" title="Mon profil">
+        <span class="bi-user__avatar">{{ request.user.initials }}</span>
+        <span><strong>{{ request.user.username }}</strong><small>Préfet</small></span>
+      </a>
+    </div>
+  </aside>
+
+  <div class="bi-canvas">
+    <header class="bi-topbar">
+      <button class="bi-icon-button bi-menu-button" type="button" data-bi-sidebar-toggle aria-label="Ouvrir le menu"><i data-lucide="menu"></i></button>
+      <a class="bi-topbar__year" href="{% url 'secretariat:academic-year-select' %}" title="Changer d'année scolaire"><i data-lucide="calendar-range"></i><span>{{ selected_year.label|default:"Année scolaire" }}</span><i data-lucide="chevron-down"></i></a>
+      <div class="bi-topbar__filters" data-bi-global-filters>
+        <label><span>Période</span><select name="period"><option value="">Année complète</option><option value="current">Période en cours</option></select></label>
+        <label><span>Classe</span><select name="class_id"><option value="">Toutes les classes</option>{% for school_class in bi_classes %}<option value="{{ school_class.id }}">{{ school_class.name }}</option>{% endfor %}</select></label>
+        <label><span>Section</span><select name="section"><option value="">Toutes sections</option>{% for section_id, section_name in bi_sections %}{% if section_id %}<option value="{{ section_id }}">{{ section_name }}</option>{% endif %}{% endfor %}</select></label>
+        <label><span>Option</span><select name="option"><option value="">Toutes options</option>{% for option_id, option_name in bi_options %}{% if option_id %}<option value="{{ option_id }}">{{ option_name }}</option>{% endif %}{% endfor %}</select></label>
+      </div>
+      <label class="bi-global-search"><i data-lucide="search"></i><input type="search" placeholder="Rechercher une donnée" data-bi-search></label>
+      <div class="bi-topbar__actions">
+        <button class="bi-icon-button" type="button" data-bi-refresh title="Actualiser"><i data-lucide="refresh-cw"></i></button>
+        <a class="bi-icon-button" href="{% url 'bi:reports' %}" title="Exporter"><i data-lucide="download"></i></a>
+        <button class="bi-icon-button" type="button" data-bi-print title="Imprimer"><i data-lucide="printer"></i></button>
+        <button class="bi-icon-button" type="button" title="Notifications"><i data-lucide="bell"></i></button>
+      </div>
+    </header>
+    <main class="bi-main" id="main-content">{% block content %}{% endblock %}</main>
+  </div>
+</div>
+{% endwith %}
+{% endblock %}

@@ -23,7 +23,6 @@ from apps.secretariat.models import (
     StudentGuardian,
 )
 from apps.secretariat.services.academic_service import (
-    activate_academic_year,
     close_academic_year,
     create_academic_year,
     create_level,
@@ -92,6 +91,7 @@ def academic_structure(db):
         academic_year=year,
         level=level,
         section=section,
+        letter="A",
         name="1re A",
         code="1A-2026",
         max_capacity=2,
@@ -133,6 +133,10 @@ def test_single_active_academic_year():
         end_date=date(2026, 7, 31),
         is_active=True,
     )
+    close_academic_year(y1, actor=None)
+    y1.refresh_from_db()
+    assert y1.is_closed
+
     y2 = create_academic_year(
         label="2026-2027",
         start_date=date(2026, 9, 1),
@@ -142,11 +146,6 @@ def test_single_active_academic_year():
     y1.refresh_from_db()
     assert not y1.is_active
     assert y2.is_active
-    activate_academic_year(y1)
-    y1.refresh_from_db()
-    y2.refresh_from_db()
-    assert y1.is_active
-    assert not y2.is_active
     assert AcademicYear.objects.filter(is_active=True).count() == 1
 
 
@@ -172,13 +171,42 @@ def test_close_academic_year(academic_structure):
 
 @pytest.mark.django_db
 def test_class_code_unique_per_year(academic_structure):
-    with pytest.raises(Exception):
+    with pytest.raises(SecretariatError, match="code"):
         create_school_class(
             academic_year=academic_structure["year"],
             level=academic_structure["level"],
             section=academic_structure["section"],
+            letter="B",
             name="1re B",
             code="1A-2026",
+            max_capacity=30,
+        )
+
+
+@pytest.mark.django_db
+def test_class_name_unique_per_year(academic_structure):
+    with pytest.raises(SecretariatError, match="nom"):
+        create_school_class(
+            academic_year=academic_structure["year"],
+            level=academic_structure["level"],
+            section=academic_structure["section"],
+            letter="B",
+            name="1re A",
+            code="1B-2026",
+            max_capacity=30,
+        )
+
+
+@pytest.mark.django_db
+def test_class_letter_unique_per_level_section(academic_structure):
+    with pytest.raises(SecretariatError, match="lettre"):
+        create_school_class(
+            academic_year=academic_structure["year"],
+            level=academic_structure["level"],
+            section=academic_structure["section"],
+            letter="A",
+            name="1re A bis",
+            code="1A-BIS-2026",
             max_capacity=30,
         )
 
@@ -238,6 +266,7 @@ def test_capacity_and_transfer(academic_structure, secretary):
         academic_year=year,
         level=level,
         section=section,
+        letter="B",
         name="1re B",
         code="1B-2026",
         max_capacity=30,
@@ -312,6 +341,8 @@ def test_card_qr_unique_and_opaque(academic_structure, secretary):
 
 @pytest.mark.django_db
 def test_views_permissions(client, secretary, accountant, academic_structure):
+    from apps.secretariat.services.year_context import SESSION_KEY
+
     url = reverse("secretariat:dashboard")
     assert client.get(url).status_code in (302, 403)
 
@@ -319,9 +350,17 @@ def test_views_permissions(client, secretary, accountant, academic_structure):
     assert client.get(url).status_code == 403
 
     client.force_login(secretary)
+    # Without a selected year, business pages redirect to the picker.
+    assert client.get(url).status_code == 302
+    assert reverse("secretariat:academic-year-select") in client.get(url).url
+    # Academic year admin stays reachable without a session year.
+    assert client.get(reverse("secretariat:academic-years")).status_code == 200
+
+    session = client.session
+    session[SESSION_KEY] = academic_structure["year"].pk
+    session.save()
     assert client.get(url).status_code == 200
     assert client.get(reverse("secretariat:students")).status_code == 200
-    assert client.get(reverse("secretariat:academic-years")).status_code == 200
 
     htmx = client.get(reverse("secretariat:students"), HTTP_HX_REQUEST="true")
     assert htmx.status_code == 200

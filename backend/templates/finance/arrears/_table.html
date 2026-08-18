@@ -1,0 +1,52 @@
+<div id="arrears-table">
+  <div class="table-wrap">
+    <table class="table table--dense">
+      <thead>
+        <tr>
+          <th class="table__index" scope="col">N°</th>
+          <th>Élève</th>
+          <th>Classe</th>
+          <th>Frais</th>
+          <th>Reste</th>
+          <th>Statut</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in page_obj %}
+          {% with tone=item.payment_tone %}
+          <tr>
+            <td class="table__index">{{ forloop.counter0|add:page_obj.start_index }}</td>
+            <td>
+              <a
+                class="finance-pay--{{ tone }}"
+                href="{% url 'finance:student-situation' item.student.public_id %}"
+              >
+                {{ item.student.matricule }} — {{ item.student.nom }} {{ item.student.prenom }}
+              </a>
+            </td>
+            <td>{{ item.enrollment.school_class.name }}</td>
+            <td>{{ item.fee.label }}</td>
+            <td class="finance-pay--{{ tone }}">{{ item.amount_remaining }} {{ item.fee.currency }}</td>
+            <td>
+              <span class="badge {% if tone == 'partial' %}badge--warning{% else %}badge--danger{% endif %}">
+                {{ item.get_status_display }}
+              </span>
+            </td>
+          </tr>
+          {% endwith %}
+        {% empty %}
+          <tr>
+            <td colspan="6" class="table__empty">
+              {% include "components/empty_state.html" with icon="circle-alert" title="Aucun impayé" %}
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <p class="finance-matrix__legend" aria-label="Légende des couleurs">
+    <span class="is-unpaid">Rien payé</span>
+    <span class="is-partial">Paiement partiel</span>
+  </p>
+  {% include "components/pagination.html" with page_obj=page_obj hx_target="#arrears-table" hx_swap="outerHTML" %}
+</div>

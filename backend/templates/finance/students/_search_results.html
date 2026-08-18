@@ -1,0 +1,48 @@
+<div id="student-search-results">
+  {% if q|length >= 2 and enrollments %}
+    <div class="table-wrap">
+      <table class="table table--dense">
+        <thead>
+          <tr>
+            <th>Matricule</th>
+            <th>Élève</th>
+            <th>Classe</th>
+            <th scope="col">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for enrollment in enrollments %}
+            <tr>
+              <td>{{ enrollment.student.matricule }}</td>
+              <td>
+                {{ enrollment.student.nom }}{% if enrollment.student.postnom %} {{ enrollment.student.postnom }}{% endif %}
+                {{ enrollment.student.prenom }}
+              </td>
+              <td>{{ enrollment.school_class.name }}</td>
+              <td>
+                <div class="content__actions" style="justify-content:flex-start;gap:0.35rem;">
+                  <a
+                    class="btn btn--secondary btn--sm"
+                    href="{% url 'finance:student-situation' enrollment.student.public_id %}"
+                  >Consulter</a>
+                  <a
+                    class="btn btn--primary btn--sm"
+                    href="{% url 'finance:payment-create' %}?classe={{ enrollment.school_class.public_id }}"
+                  >Paiement</a>
+                </div>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% elif q|length >= 2 %}
+    <p class="table__empty">Aucun élève trouvé pour « {{ q }} ».</p>
+  {% else %}
+    <section class="card">
+      <div class="card__body">
+        {% include "components/empty_state.html" with icon="search" title="Recherchez un élève" description="Saisissez au moins 2 caractères (matricule ou nom)." %}
+      </div>
+    </section>
+  {% endif %}
+</div>

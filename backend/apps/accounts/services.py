@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from django.conf import settings
-from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth import authenticate, login, logout, update_session_auth_hash
 from django.db import transaction
 from django.utils import timezone
 
@@ -28,9 +28,13 @@ def has_administrator() -> bool:
 def ensure_system_roles() -> dict[str, Role]:
     descriptions = {
         Role.CODE_ADMINISTRATEUR: "Gestion complète des comptes du personnel et de la configuration système.",
-        Role.CODE_SECRETAIRE: "Accès futur au module secrétariat (inscriptions, élèves, parents).",
-        Role.CODE_COMPTABLE: "Accès futur au module comptabilité (frais et paiements).",
-        Role.CODE_DISCIPLINE: "Accès futur au module discipline (présences, incidents).",
+        Role.CODE_SECRETAIRE: "Accès au module secrétariat (inscriptions, élèves, parents).",
+        Role.CODE_COMPTABLE: "Accès au module comptabilité (frais et paiements).",
+        Role.CODE_DISCIPLINE: "Accès au module discipline (présences, incidents).",
+        Role.CODE_PREFET: (
+            "Responsable chargé de la consultation des tableaux de bord décisionnels "
+            "et des indicateurs de gestion de l'établissement."
+        ),
     }
     roles = {}
     for code, name in Role.SYSTEM_ROLES:
@@ -336,6 +340,9 @@ def change_own_password(*, request, user: User, old_password: str, new_password:
     user.set_password(new_password)
     user.must_change_password = False
     user.save(update_fields=["password", "must_change_password", "updated_at"])
+    # Keep the current session valid after the password change,
+    # otherwise the user is silently logged out.
+    update_session_auth_hash(request, user)
     log_action(
         request=request,
         actor=user,

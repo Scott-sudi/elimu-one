@@ -1,0 +1,218 @@
+/* Finance — payment status tones (names / amounts) */
+
+.finance-pay--unpaid,
+a.finance-pay--unpaid:hover {
+  color: #c62828;
+  font-weight: 600;
+}
+
+.finance-pay--partial,
+a.finance-pay--partial:hover {
+  color: #ef6c00;
+  font-weight: 600;
+}
+
+.finance-pay--paid,
+a.finance-pay--paid:hover {
+  color: #2e7d32;
+  font-weight: 600;
+}
+
+/* Alias used by class situation matrix */
+.finance-name--unpaid {
+  color: #c62828;
+  font-weight: 600;
+}
+
+.finance-name--partial {
+  color: #ef6c00;
+  font-weight: 600;
+}
+
+.finance-name--paid {
+  color: #2e7d32;
+  font-weight: 600;
+}
+
+.finance-matrix__legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin: 0.75rem 0 0;
+  font-size: 0.8rem;
+  color: var(--color-muted, #556);
+}
+
+.finance-matrix__legend span::before {
+  content: "";
+  display: inline-block;
+  width: 0.65rem;
+  height: 0.65rem;
+  border-radius: 50%;
+  margin-right: 0.35rem;
+  vertical-align: -0.05rem;
+}
+
+.finance-matrix__legend .is-unpaid::before {
+  background: #c62828;
+}
+
+.finance-matrix__legend .is-partial::before {
+  background: #ef6c00;
+}
+
+.finance-matrix__legend .is-paid::before {
+  background: #2e7d32;
+}
+
+.finance-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: flex-end;
+  margin-bottom: 1rem;
+}
+
+.finance-filters .form-group {
+  margin: 0;
+  min-width: 10rem;
+}
+
+.finance-filters .form-label {
+  display: block;
+  font-size: 0.75rem;
+  margin-bottom: 0.2rem;
+}
+
+.finance-filters .form-input,
+.finance-filters .form-select {
+  min-width: 11rem;
+}
+
+.finance-qr-scan__hint {
+  margin: 0 0 0.75rem;
+  font-size: 0.875rem;
+  color: var(--color-muted, #556);
+}
+
+.finance-qr-scan__reader {
+  width: 100%;
+  min-height: 14rem;
+  max-height: 18rem;
+  overflow: hidden;
+  position: relative;
+  background: #111;
+  border: 1px solid var(--color-divider, #ddd);
+}
+
+.finance-qr-scan__reader video {
+  display: block;
+  width: 100% !important;
+  height: auto !important;
+  max-height: 18rem;
+  object-fit: cover;
+}
+
+/* html5-qrcode sometimes leaves an extra dashboard / shaded layer */
+.finance-qr-scan__reader img,
+.finance-qr-scan__reader canvas {
+  max-width: 100%;
+}
+
+.finance-qr-scan__reader #qr-shaded-region {
+  border-width: 2px !important;
+}
+
+.finance-qr-scan__status {
+  min-height: 1.25rem;
+  margin: 0.5rem 0 0;
+  font-size: 0.8rem;
+  color: var(--color-muted, #556);
+}
+
+.finance-qr-scan__status.is-error {
+  color: #c62828;
+}
+
+.finance-qr-scan__status.is-ok {
+  color: #2e7d32;
+}
+
+.finance-qr-scan__manual {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.finance-qr-scan__manual .form-input {
+  flex: 1;
+}
+
+/* Dashboard KPI panels — solid black, white type, no gradients */
+.finance-stat-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.finance-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  min-width: 0;
+  padding: 1rem 1.1rem;
+  background: #111111;
+  color: #ffffff;
+  border: 1px solid #111111;
+  border-radius: 6px;
+}
+
+.finance-stat__label {
+  font-size: 0.8rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.finance-stat__value {
+  font-size: clamp(1.35rem, 2.2vw, 1.85rem);
+  font-weight: 700;
+  line-height: 1.15;
+  color: #ffffff;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+}
+
+.finance-stat__sub {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.88);
+  word-break: break-word;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 1100px) {
+  .finance-stat-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 560px) {
+  .finance-stat-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+[data-page="discipline-attendance-sheet"] tr.is-updated {
+  animation: discipline-row-flash 1.2s ease;
+}
+
+@keyframes discipline-row-flash {
+  0% {
+    background-color: rgba(46, 125, 50, 0.18);
+  }
+  100% {
+    background-color: transparent;
+  }
+}

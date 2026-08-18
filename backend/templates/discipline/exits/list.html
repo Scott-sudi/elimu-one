@@ -1,0 +1,118 @@
+{% extends "layouts/app.html" %}
+{% block title %}Sorties | Discipline{% endblock %}
+{% block content %}
+<div
+  data-page="discipline-exits-list"
+  data-incident-lookup-url="{{ incident_lookup_url }}"
+>
+  <div class="content__header">
+    <div class="content__header-main">
+      <h2 class="content__title">Sorties autorisées</h2>
+      <p class="content__description">Gestion des demandes de sortie pendant les heures de cours.</p>
+    </div>
+    <div class="content__actions">
+      {% if year_writable %}
+        <button class="btn btn--primary" type="button" data-modal-open="exit-modal">
+          <i data-lucide="plus" width="16" height="16"></i>
+          Nouvelle autorisation
+        </button>
+      {% endif %}
+    </div>
+  </div>
+
+  <section class="card">
+    <div class="table-wrap">
+      <table class="table table--dense">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Élève</th>
+            <th>Classe</th>
+            <th>Sortie prévue</th>
+            <th>Retour prévu</th>
+            <th>Statut</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for item in exits %}
+            <tr>
+              <td>{{ item.date|date:"d/m/Y" }}</td>
+              <td>{{ item.student.matricule }} — {{ item.student.nom }} {{ item.student.prenom }}</td>
+              <td>{{ item.enrollment.school_class.name }}</td>
+              <td>{% if item.planned_exit_time %}{{ item.planned_exit_time|time:"H:i" }}{% else %}—{% endif %}</td>
+              <td>{% if item.expected_return_time %}{{ item.expected_return_time|time:"H:i" }}{% else %}—{% endif %}</td>
+              <td>{{ item.get_status_display }}</td>
+              <td>
+                <a class="btn btn--secondary btn--sm" href="{% url 'discipline:exit-detail' item.public_id %}">Consulter</a>
+              </td>
+            </tr>
+          {% empty %}
+            <tr><td colspan="7" class="table__empty">Aucune sortie enregistrée.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+</div>
+{% endblock %}
+
+{% block modals %}
+{% if year_writable %}
+<div
+  class="modal-backdrop"
+  id="exit-modal"
+  data-modal="exit-modal"
+  {% if not open_create_modal %}hidden{% endif %}
+>
+  <div class="modal modal--lg" data-modal-panel role="dialog" aria-modal="true" aria-labelledby="exit-modal-title">
+    <div class="modal__header">
+      <h2 id="exit-modal-title">Nouvelle autorisation de sortie</h2>
+      <button type="button" class="modal__close" data-modal-close aria-label="Fermer">×</button>
+    </div>
+    <div class="modal__body">
+      <form method="post" action="{% url 'discipline:exits' %}" data-matricule-autofill-form>
+        {% csrf_token %}
+        {% if form.non_field_errors %}
+          <div class="alert alert--danger">{{ form.non_field_errors }}</div>
+        {% endif %}
+
+        <div class="form-group">
+          <label class="form-label form-label--required" for="{{ form.matricule.id_for_label }}">{{ form.matricule.label }}</label>
+          {{ form.matricule }}
+          <p class="form-hint" data-student-hint>{% if form.matricule.help_text %}{{ form.matricule.help_text }}{% endif %}</p>
+          {% for error in form.matricule.errors %}<div class="form-error">{{ error }}</div>{% endfor %}
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="{{ form.school_class_display.id_for_label }}">{{ form.school_class_display.label }}</label>
+          {{ form.school_class_display }}
+          {% if form.school_class_display.help_text %}<small class="form-hint">{{ form.school_class_display.help_text }}</small>{% endif %}
+          {% for error in form.school_class_display.errors %}<div class="form-error">{{ error }}</div>{% endfor %}
+        </div>
+
+        {% for field in form %}
+          {% if field.name != "matricule" and field.name != "school_class_display" %}
+            <div class="form-group">
+              {% if field.field.widget.input_type == "checkbox" %}
+                <label class="form-check">{{ field }} {{ field.label }}</label>
+              {% else %}
+                <label class="form-label{% if field.field.required %} form-label--required{% endif %}" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                {{ field }}
+              {% endif %}
+              {% if field.help_text %}<small class="form-hint">{{ field.help_text }}</small>{% endif %}
+              {% for error in field.errors %}<div class="form-error">{{ error }}</div>{% endfor %}
+            </div>
+          {% endif %}
+        {% endfor %}
+
+        <div class="modal__footer">
+          <button type="button" class="btn btn--secondary" data-modal-close>Annuler</button>
+          <button class="btn btn--primary" type="submit">Enregistrer l'autorisation</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endif %}
+{% endblock %}

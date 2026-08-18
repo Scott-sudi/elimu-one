@@ -1,0 +1,58 @@
+/* BI Plotly chart containers */
+
+.bi-chart {
+  position: relative;
+  width: 100%;
+  min-height: 280px;
+  background: var(--color-surface);
+}
+
+.bi-chart--sm {
+  min-height: 160px;
+}
+
+.bi-chart--empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.bi-chart__empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 1.5rem 1rem;
+  color: var(--color-text-secondary);
+  font-size: 0.9rem;
+  border: 1px dashed var(--color-border);
+  border-radius: 4px;
+  background: var(--color-background);
+  width: 100%;
+  min-height: 200px;
+}
+
+.bi-chart__empty[hidden] {
+  display: none !important;
+}
+
+/* Plotly modebar: keep subtle, Kalunga-aligned */
+.bi-chart .modebar {
+  top: 0 !important;
+  right: 0 !important;
+}
+
+.bi-chart .modebar-btn path {
+  fill: var(--color-text-secondary) !important;
+}
+
+.bi-chart-grid {
+  display: grid;
+  gap: var(--space-4, 1rem);
+}
+
+@media (min-width: 960px) {
+  .bi-chart-grid--2 {
+    grid-template-columns: 1fr 1fr;
+  }
+}

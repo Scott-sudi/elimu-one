@@ -42,6 +42,35 @@ class SecretaryRequiredMixin(RoleRequiredMixin):
     allowed_roles = (Role.CODE_SECRETAIRE,)
 
 
+class AccountantRequiredMixin(RoleRequiredMixin):
+    """Restrict access to authenticated accountants."""
+
+    allowed_roles = (Role.CODE_COMPTABLE,)
+
+
+class DisciplineRequiredMixin(RoleRequiredMixin):
+    """Restrict access to authenticated discipline staff."""
+
+    allowed_roles = (Role.CODE_DISCIPLINE,)
+
+
+class PrefetRequiredMixin(RoleRequiredMixin):
+    """Restrict access to authenticated prefets (BI read-only)."""
+
+    allowed_roles = (Role.CODE_PREFET,)
+
+
+class YearOperatorRequiredMixin(RoleRequiredMixin):
+    """Secrétaire, Comptable, Discipline ou Préfet — sélection d'année partagée."""
+
+    allowed_roles = (
+        Role.CODE_SECRETAIRE,
+        Role.CODE_COMPTABLE,
+        Role.CODE_DISCIPLINE,
+        Role.CODE_PREFET,
+    )
+
+
 class StaffActiveRequiredMixin(LoginRequiredMixin):
     """Ensure the account can use the application."""
 

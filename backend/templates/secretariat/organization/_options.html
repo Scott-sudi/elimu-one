@@ -1,1 +1,105 @@
-<div class="table-wrap"><table class="table table--dense"><thead><tr><th>Nom</th><th>Code</th><th>Section</th><th>Statut</th></tr></thead><tbody>{% for item in options %}<tr><td>{{ item.name }}</td><td>{{ item.code }}</td><td>{{ item.section|default:"—" }}</td><td><span class="badge {% if item.is_active %}badge--success{% endif %}">{{ item.is_active|yesno:"Active,Inactive" }}</span></td></tr>{% empty %}<tr><td colspan="4" class="table__empty">Aucune option</td></tr>{% endfor %}</tbody></table></div>
+<div class="table-wrap">
+  <table class="table table--dense">
+    <thead>
+      <tr>
+        <th class="table__index" scope="col">N°</th>
+        <th>Nom</th>
+        <th>Code</th>
+        <th>Section</th>
+        <th>Statut</th>
+        <th style="text-align: right;">Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for item in options %}
+        <tr>
+          <td class="table__index">{{ forloop.counter }}</td>
+          <td>{{ item.name }}</td>
+          <td>{{ item.code }}</td>
+          <td>{{ item.section|default:"—" }}</td>
+          <td>
+            <span class="badge {% if item.is_active %}badge--success{% else %}badge--neutral{% endif %}">
+              {{ item.is_active|yesno:"Active,Inactive" }}
+            </span>
+          </td>
+          <td>
+            <div class="dropdown" data-dropdown style="display: flex; justify-content: flex-end;">
+              <button type="button" class="btn btn--ghost btn--sm" data-dropdown-trigger aria-label="Actions" aria-haspopup="menu">
+                <i data-lucide="ellipsis-vertical" width="16" height="16"></i>
+              </button>
+              <div class="dropdown__menu dropdown__menu--right" data-dropdown-menu hidden role="menu">
+                {% if year_writable %}
+                <button type="button" class="dropdown__item" data-dropdown-item data-modal-open="option-edit-{{ item.public_id }}">
+                  <span class="dropdown__icon"><i data-lucide="pencil" width="16" height="16"></i></span>
+                  Modifier
+                </button>
+                <div class="dropdown__divider"></div>
+                {% if item.is_active %}
+                  <form method="post" action="{% url 'secretariat:option-action' item.public_id %}" data-confirm-form="Désactiver « {{ item.name }} » ?">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="deactivate">
+                    <button type="submit" class="dropdown__item" data-dropdown-item>
+                      <span class="dropdown__icon"><i data-lucide="ban" width="16" height="16"></i></span>
+                      Désactiver
+                    </button>
+                  </form>
+                {% else %}
+                  <form method="post" action="{% url 'secretariat:option-action' item.public_id %}" data-confirm-form="Réactiver « {{ item.name }} » ?">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="reactivate">
+                    <button type="submit" class="dropdown__item" data-dropdown-item>
+                      <span class="dropdown__icon"><i data-lucide="check-circle" width="16" height="16"></i></span>
+                      Réactiver
+                    </button>
+                  </form>
+                {% endif %}
+                <form method="post" action="{% url 'secretariat:option-action' item.public_id %}" data-confirm-form="Supprimer définitivement « {{ item.name }} » ?" data-confirm-danger>
+                  {% csrf_token %}
+                  <input type="hidden" name="action" value="delete">
+                  <button type="submit" class="dropdown__item dropdown__item--danger" data-dropdown-item>
+                    <span class="dropdown__icon"><i data-lucide="trash-2" width="16" height="16"></i></span>
+                    Supprimer
+                  </button>
+                </form>
+                {% endif %}
+              </div>
+            </div>
+            <div class="modal-backdrop" id="option-edit-{{ item.public_id }}" data-modal="option-edit-{{ item.public_id }}" hidden>
+              <div class="modal" data-modal-panel>
+                <div class="modal__header">
+                  <h2>Modifier l'option</h2>
+                  <button type="button" class="modal__close" data-modal-close>×</button>
+                </div>
+                <div class="modal__body">
+                  <form method="post" action="{% url 'secretariat:option-action' item.public_id %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="update">
+                    <div class="form-field"><label class="form-label">Nom</label><input class="form-input" name="name" value="{{ item.name }}" required></div>
+                    <div class="form-field"><label class="form-label">Code</label><input class="form-input" name="code" value="{{ item.code }}" required></div>
+                    <div class="form-field">
+                      <label class="form-label">Section</label>
+                      <select class="form-select" name="section">
+                        <option value="">—</option>
+                        {% for section in sections %}
+                          <option value="{{ section.pk }}" {% if item.section_id == section.pk %}selected{% endif %}>{{ section.name }}</option>
+                        {% endfor %}
+                      </select>
+                    </div>
+                    <div class="form-field"><label class="form-label">Description</label><textarea class="form-input" name="description" rows="3">{{ item.description }}</textarea></div>
+                    <label class="form-check"><input type="checkbox" name="is_active" value="on" {% if item.is_active %}checked{% endif %}> Active</label>
+                    <div class="modal__footer">
+                      <button type="button" class="btn btn--secondary" data-modal-close>Annuler</button>
+                      <button class="btn btn--primary">Enregistrer</button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            </div>
+          </td>
+        </tr>
+      {% empty %}
+        <tr><td colspan="6" class="table__empty">Aucune option</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>

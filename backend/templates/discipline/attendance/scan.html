@@ -1,0 +1,36 @@
+{% extends "layouts/app.html" %}
+{% block title %}Pointage{% endblock %}
+{% block content %}
+<div
+  data-page="discipline-attendance-scan"
+  data-default-scanner-mode="{{ default_scanner_mode|default:'attendance' }}"
+  {% if auto_open_scanner %}data-auto-open-scanner="1"{% endif %}
+>
+  <div class="content__header">
+    <div>
+      <h2 class="content__title">Pointage</h2>
+      <p class="content__description">
+        {% if selected_academic_year %}Année {{ selected_academic_year.label }} · {% endif %}
+        Scannez la carte de l’élève ou saisissez son matricule pour enregistrer sa présence (entrée).
+      </p>
+    </div>
+    <div class="content__actions">
+      <button
+        type="button"
+        class="btn btn--primary"
+        data-modal-open="discipline-qr-scan-modal"
+        data-discipline-open-scanner
+        data-default-mode="{{ default_scanner_mode|default:'attendance' }}"
+      >
+        <i data-lucide="scan-qr-code" width="16" height="16"></i>
+        Ouvrir le scanner
+      </button>
+    </div>
+  </div>
+  <section class="card">
+    <div class="card__body">
+      {% include "components/empty_state.html" with icon="scan-qr-code" title="Scanner Discipline prêt" description="Utilisez “Ouvrir le scanner” pour pointer une présence ou consulter la conduite." %}
+    </div>
+  </section>
+</div>
+{% endblock %}

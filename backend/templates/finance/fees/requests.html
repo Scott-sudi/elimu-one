@@ -1,0 +1,108 @@
+{% extends "layouts/app.html" %}
+{% block title %}Demandes{% endblock %}
+{% block content %}
+<div data-page="finance-fee-requests">
+  <div class="content__header">
+    <div>
+      <h2 class="content__title">Demandes</h2>
+      <p class="content__description">
+        {% if selected_academic_year %}Année {{ selected_academic_year.label }} · {% endif %}
+        En attente de validation par le secrétariat
+      </p>
+    </div>
+    <div class="content__actions">
+      <a class="btn btn--secondary" href="{% url 'finance:fees' %}">Tous les frais</a>
+    </div>
+  </div>
+
+  <form class="secretariat-toolbar" method="get">
+    <input
+      class="form-input form-input--sm"
+      type="search"
+      name="q"
+      value="{{ current_filters.q }}"
+      placeholder="Code, libellé ou classe"
+    >
+    <button class="btn btn--secondary btn--sm" type="submit">Filtrer</button>
+  </form>
+
+  <section class="card" style="margin-bottom: 1.25rem;">
+    <div class="card__header"><h3>Modifications de montants</h3></div>
+    <div class="table-wrap">
+      <table class="table table--dense">
+        <thead>
+          <tr>
+            <th>Période / frais</th>
+            <th>Ancien</th>
+            <th>Nouveau</th>
+            <th>Portée</th>
+            <th>Classe d'origine</th>
+            <th>Soumis le</th>
+            <th>Statut</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in amount_changes %}
+            <tr>
+              <td>
+                <a href="{% url 'finance:fee-detail' row.change.fee.public_id %}">
+                  {{ row.period_label }}
+                  <span class="table__muted">({{ row.change.fee.code }})</span>
+                </a>
+              </td>
+              <td>{{ row.change.previous_base_amount }} {{ row.change.fee.currency }}</td>
+              <td><strong>{{ row.change.new_amount }} {{ row.change.fee.currency }}</strong></td>
+              <td>{{ row.change.get_scope_display }}</td>
+              <td>{{ row.change.origin_class.name }}</td>
+              <td>
+                {% if row.change.submitted_at %}
+                  {{ row.change.submitted_at|date:"d/m/Y H:i" }}
+                {% else %}—{% endif %}
+              </td>
+              <td><span class="badge badge--warning">{{ row.change.get_status_display }}</span></td>
+            </tr>
+          {% empty %}
+            <tr>
+              <td colspan="7" class="table__empty">Aucune modification de montant en attente</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="card__header"><h3>Nouveaux frais</h3></div>
+    <div class="table-wrap">
+      <table class="table table--dense">
+        <thead>
+          <tr>
+            <th>Code</th>
+            <th>Libellé</th>
+            <th>Catégorie</th>
+            <th>Montant</th>
+            <th>Soumis le</th>
+            <th>Statut</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for fee in pending_fees %}
+            <tr>
+              <td><a href="{% url 'finance:fee-detail' fee.public_id %}">{{ fee.code }}</a></td>
+              <td>{{ fee.label }}</td>
+              <td>{{ fee.category.name }}</td>
+              <td>{{ fee.amount }} {{ fee.currency }}</td>
+              <td>{% if fee.submitted_at %}{{ fee.submitted_at|date:"d/m/Y H:i" }}{% else %}—{% endif %}</td>
+              <td><span class="badge badge--warning">{{ fee.get_status_display }}</span></td>
+            </tr>
+          {% empty %}
+            <tr>
+              <td colspan="6" class="table__empty">Aucun nouveau frais en attente</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+</div>
+{% endblock %}

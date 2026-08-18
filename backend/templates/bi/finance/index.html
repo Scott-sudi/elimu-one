@@ -1,0 +1,61 @@
+{% extends "layouts/bi.html" %}
+{% block title %}{{ page_title }} — BI{% endblock %}
+{% block content %}
+{{ charts|json_script:"bi-charts-data" }}
+<div data-page="bi-finance" class="bi-page">
+  <div class="content__header">
+    <div class="content__header-main">
+      <h2 class="content__title">{{ page_title }}</h2>
+      <p class="content__description">
+        {% if selected_year %}Année {{ selected_year.label }} · {% endif %}
+        Obligations hors annulées · encaissements VALIDE uniquement.
+      </p>
+    </div>
+  </div>
+
+  {% include "bi/partials/filters.html" with bi_domain="finance" clear_url=request.path %}
+
+  <div class="dashboard__stats" aria-label="Indicateurs financiers">
+    <div class="stat-card">
+      <div class="stat-card__label">Montant attendu</div>
+      <div class="stat-card__value">{{ kpis.montant_attendu }} CDF</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-card__label">Montant encaissé</div>
+      <div class="stat-card__value">{{ kpis.montant_encaisse }} CDF</div>
+      <div class="stat-card__meta">
+        {% if kpis.taux_recouvrement is not None %}{{ kpis.taux_recouvrement }} %{% else %}—{% endif %}
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-card__label">Solde</div>
+      <div class="stat-card__value">{{ kpis.solde }} CDF</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-card__label">Élèves en ordre</div>
+      <div class="stat-card__value">{{ kpis.eleves_en_ordre|default:0 }}</div>
+      <div class="stat-card__meta">
+        Partiels {{ kpis.eleves_partiels|default:0 }} · Sans paiement {{ kpis.eleves_sans_paiement|default:0 }}
+      </div>
+    </div>
+  </div>
+
+  <section class="card bi-section" aria-label="Encaissements">
+    <div class="card__header"><h3>Encaissements</h3></div>
+    <div class="card__body">
+      <div data-bi-chart="finance-collections" data-bi-chart-type="line" class="bi-chart"></div>
+    </div>
+  </section>
+
+  <section class="card bi-section" aria-label="Taux de recouvrement">
+    <div class="card__header"><h3>Taux de recouvrement</h3></div>
+    <div class="card__body">
+      <div data-bi-chart="finance-recovery" data-bi-chart-type="hbar" class="bi-chart"></div>
+      <p class="bi-meta">
+        Paiements annulés exclus des encaissements · {{ kpis.paiements_annules|default:0 }} annulé(s) ·
+        {{ kpis.nombre_recus|default:0 }} reçu(s) valides.
+      </p>
+    </div>
+  </section>
+</div>
+{% endblock %}

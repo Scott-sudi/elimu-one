@@ -1,1 +1,52 @@
-{% extends "layouts/app.html" %}{% block title %}{{ guardian }}{% endblock %}{% block content %}<div data-page="secretariat-guardians"><div class="content__header"><div><h2 class="content__title">{{ guardian }}</h2><p class="content__description">Dossier du responsable</p></div><a class="btn btn--secondary" href="{% url 'secretariat:guardians' %}">Retour</a></div><div class="secretariat-detail-grid"><section class="card"><div class="card__body"><h3>Coordonnées</h3><dl class="secretariat-dl"><dt>Téléphone</dt><dd>{{ guardian.telephone_principal }}</dd><dt>Téléphone secondaire</dt><dd>{{ guardian.telephone_secondaire|default:"—" }}</dd><dt>E-mail</dt><dd>{{ guardian.email|default:"—" }}</dd><dt>Adresse</dt><dd>{{ guardian.adresse|default:"—" }}</dd><dt>Profession</dt><dd>{{ guardian.profession|default:"—" }}</dd></dl></div></section><section class="card"><div class="card__body"><h3>Élèves liés</h3>{% for link in student_links %}<p><a href="{% url 'secretariat:student-detail' link.student.public_id %}">{{ link.student }}</a> · {{ link.get_lien_parente_display }}</p>{% empty %}<p>Aucun élève associé.</p>{% endfor %}</div></section></div></div>{% endblock %}
+{% extends "layouts/app.html" %}
+{% block title %}{{ guardian }}{% endblock %}
+{% block content %}
+<div data-page="secretariat-guardians">
+  <div class="content__header">
+    <div>
+      <h2 class="content__title">{{ guardian }}</h2>
+      <p class="content__description">Dossier du responsable</p>
+    </div>
+    <div class="content__actions">
+      {% if year_writable %}
+        <a class="btn btn--secondary" href="{% url 'secretariat:guardian-update' guardian.public_id %}">Modifier</a>
+        {% if guardian.is_archived %}
+          <form method="post" action="{% url 'secretariat:guardian-restore' guardian.public_id %}" data-confirm-form="Restaurer ce responsable ?">
+            {% csrf_token %}<button class="btn btn--primary">Restaurer</button>
+          </form>
+        {% else %}
+          <form method="post" action="{% url 'secretariat:guardian-archive' guardian.public_id %}" data-confirm-form="Archiver ce responsable ?">
+            {% csrf_token %}<button class="btn btn--ghost">Archiver</button>
+          </form>
+        {% endif %}
+      {% endif %}
+      <a class="btn btn--secondary" href="{% url 'secretariat:guardians' %}">Retour</a>
+    </div>
+  </div>
+  <div class="secretariat-detail-grid">
+    <section class="card">
+      <div class="card__body">
+        <h3>Coordonnées</h3>
+        <dl class="secretariat-dl">
+          <dt>N° d'identification</dt><dd>{{ guardian.numero_identification|default:"—" }}</dd>
+          <dt>Téléphone</dt><dd>{{ guardian.telephone_principal }}</dd>
+          <dt>Téléphone secondaire</dt><dd>{{ guardian.telephone_secondaire|default:"—" }}</dd>
+          <dt>E-mail</dt><dd>{{ guardian.email|default:"—" }}</dd>
+          <dt>Adresse</dt><dd>{{ guardian.adresse|default:"—" }}</dd>
+          <dt>Profession</dt><dd>{{ guardian.profession|default:"—" }}</dd>
+        </dl>
+      </div>
+    </section>
+    <section class="card">
+      <div class="card__body">
+        <h3>Élèves liés</h3>
+        {% for link in student_links %}
+          <p><a href="{% url 'secretariat:student-detail' link.student.public_id %}">{{ link.student }}</a> · {{ link.get_lien_parente_display }}</p>
+        {% empty %}
+          <p>Aucun élève associé.</p>
+        {% endfor %}
+      </div>
+    </section>
+  </div>
+</div>
+{% endblock %}

@@ -1,4 +1,264 @@
-{% extends "layouts/app.html" %}{% block title %}{{ school_class.name }}{% endblock %}{% block content %}
-<div data-page="secretariat-classes"><div class="content__header"><div><h2 class="content__title">{{ school_class.name }}</h2><p class="content__description">{{ school_class.academic_year }} · {{ school_class.level }}{% if school_class.section %} · {{ school_class.section }}{% endif %}</p></div><a class="btn btn--secondary" href="{% url 'secretariat:classes' %}">Retour</a></div>
-<div class="secretariat-stats"><article class="card"><div class="card__body"><span>Occupation</span><h3>{{ occupied }}/{{ school_class.max_capacity }}</h3></div></article><article class="card"><div class="card__body"><span>Filles</span><h3>{{ girls }}</h3></div></article><article class="card"><div class="card__body"><span>Garçons</span><h3>{{ boys }}</h3></div></article></div>
-<section class="card secretariat-section"><div class="card__header"><h3>Élèves inscrits</h3></div><div class="table-wrap"><table class="table table--dense"><thead><tr><th>Matricule</th><th>Nom complet</th><th>Sexe</th></tr></thead><tbody>{% for e in enrollments %}<tr><td>{{ e.student.matricule }}</td><td><a href="{% url 'secretariat:student-detail' e.student.public_id %}">{{ e.student }}</a></td><td>{{ e.student.get_sexe_display }}</td></tr>{% empty %}<tr><td colspan="3" class="table__empty">Aucun élève</td></tr>{% endfor %}</tbody></table></div></section></div>{% endblock %}
+{% extends "layouts/app.html" %}
+{% block title %}{{ school_class.name }}{% endblock %}
+{% block content %}
+<div data-page="secretariat-classes">
+  <div class="content__header">
+    <div>
+      <h2 class="content__title">{{ school_class.name }}</h2>
+      <p class="content__description">{{ school_class.academic_year }} · {{ school_class.level }}{% if school_class.section %} · {{ school_class.section }}{% endif %}</p>
+    </div>
+    <div class="secretariat-actions">
+      {% if class_writable %}
+        <a class="btn btn--primary" href="{% url 'secretariat:class-enroll' school_class.public_id %}">Inscription</a>
+        <a class="btn btn--secondary" href="{% url 'secretariat:class-reenroll' school_class.public_id %}">Réinscription</a>
+        <a class="btn btn--secondary" href="{% url 'secretariat:class-update' school_class.public_id %}">Modifier</a>
+        <form method="post" action="{% url 'secretariat:class-deactivate' school_class.public_id %}" data-confirm-form="Désactiver cette classe ?">
+          {% csrf_token %}<button class="btn btn--ghost">Désactiver</button>
+        </form>
+        <button class="btn btn--ghost" type="button" data-modal-open="class-delete-modal">Supprimer</button>
+      {% endif %}
+      {% if occupied %}
+        <a class="btn btn--primary" href="{% url 'secretariat:class-cards-zip' school_class.public_id %}">Télécharger les cartes (PNG)</a>
+      {% endif %}
+      <a class="btn btn--secondary" href="{% url 'secretariat:classes' %}">Retour</a>
+    </div>
+  </div>
+
+  {% if not school_class.is_active %}
+    <div class="alert alert--warning" style="margin-bottom: var(--space-4);">
+      Cette classe est désactivée. Consultation uniquement — aucune modification n’est possible.
+    </div>
+  {% endif %}
+
+  <div class="secretariat-stats">
+    <article class="card"><div class="card__body"><span>Occupation</span><h3>{{ occupied }}/{{ school_class.max_capacity }}</h3></div></article>
+    <article class="card"><div class="card__body"><span>Filles</span><h3>{{ girls }}</h3></div></article>
+    <article class="card"><div class="card__body"><span>Garçons</span><h3>{{ boys }}</h3></div></article>
+    <article class="card"><div class="card__body"><span>Cartes prêtes</span><h3>{{ cards_ready }}/{{ occupied }}</h3></div></article>
+  </div>
+
+  {% if class_writable and class_is_full %}
+    <div class="alert alert--warning" style="margin-bottom: var(--space-4);">
+      Cette classe est pleine ({{ occupied }}/{{ school_class.max_capacity }}).
+      L’inscription est refusée tant que la capacité n’est pas élargie.
+      <button class="btn btn--secondary btn--sm" type="button" data-modal-open="class-expand-capacity-modal" style="margin-left:.5rem;">
+        Élargir les places
+      </button>
+    </div>
+  {% endif %}
+
+  <section class="card secretariat-section">
+    <div class="card__header card__header--toolbar">
+      <h3>Élèves inscrits</h3>
+      <form
+        class="secretariat-inline-filters"
+        method="get"
+        action="{% url 'secretariat:class-detail' school_class.public_id %}"
+      >
+        <input
+          class="form-input form-input--sm"
+          type="search"
+          name="q"
+          value="{{ student_filters.q }}"
+          placeholder="Matricule, nom ou n° de carte"
+        >
+        <select class="form-input form-input--sm" name="sexe" aria-label="Filtrer par sexe">
+          <option value="">Tous les sexes</option>
+          <option value="M" {% if student_filters.sexe == "M" %}selected{% endif %}>Garçons</option>
+          <option value="F" {% if student_filters.sexe == "F" %}selected{% endif %}>Filles</option>
+        </select>
+        <button class="btn btn--secondary btn--sm" type="submit">Filtrer</button>
+        {% if student_filters.q or student_filters.sexe %}
+          <a class="btn btn--ghost btn--sm" href="{% url 'secretariat:class-detail' school_class.public_id %}">Réinitialiser</a>
+        {% endif %}
+      </form>
+    </div>
+    <div class="table-wrap">
+      <table class="table table--dense">
+        <thead>
+          <tr>
+            <th class="table__index" scope="col">N°</th>
+            <th>Matricule</th>
+            <th>Nom complet</th>
+            <th>Sexe</th>
+            <th>Carte</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in enrollment_rows %}
+            {% with e=row.enrollment card=row.card %}
+              <tr>
+                <td class="table__index">{{ forloop.counter }}</td>
+                <td>{{ e.student.matricule }}</td>
+                <td>
+                  <a href="{% url 'secretariat:student-detail' e.student.public_id %}">
+                    {{ e.student.nom }}{% if e.student.postnom %} {{ e.student.postnom }}{% endif %} {{ e.student.prenom }}
+                  </a>
+                </td>
+                <td>{{ e.student.get_sexe_display }}</td>
+                <td>
+                  {% if card %}
+                    {% if card.is_blocked %}
+                      <span class="badge badge--neutral" title="{{ card.block_reason }}">{{ card.card_number }} · Bloquée</span>
+                    {% else %}
+                      <span class="badge badge--success">{{ card.card_number }}</span>
+                    {% endif %}
+                  {% else %}
+                    <span class="badge">Absente</span>
+                  {% endif %}
+                </td>
+                <td class="secretariat-card-actions" style="justify-content:flex-end; gap:.35rem;">
+                  <a class="btn btn--secondary btn--sm" href="{% url 'secretariat:student-detail' e.student.public_id %}">Consulter</a>
+                  {% if card %}
+                    <a class="btn btn--ghost btn--sm" href="{% url 'secretariat:card-preview' card.public_id %}">Aperçu</a>
+                    <a class="btn btn--primary btn--sm" href="{% url 'secretariat:card-png' card.public_id %}">PNG</a>
+                  {% elif class_writable %}
+                    <form method="post" action="{% url 'secretariat:card-generate' e.public_id %}">
+                      {% csrf_token %}
+                      <input type="hidden" name="next" value="{{ request.path }}">
+                      <button class="btn btn--ghost btn--sm" type="submit">Générer carte</button>
+                    </form>
+                  {% endif %}
+                  {% if class_writable %}
+                    <button
+                      class="btn btn--ghost btn--sm"
+                      type="button"
+                      data-modal-open="student-delete-modal"
+                      data-student-delete-url="{% url 'secretariat:student-delete' e.student.public_id %}"
+                      data-student-delete-label="{{ e.student.matricule }} — {{ e.student.nom }}{% if e.student.postnom %} {{ e.student.postnom }}{% endif %} {{ e.student.prenom }}"
+                    >Supprimer</button>
+                  {% endif %}
+                </td>
+              </tr>
+            {% endwith %}
+          {% empty %}
+            <tr><td colspan="6" class="table__empty">Aucun élève</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+</div>
+{% endblock %}
+
+{% block modals %}
+{% if class_writable %}
+{% if class_is_full %}
+  {% url 'secretariat:class-detail' school_class.public_id as expand_next %}
+  {% include "secretariat/classes/_expand_capacity_modal.html" with next_url=expand_next %}
+{% endif %}
+<div class="modal-backdrop" id="class-delete-modal" data-modal="class-delete-modal" hidden>
+  <div class="modal modal--sm" data-modal-panel>
+    <div class="modal__header">
+      <h2>Supprimer la classe</h2>
+      <button class="modal__close" data-modal-close type="button" aria-label="Fermer">×</button>
+    </div>
+    <div class="modal__body">
+      <p class="form-hint" style="margin-top:0;">
+        Suppression définitive de <strong>{{ school_class.name }}</strong>.
+        Indiquez la raison et confirmez avec votre mot de passe.
+      </p>
+      <form method="post" action="{% url 'secretariat:class-delete' school_class.public_id %}" autocomplete="off">
+        {% csrf_token %}
+        <div class="form-group">
+          <label class="form-label form-label--required" for="class_delete_reason">Raison de la suppression</label>
+          <textarea
+            class="form-input"
+            id="class_delete_reason"
+            name="reason"
+            rows="3"
+            required
+            placeholder="Ex. : classe créée par erreur, doublon…"
+          ></textarea>
+        </div>
+        <div class="form-group">
+          <label class="form-label form-label--required" for="class_delete_password">Mot de passe</label>
+          <input
+            class="form-input"
+            id="class_delete_password"
+            type="password"
+            name="password"
+            required
+            autocomplete="current-password"
+            placeholder="Votre mot de passe secrétaire"
+          >
+        </div>
+        <div class="content__actions" style="margin-top:1rem;">
+          <button class="btn btn--ghost" type="button" data-modal-close>Annuler</button>
+          <button class="btn btn--danger" type="submit">Confirmer la suppression</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<div class="modal-backdrop" id="student-delete-modal" data-modal="student-delete-modal" hidden>
+  <div class="modal modal--sm" data-modal-panel>
+    <div class="modal__header">
+      <h2>Supprimer l'élève</h2>
+      <button class="modal__close" data-modal-close type="button" aria-label="Fermer">×</button>
+    </div>
+    <div class="modal__body">
+      <p class="form-hint" style="margin-top:0;">
+        L’élève <strong data-student-delete-name>—</strong> sera retiré de la classe
+        et de l’application mobile des parents. Motif + mot de passe secrétaire requis.
+      </p>
+      <form method="post" action="" data-student-delete-form autocomplete="off">
+        {% csrf_token %}
+        <input type="hidden" name="next" value="{{ request.path }}">
+        <div class="form-group">
+          <label class="form-label form-label--required" for="student_delete_reason">Motif de la suppression</label>
+          <textarea
+            class="form-input"
+            id="student_delete_reason"
+            name="reason"
+            rows="3"
+            required
+            minlength="5"
+            placeholder="Ex. : inscription erronée, départ de l’élève…"
+          ></textarea>
+        </div>
+        <div class="form-group">
+          <label class="form-label form-label--required" for="student_delete_password">Mot de passe secrétaire</label>
+          <input
+            class="form-input"
+            id="student_delete_password"
+            type="password"
+            name="password"
+            required
+            autocomplete="current-password"
+            placeholder="Votre mot de passe"
+          >
+        </div>
+        <div class="content__actions" style="margin-top:1rem;">
+          <button class="btn btn--ghost" type="button" data-modal-close>Annuler</button>
+          <button class="btn btn--danger" type="submit">Confirmer la suppression</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+{% if class_writable %}
+<script>
+(function () {
+  const modal = document.getElementById('student-delete-modal');
+  if (!modal) return;
+  const form = modal.querySelector('[data-student-delete-form]');
+  const nameEl = modal.querySelector('[data-student-delete-name]');
+  document.querySelectorAll('[data-student-delete-url]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const url = btn.getAttribute('data-student-delete-url');
+      const label = btn.getAttribute('data-student-delete-label') || 'cet élève';
+      if (nameEl) nameEl.textContent = label;
+      if (form && url) form.action = url;
+    });
+  });
+})();
+</script>
+{% endif %}
+{% endblock %}

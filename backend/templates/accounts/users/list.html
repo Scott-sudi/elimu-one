@@ -53,6 +53,7 @@
               <option value="SECRETAIRE" {% if request.GET.role == 'SECRETAIRE' %}selected{% endif %}>Secrétaire</option>
               <option value="COMPTABLE" {% if request.GET.role == 'COMPTABLE' %}selected{% endif %}>Comptable</option>
               <option value="DISCIPLINE" {% if request.GET.role == 'DISCIPLINE' %}selected{% endif %}>Discipline</option>
+              <option value="PREFET" {% if request.GET.role == 'PREFET' %}selected{% endif %}>Préfet</option>
             {% endfor %}
           </select>
           <select name="status" class="form-select" aria-label="Filtrer par statut">

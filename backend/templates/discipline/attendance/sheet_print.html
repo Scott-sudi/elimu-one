@@ -1,0 +1,47 @@
+{% extends "layouts/base.html" %}
+{% block title %}Impression feuille de présence{% endblock %}
+{% block body %}
+<main class="content">
+  <div class="content__inner">
+    <section class="card">
+      <div class="card__body">
+        <h2>{{ school_name }} – Feuille de présence</h2>
+        <p>Classe : {{ school_class.name }} · Date : {{ sheet_date|date:"d/m/Y" }} · Année : {{ selected_year.label }}</p>
+        <p>Statut : {{ sheet.get_status_display }} · Effectif : {{ totals.total_students }}</p>
+      </div>
+    </section>
+    <section class="card">
+      <div class="table-wrap">
+        <table class="table table--dense">
+          <thead>
+            <tr>
+              <th>N°</th>
+              <th>Matricule</th>
+              <th>Nom complet</th>
+              <th>Présence</th>
+              <th>Mention</th>
+              <th>Observation</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for record in records %}
+              <tr>
+                <td>{{ forloop.counter }}</td>
+                <td>{{ record.student.matricule }}</td>
+                <td>{{ record.student.nom }} {{ record.student.postnom }} {{ record.student.prenom }}</td>
+                <td>{% if record.presence_value is None %}—{% else %}{{ record.presence_value }}{% endif %}</td>
+                <td>{{ record.mention|default:"—" }}</td>
+                <td>{{ record.observation|default:"—" }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      <div class="card__body">
+        <p>Présents : {{ totals.total_present }} · Absents : {{ totals.total_absent }} · Non pointés : {{ totals.total_unmarked }}</p>
+        {% if sheet.validated_by %}<p>Validé par {{ sheet.validated_by }} le {{ sheet.validation_at|date:"d/m/Y H:i" }}</p>{% endif %}
+      </div>
+    </section>
+  </div>
+</main>
+{% endblock %}

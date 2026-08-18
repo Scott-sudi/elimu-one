@@ -1,0 +1,90 @@
+{% extends "layouts/app.html" %}
+{% block title %}Reçu {{ payment.receipt_number }}{% endblock %}
+{% block content %}
+<style>
+  .receipt-preview {
+    width: 100%;
+    min-height: 70vh;
+    border: 1px solid var(--color-border, #cfd6d2);
+    border-radius: 0.5rem;
+    background: #f7f7f7;
+  }
+  .receipt-preview__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+  }
+  @media print {
+    .content__header,
+    .receipt-preview__actions,
+    .sidebar,
+    .navbar,
+    .topbar,
+    .breadcrumbs {
+      display: none !important;
+    }
+    .receipt-preview {
+      border: none;
+      min-height: auto;
+      height: 100vh;
+    }
+  }
+</style>
+<div data-page="finance-receipts">
+  <div class="content__header">
+    <div>
+      <h2 class="content__title">Reçu {{ payment.receipt_number }}</h2>
+      <p class="content__description">
+        {{ payment.student.nom }} {{ payment.student.prenom }}
+        · {{ payment.payment_date|date:"d/m/Y" }}
+        · {{ payment.amount_total }} {{ payment.currency }}
+      </p>
+    </div>
+    <div class="content__actions receipt-preview__actions">
+      <a class="btn btn--secondary" href="{% url 'finance:receipts' %}">Retour aux reçus</a>
+      <a class="btn btn--secondary" href="{% url 'finance:payment-detail' payment.public_id %}">Paiement</a>
+      {% if payment.status == "VALIDE" %}
+        <button type="button" class="btn btn--secondary" id="receipt-print-btn">Imprimer</button>
+        <a class="btn btn--primary" href="{% url 'finance:receipt-pdf' payment.public_id %}">Télécharger PDF</a>
+      {% endif %}
+    </div>
+  </div>
+
+  {% if payment.status == "VALIDE" %}
+    <section class="card">
+      <div class="card__body">
+        <iframe
+          id="receipt-pdf-frame"
+          class="receipt-preview"
+          title="Aperçu du reçu {{ payment.receipt_number }}"
+          src="{% url 'finance:receipt-pdf' payment.public_id %}?inline=1"
+        ></iframe>
+      </div>
+    </section>
+  {% else %}
+    <section class="card">
+      <div class="card__body">
+        <p class="form-error">Ce paiement est annulé : le reçu n'est plus disponible.</p>
+      </div>
+    </section>
+  {% endif %}
+</div>
+<script>
+  (function () {
+    var btn = document.getElementById("receipt-print-btn");
+    var frame = document.getElementById("receipt-pdf-frame");
+    if (!btn || !frame) return;
+    btn.addEventListener("click", function () {
+      try {
+        if (frame.contentWindow) {
+          frame.contentWindow.focus();
+          frame.contentWindow.print();
+          return;
+        }
+      } catch (e) {}
+      window.open(frame.src, "_blank");
+    });
+  })();
+</script>
+{% endblock %}

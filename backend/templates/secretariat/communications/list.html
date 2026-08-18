@@ -1,1 +1,45 @@
-{% extends "layouts/app.html" %}{% block title %}Communications{% endblock %}{% block content %}<div data-page="secretariat-communications"><div class="content__header"><div><h2 class="content__title">Communications</h2><p class="content__description">Messages adressés aux responsables</p></div><a class="btn btn--primary" href="{% url 'secretariat:communication-create' %}">Nouvelle communication</a></div><form class="secretariat-toolbar" hx-get="{% url 'secretariat:communications' %}" hx-target="#communications-table"><input class="form-input form-input--sm" name="q" value="{{ request.GET.q }}" placeholder="Titre ou contenu"><select class="form-select" name="status"><option value="">Tous les statuts</option><option value="BROUILLON">Brouillons</option><option value="PUBLIEE">Publiées</option></select><button class="btn btn--secondary btn--sm">Filtrer</button></form>{% include "secretariat/communications/_table.html" %}</div>{% endblock %}
+{% extends "layouts/app.html" %}
+{% block title %}Communications{% endblock %}
+{% block content %}
+<div data-page="secretariat-communications">
+  <div class="content__header content__header--with-filters">
+    <div class="content__header-main">
+      <h2 class="content__title">Communications</h2>
+      <p class="content__description">Messages adressés aux responsables</p>
+    </div>
+    <div class="content__actions content__actions--toolbar">
+      <form
+        class="secretariat-inline-filters"
+        method="get"
+        action="{% url 'secretariat:communications' %}"
+        hx-get="{% url 'secretariat:communications' %}"
+        hx-target="#communications-table"
+        hx-push-url="true"
+        hx-trigger="submit, change delay:150ms from:select"
+      >
+        <input
+          class="form-input form-input--sm"
+          type="search"
+          name="q"
+          value="{{ request.GET.q }}"
+          placeholder="Titre ou contenu"
+          aria-label="Rechercher"
+        >
+        <select class="form-input form-input--sm" name="filter" aria-label="Filtrer par statut">
+          <option value="">Toutes</option>
+          <option value="BROUILLON" {% if active_filter == "BROUILLON" %}selected{% endif %}>Brouillons</option>
+          <option value="PROGRAMMEE" {% if active_filter == "PROGRAMMEE" %}selected{% endif %}>Programmées</option>
+          <option value="PUBLIEE" {% if active_filter == "PUBLIEE" %}selected{% endif %}>Publiées</option>
+          <option value="pinned" {% if active_filter == "pinned" %}selected{% endif %}>Épinglées</option>
+          <option value="ARCHIVEE" {% if active_filter == "ARCHIVEE" %}selected{% endif %}>Archivées</option>
+        </select>
+        <button class="btn btn--secondary btn--sm" type="submit">Filtrer</button>
+      </form>
+      {% if year_writable %}
+        <a class="btn btn--primary" href="{% url 'secretariat:communication-create' %}">Nouvelle communication</a>
+      {% endif %}
+    </div>
+  </div>
+  {% include "secretariat/communications/_table.html" %}
+</div>
+{% endblock %}

@@ -12,21 +12,21 @@
           <div class="login-card__logo">
             <img
               src="{% static 'images/branding/logo.png' %}"
-              alt="{{ school_name|default:'Institut Kalunga' }}"
+              alt="{{ platform_name }}"
               onerror="this.remove(); this.parentElement.insertAdjacentHTML('beforeend', '<i data-lucide=\'school\' width=\'28\' height=\'28\'></i>'); if (window.Kalunga?.icons?.refresh) window.Kalunga.icons.refresh(this.parentElement);"
             >
           </div>
-          <div class="login-card__brand-name">{{ school_name|default:"Institut Kalunga" }}</div>
-          <p class="login-card__brand-tagline">{{ school_slogan|default:"La Source du Savoir" }}</p>
+          <div class="login-card__brand-name">{{ platform_name }}</div>
+          <p class="login-card__brand-tagline">{{ platform_tagline }}</p>
           <p class="login-card__brand-tagline" style="margin-top: 0.5rem;">
-            Système intégré de gestion scolaire
+            Plateforme web pour la gestion des établissements scolaires.
           </p>
           <p class="login-card__brand-tagline" style="margin-top: 0.75rem; font-size: 0.8rem;">
             Espace d'administration du personnel et des accès.
           </p>
         </div>
         <div class="login-card__brand-footer">
-          {{ school_full_name|default:"Institut Kalunga – La Source du Savoir" }}
+          {{ app_full_name }}
         </div>
       </aside>
 

@@ -1,0 +1,52 @@
+{% extends "layouts/bi.html" %}
+{% block title %}{{ page_title }} — BI{% endblock %}
+{% block content %}
+{{ charts|json_script:"bi-charts-data" }}
+<div data-page="bi-discipline" class="bi-page">
+  <div class="content__header">
+    <div class="content__header-main">
+      <h2 class="content__title">{{ page_title }}</h2>
+      <p class="content__description">
+        {% if selected_year %}Année {{ selected_year.label }} · {% endif %}
+        Incidents, mesures et convocations.
+      </p>
+    </div>
+  </div>
+
+  {% include "bi/partials/filters.html" with bi_domain="discipline" clear_url=request.path %}
+
+  <div class="dashboard__stats" aria-label="Indicateurs discipline">
+    <div class="stat-card">
+      <div class="stat-card__label">Incidents</div>
+      <div class="stat-card__value">{{ kpis.incidents_total|default:0 }}</div>
+      <div class="stat-card__meta">{{ kpis.incidents_ouverts|default:0 }} ouvert(s)</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-card__label">Mesures</div>
+      <div class="stat-card__value">{{ kpis.mesures|default:0 }}</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-card__label">Convocations en attente</div>
+      <div class="stat-card__value">{{ kpis.convocations_attente|default:0 }}</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-card__label">Récidives</div>
+      <div class="stat-card__value">{{ kpis.recidives|default:0 }}</div>
+    </div>
+  </div>
+
+  <section class="card bi-section" aria-label="Incidents par gravité">
+    <div class="card__header"><h3>Incidents par gravité</h3></div>
+    <div class="card__body">
+      <div data-bi-chart="discipline-severity" data-bi-chart-type="hbar" class="bi-chart"></div>
+    </div>
+  </section>
+
+  <section class="card bi-section" aria-label="Convocations">
+    <div class="card__header"><h3>Convocations</h3></div>
+    <div class="card__body">
+      <div data-bi-chart="discipline-summons" data-bi-chart-type="hbar" class="bi-chart"></div>
+    </div>
+  </section>
+</div>
+{% endblock %}

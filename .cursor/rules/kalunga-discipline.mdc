@@ -1,0 +1,22 @@
+---
+description: Discipline module guardrails for Kalunga
+alwaysApply: true
+---
+
+# Kalunga Discipline Rule
+
+- Le projet existe deja: ne pas reconstruire Administrateur, Secretariat, Comptabilite.
+- Developper uniquement `apps.discipline` et l'integration minimale necessaire (menu, routes, permissions, annee).
+- Reutiliser la selection d'annee scolaire existante (`secretariat:academic-year-select` + session `secretariat_academic_year_id`).
+- Reutiliser le theme actuel (CSS tokens existants, boutons, tableaux, modales). Aucun degrade.
+- Conserver de faibles rayons de bordure et les composants UI actuels.
+- Ne pas creer de nouvelles tables doublons pour eleves/classes/parents/inscriptions/cartes.
+- Utiliser les donnees Secretariat en lecture et les relations existantes.
+- Reutiliser la confirmation mot de passe existante pour les actions sensibles.
+- Assurer l'audit des actions sensibles de discipline.
+- Proteger strictement les donnees disciplinaires (permissions web + API + fichiers).
+- Ne pas developper Flutter ni Business Intelligence dans cette phase.
+- Base cible: MySQL `kalunga_school`.
+- Interface en francais.
+- Tester non-regression des modules existants apres modifications.
+

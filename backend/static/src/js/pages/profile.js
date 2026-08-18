@@ -2,9 +2,7 @@
  * Profile page — password toggle and form feedback.
  */
 
-import { apiPost } from '../core/api.js';
 import { toast } from '../core/notifications.js';
-import { setButtonLoading } from '../core/loading.js';
 import { initPasswordToggles } from '../components/password-toggle.js';
 
 /**
@@ -19,33 +17,15 @@ export function initProfile(root = document) {
   initProfilePhoto(page);
 
   const passwordForm = page.querySelector('[data-password-form]');
-  passwordForm?.addEventListener('submit', async (e) => {
-    if (passwordForm.hasAttribute('hx-post')) return;
-    e.preventDefault();
-
-    const btn = passwordForm.querySelector('[type="submit"]');
-    const newPass = passwordForm.querySelector('[name="new_password"], [name="new_password1"]')?.value;
-    const confirm = passwordForm.querySelector('[name="new_password_confirm"], [name="new_password2"], [name="confirm_password"]')?.value;
-
+  passwordForm?.addEventListener('submit', (e) => {
+    // Client-side confirmation check only. Do NOT disable the submit button
+    // here: browsers cancel a native form POST if the submitter is disabled
+    // synchronously during the submit event.
+    const newPass = passwordForm.querySelector('[name="new_password"]')?.value;
+    const confirm = passwordForm.querySelector('[name="new_password_confirm"]')?.value;
     if (newPass && confirm && newPass !== confirm) {
+      e.preventDefault();
       toast.error('Les mots de passe ne correspondent pas.');
-      return;
-    }
-
-    setButtonLoading(btn, true, { label: 'Mise à jour…' });
-    try {
-      const action = passwordForm.getAttribute('action') || '/profil/mot-de-passe/';
-      const result = await apiPost(action, new FormData(passwordForm));
-      if (!result.ok) {
-        toast.error(result.error || 'Impossible de changer le mot de passe.');
-        return;
-      }
-      passwordForm.reset();
-      toast.success('Mot de passe mis à jour.');
-      // Reload so the forced-change middleware releases navigation.
-      window.setTimeout(() => { window.location.href = '/tableau-de-bord/'; }, 600);
-    } finally {
-      setButtonLoading(btn, false);
     }
   });
 }

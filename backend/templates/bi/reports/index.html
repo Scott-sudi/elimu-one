@@ -1,0 +1,42 @@
+{% extends "layouts/bi.html" %}
+{% block title %}{{ page_title }} — BI{% endblock %}
+{% block content %}
+{{ charts|json_script:"bi-charts-data" }}
+<div data-page="bi-reports" class="bi-page">
+  <div class="content__header">
+    <div class="content__header-main">
+      <h2 class="content__title">{{ page_title }}</h2>
+      <p class="content__description">
+        {% if selected_year %}Année {{ selected_year.label }} · {% endif %}
+        Exports CSV / XLSX des tableaux analytiques.
+      </p>
+    </div>
+  </div>
+
+  <section class="card bi-section" aria-label="Aperçu des rapports">
+    <div class="card__header"><h3>Aperçu des rapports</h3></div>
+    <div class="card__body">
+      <div data-bi-chart="reports-preview" data-bi-chart-type="bar" class="bi-chart"></div>
+    </div>
+  </section>
+
+  <section class="card bi-section" aria-label="Exports disponibles">
+    <div class="card__header"><h3>Exports disponibles</h3></div>
+    <div class="card__body">
+      <div data-bi-chart="reports-exports" data-bi-chart-type="donut" class="bi-chart bi-chart--sm"></div>
+      <ul class="bi-alert-list" style="margin-top:1rem;">
+        {% for item in exports %}
+        <li>
+          {{ item.label }} —
+          <a href="{% url 'bi:export-download' domain=item.domain file_format='csv' %}">CSV</a>
+          ·
+          <a href="{% url 'bi:export-download' domain=item.domain file_format='xlsx' %}">XLSX</a>
+        </li>
+        {% empty %}
+        <li class="table__cell-muted">Aucun export configuré.</li>
+        {% endfor %}
+      </ul>
+    </div>
+  </section>
+</div>
+{% endblock %}

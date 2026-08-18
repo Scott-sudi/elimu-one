@@ -3,15 +3,88 @@
 {% block content %}
 <div data-page="secretariat-dashboard">
   <div class="content__header">
-    <div class="content__header-main"><h2 class="content__title">Tableau de bord du secrétariat</h2><p class="content__description">{% if stats.academic_year %}Année {{ stats.academic_year.label }}{% else %}Aucune année scolaire active{% endif %}</p></div>
-    <div class="content__actions"><a class="btn btn--primary" href="{% url 'secretariat:enrollment-create' %}">Nouvelle inscription</a></div>
+    <div class="content__header-main">
+      <h2 class="content__title">Tableau de bord du secrétariat</h2>
+      <p class="content__description">
+        {% if stats.academic_year %}
+          Année {{ stats.academic_year.label }}
+        {% else %}
+          Aucune année scolaire sélectionnée
+        {% endif %}
+      </p>
+    </div>
+    <div class="content__actions">
+      <a class="btn btn--primary" href="{% url 'secretariat:classes' %}">Voir les classes</a>
+    </div>
   </div>
   {% include "secretariat/dashboard/_stats.html" %}
-  <section class="card secretariat-section"><div class="card__header"><h3>Inscriptions récentes</h3></div><div class="table-wrap">
-    <table class="table table--dense"><thead><tr><th>Numéro</th><th>Élève</th><th>Classe</th><th>Date</th><th>Statut</th></tr></thead><tbody>
-    {% for enrollment in recent_enrollments %}<tr><td>{{ enrollment.enrollment_number }}</td><td><a href="{% url 'secretariat:student-detail' enrollment.student.public_id %}">{{ enrollment.student }}</a></td><td>{{ enrollment.school_class.name }}</td><td>{{ enrollment.enrollment_date|date:"d/m/Y" }}</td><td><span class="badge">{{ enrollment.get_status_display }}</span></td></tr>
-    {% empty %}<tr><td colspan="5" class="table__empty">{% include "components/empty_state.html" with icon="clipboard-list" title="Aucune inscription récente" %}</td></tr>{% endfor %}
-    </tbody></table>
-  </div></section>
+
+  <div class="secretariat-dashboard-tables">
+    <section class="card secretariat-section">
+      <div class="card__header">
+        <h3>Effectifs par classe</h3>
+      </div>
+      <div class="table-wrap">
+        <table class="table table--dense">
+          <thead>
+            <tr>
+              <th scope="col">Classe</th>
+              <th scope="col">Filles</th>
+              <th scope="col">Garçons</th>
+              <th scope="col">Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in stats.class_gender_rows %}
+              <tr>
+                <td>
+                  <a class="secretariat-class-nav" href="{% url 'secretariat:class-detail' row.public_id %}">
+                    {{ row.name }}
+                  </a>
+                </td>
+                <td>{{ row.girls }}</td>
+                <td>{{ row.boys }}</td>
+                <td>{{ row.total }}</td>
+              </tr>
+            {% empty %}
+              <tr><td colspan="4" class="table__empty">Aucune classe</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="card secretariat-section">
+      <div class="card__header">
+        <h3>Places libres</h3>
+      </div>
+      <div class="table-wrap">
+        <table class="table table--dense">
+          <thead>
+            <tr>
+              <th scope="col">Classe</th>
+              <th scope="col">Places libres</th>
+              <th scope="col">Occupation</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in stats.class_free_place_rows %}
+              <tr>
+                <td>
+                  <a class="secretariat-class-nav" href="{% url 'secretariat:class-detail' row.public_id %}">
+                    {{ row.name }}
+                  </a>
+                </td>
+                <td>{{ row.free_places }}</td>
+                <td class="table__cell-muted">{{ row.occupied }}/{{ row.capacity }}</td>
+              </tr>
+            {% empty %}
+              <tr><td colspan="3" class="table__empty">Aucune place libre</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </div>
 </div>
 {% endblock %}

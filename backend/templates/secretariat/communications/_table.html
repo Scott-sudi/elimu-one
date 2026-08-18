@@ -1,1 +1,99 @@
-<div id="communications-table"><div class="table-wrap"><table class="table table--dense"><thead><tr><th>Titre</th><th>Catégorie</th><th>Priorité</th><th>Statut</th><th>Publication</th><th></th></tr></thead><tbody>{% for item in page_obj %}<tr><td>{% if item.is_pinned %}📌 {% endif %}{{ item.title }}</td><td>{{ item.get_category_display }}</td><td><span class="badge">{{ item.get_priority_display }}</span></td><td><span class="badge {% if item.status == 'PUBLIEE' %}badge--success{% endif %}">{{ item.get_status_display }}</span></td><td>{{ item.published_at|date:"d/m/Y H:i"|default:"—" }}</td><td><a class="btn btn--ghost btn--sm" href="{% url 'secretariat:communication-detail' item.public_id %}">Consulter</a></td></tr>{% empty %}<tr><td colspan="6" class="table__empty">{% include "components/empty_state.html" with icon="megaphone" title="Aucune communication" %}</td></tr>{% endfor %}</tbody></table></div>{% include "components/pagination.html" with page_obj=page_obj hx_target="#communications-table" hx_swap="outerHTML" %}</div>
+<div id="communications-table">
+  <div class="table-wrap">
+    <table class="table table--dense">
+      <thead>
+        <tr>
+          <th class="table__index" scope="col">N°</th>
+          <th>Titre</th>
+          <th>Catégorie</th>
+          <th>Priorité</th>
+          <th>Statut</th>
+          <th>Publication</th>
+          <th style="text-align: right;">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in page_obj %}
+          <tr>
+            <td class="table__index">{{ forloop.counter0|add:page_obj.start_index }}</td>
+            <td>
+              {{ item.title }}
+              {% if item.is_pinned %}<span class="badge badge--primary">Épinglée</span>{% endif %}
+            </td>
+            <td>{{ item.get_category_display }}</td>
+            <td><span class="badge">{{ item.get_priority_display }}</span></td>
+            <td>
+              <span class="badge {% if item.status == 'PUBLIEE' %}badge--success{% elif item.status == 'ARCHIVEE' %}badge--neutral{% endif %}">
+                {{ item.get_status_display }}
+              </span>
+            </td>
+            <td>{{ item.published_at|date:"d/m/Y H:i"|default:"—" }}</td>
+            <td>
+              <div class="dropdown" data-dropdown style="display: flex; justify-content: flex-end;">
+                <button type="button" class="btn btn--ghost btn--sm" data-dropdown-trigger aria-label="Actions">
+                  <i data-lucide="ellipsis-vertical" width="16" height="16"></i>
+                </button>
+                <div class="dropdown__menu dropdown__menu--right" data-dropdown-menu hidden role="menu">
+                  <a class="dropdown__item" href="{% url 'secretariat:communication-detail' item.public_id %}">
+                    <span class="dropdown__icon"><i data-lucide="eye" width="16" height="16"></i></span>
+                    Consulter
+                  </a>
+                  {% if year_writable %}
+                    {% if item.status != 'ARCHIVEE' %}
+                      <a class="dropdown__item" href="{% url 'secretariat:communication-update' item.public_id %}">
+                        <span class="dropdown__icon"><i data-lucide="pencil" width="16" height="16"></i></span>
+                        Modifier
+                      </a>
+                      {% if item.is_pinned %}
+                        <form method="post" action="{% url 'secretariat:communication-unpin' item.public_id %}"
+                              hx-post="{% url 'secretariat:communication-unpin' item.public_id %}"
+                              hx-target="#communications-table" hx-swap="outerHTML">
+                          {% csrf_token %}
+                          <button type="submit" class="dropdown__item" data-dropdown-item>Désépingler</button>
+                        </form>
+                      {% else %}
+                        <form method="post" action="{% url 'secretariat:communication-pin' item.public_id %}"
+                              hx-post="{% url 'secretariat:communication-pin' item.public_id %}"
+                              hx-target="#communications-table" hx-swap="outerHTML">
+                          {% csrf_token %}
+                          <button type="submit" class="dropdown__item" data-dropdown-item>Épingler</button>
+                        </form>
+                      {% endif %}
+                      <form method="post" action="{% url 'secretariat:communication-archive' item.public_id %}"
+                            hx-post="{% url 'secretariat:communication-archive' item.public_id %}"
+                            hx-target="#communications-table" hx-swap="outerHTML"
+                            data-confirm-form="Archiver « {{ item.title }} » ?">
+                        {% csrf_token %}
+                        <button type="submit" class="dropdown__item" data-dropdown-item>Archiver</button>
+                      </form>
+                    {% else %}
+                      <form method="post" action="{% url 'secretariat:communication-restore' item.public_id %}"
+                            hx-post="{% url 'secretariat:communication-restore' item.public_id %}"
+                            hx-target="#communications-table" hx-swap="outerHTML">
+                        {% csrf_token %}
+                        <button type="submit" class="dropdown__item" data-dropdown-item>Restaurer</button>
+                      </form>
+                    {% endif %}
+                    <form method="post" action="{% url 'secretariat:communication-delete' item.public_id %}"
+                          data-confirm-form="Supprimer définitivement « {{ item.title }} » ?"
+                          data-confirm-danger>
+                      {% csrf_token %}
+                      <button type="submit" class="dropdown__item" data-dropdown-item>Supprimer</button>
+                    </form>
+                  {% endif %}
+                </div>
+              </div>
+            </td>
+          </tr>
+        {% empty %}
+          <tr>
+            <td colspan="7" class="table__empty">
+              {% include "components/empty_state.html" with icon="megaphone" title="Aucune communication" %}
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% include "components/pagination.html" with page_obj=page_obj hx_target="#communications-table" hx_swap="outerHTML" %}
+</div>

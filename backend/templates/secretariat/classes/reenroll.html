@@ -1,0 +1,96 @@
+{% extends "layouts/app.html" %}
+{% block title %}Réinscription — {{ school_class.name }}{% endblock %}
+{% block content %}
+<div data-page="secretariat-enrollment" data-class-id="{{ school_class.public_id }}">
+  <div class="content__header">
+    <div>
+      <h2 class="content__title">Réinscription</h2>
+      <p class="content__description">
+        Classe {{ school_class.name }} · {{ school_class.academic_year }}
+        {% if previous_year %}
+          — élèves de {{ previous_year.label }} au niveau immédiatement inférieur.
+        {% else %}
+          — aucune année précédente clôturée.
+        {% endif %}
+      </p>
+    </div>
+    <a class="btn btn--secondary" href="{% url 'secretariat:class-detail' school_class.public_id %}">Retour à la classe</a>
+  </div>
+
+  {% if not year_writable %}
+    <div class="alert alert--warning">Cette année scolaire est clôturée : réinscription impossible.</div>
+  {% elif not previous_year %}
+    <section class="card"><div class="card__body">
+      <p>Aucune année scolaire précédente clôturée. La réinscription n’est possible qu’après clôture de l’année précédente.</p>
+    </div></section>
+  {% elif source_order is None %}
+    <section class="card"><div class="card__body">
+      <p>Cette classe est un premier niveau. Pour y enregistrer un élève, utilisez l’inscription.</p>
+      <a class="btn btn--primary" href="{% url 'secretariat:class-enroll' school_class.public_id %}">Aller à l’inscription</a>
+    </div></section>
+  {% else %}
+    {% if class_is_full %}
+      <div class="alert alert--warning">
+        Cette classe est pleine ({{ occupied }}/{{ school_class.max_capacity }}).
+        La réinscription est refusée. Élargissez d’abord le nombre de places.
+        <button class="btn btn--secondary btn--sm" type="button" data-modal-open="class-expand-capacity-modal" style="margin-left:.5rem;">
+          Élargir les places
+        </button>
+      </div>
+    {% endif %}
+  <div class="secretariat-split">
+    <section class="card">
+      <div class="card__header"><h3>Réinscription individuelle</h3></div>
+      <div class="card__body">
+        {% if candidates_count %}
+          <form method="post">
+            {% csrf_token %}
+            {% include "secretariat/_form_fields.html" with form=form %}
+            <div class="content__actions">
+              <button class="btn btn--primary" type="submit" {% if class_is_full %}disabled{% endif %}>Réinscrire</button>
+            </div>
+          </form>
+        {% else %}
+          <p>Aucun élève éligible pour cette classe.</p>
+        {% endif %}
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="card__header"><h3>Réinscription groupée</h3></div>
+      <div class="card__body">
+        {% if candidates_count %}
+          <form method="post" action="{% url 'secretariat:class-reenroll-bulk' school_class.public_id %}">
+            {% csrf_token %}
+            <div class="form-group">
+              <label class="form-label">Élèves à réinscrire ({{ candidates_count }})</label>
+              <select class="form-select" name="enrollments" multiple required size="10" {% if class_is_full %}disabled{% endif %}>
+                {% for e in candidates %}
+                  <option value="{{ e.public_id }}">
+                    {{ e.student.matricule }} —
+                    {{ e.student.nom }}{% if e.student.postnom %} {{ e.student.postnom }}{% endif %} {{ e.student.prenom }}
+                    · {{ e.school_class.name }}
+                  </option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="content__actions" style="margin-top:1rem;">
+              <button class="btn btn--primary" type="submit" {% if class_is_full %}disabled{% endif %}>Réinscrire la sélection</button>
+            </div>
+          </form>
+        {% else %}
+          <p>Aucun élève éligible pour cette classe.</p>
+        {% endif %}
+      </div>
+    </section>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}
+
+{% block modals %}
+{% if year_writable and class_is_full %}
+  {% url 'secretariat:class-reenroll' school_class.public_id as expand_next %}
+  {% include "secretariat/classes/_expand_capacity_modal.html" with next_url=expand_next %}
+{% endif %}
+{% endblock %}

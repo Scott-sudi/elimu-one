@@ -1,1 +1,123 @@
-{% extends "layouts/app.html" %}{% block title %}Carte {{ card.card_number }}{% endblock %}{% block content %}<div data-page="secretariat-cards"><div class="content__header"><div><h2 class="content__title">Aperçu de la carte</h2><p class="content__description">{{ card.student }}</p></div><a class="btn btn--secondary" href="{% url 'secretariat:cards' %}">Retour</a></div><section class="card secretariat-card-preview"><div class="card__body"><h3>Kalunga School</h3><p><strong>{{ card.student.nom }} {{ card.student.prenom }}</strong></p><p>{{ card.student.matricule }} · {{ card.enrollment.school_class }}</p>{% if card.qr_image %}<img src="{{ card.qr_image.url }}" alt="Code QR de la carte">{% endif %}<p>{{ card.card_number }}</p>{% if card.pdf_file %}<a class="btn btn--primary" href="{{ card.pdf_file.url }}">Télécharger le PDF</a>{% endif %}{% if card.is_active %}<form method="post" action="{% url 'secretariat:card-block' card.public_id %}">{% csrf_token %}<label class="form-label">Motif du blocage</label><input class="form-input" name="reason" required><button class="btn btn--secondary">Bloquer la carte</button></form>{% endif %}</div></section></div>{% endblock %}
+{% extends "layouts/app.html" %}
+{% load static %}
+{% block title %}Carte {{ card.card_number }}{% endblock %}
+{% block content %}
+<div data-page="secretariat-cards">
+  <div class="content__header no-print">
+    <div>
+      <h2 class="content__title">Aperçu de la carte</h2>
+      <p class="content__description">{{ card.student }}</p>
+    </div>
+    <div class="secretariat-actions">
+      <a class="btn btn--primary" href="{% url 'secretariat:card-png' card.public_id %}">Télécharger l'image (PNG)</a>
+      <button type="button" class="btn btn--secondary" onclick="window.print()">Imprimer</button>
+      {% if card.pdf_file %}
+        <a class="btn btn--ghost" href="{{ card.pdf_file.url }}" target="_blank" rel="noopener">PDF</a>
+      {% endif %}
+      <a class="btn btn--secondary" href="{% url 'secretariat:cards' %}">Retour</a>
+    </div>
+  </div>
+
+  {% if card.is_blocked %}
+    <div class="alert alert--warning no-print" style="margin-bottom: var(--space-4);">
+      Cette carte est bloquée
+      {% if card.block_reason %}— {{ card.block_reason }}{% endif %}
+      Vous pouvez toujours la consulter et l’imprimer, mais elle n’est plus valide pour le contrôle.
+    </div>
+  {% endif %}
+
+  {% if card_preview_url %}
+    <div class="kalunga-card-stage no-print-measure">
+      <div class="kalunga-card-stage__width" aria-hidden="true">
+        <span class="kalunga-card-stage__tick"></span>
+        <span class="kalunga-card-stage__label">Largeur {{ card_width_cm }} cm</span>
+        <span class="kalunga-card-stage__tick"></span>
+      </div>
+      <div class="kalunga-card-stage__row">
+        <div class="kalunga-card-stage__height" aria-hidden="true">
+          <span class="kalunga-card-stage__tick kalunga-card-stage__tick--v"></span>
+          <span class="kalunga-card-stage__label kalunga-card-stage__label--v">Longueur {{ card_height_cm }} cm</span>
+          <span class="kalunga-card-stage__tick kalunga-card-stage__tick--v"></span>
+        </div>
+        <figure class="kalunga-id-card-print">
+          <img
+            class="kalunga-id-card-print__img"
+            src="{{ card_preview_url }}"
+            alt="Carte d'élève {{ card.card_number }}"
+          >
+        </figure>
+        <div class="kalunga-card-stage__height" aria-hidden="true">
+          <span class="kalunga-card-stage__tick kalunga-card-stage__tick--v"></span>
+          <span class="kalunga-card-stage__label kalunga-card-stage__label--v">{{ card_height_cm }} cm</span>
+          <span class="kalunga-card-stage__tick kalunga-card-stage__tick--v"></span>
+        </div>
+      </div>
+      <div class="kalunga-card-stage__width" aria-hidden="true">
+        <span class="kalunga-card-stage__tick"></span>
+        <span class="kalunga-card-stage__label">{{ card_width_cm }} cm</span>
+        <span class="kalunga-card-stage__tick"></span>
+      </div>
+    </div>
+  {% else %}
+    <article class="kalunga-id-card" aria-label="Carte d'élève">
+      <header class="kalunga-id-card__header">
+        <div class="kalunga-id-card__brand">
+          <img class="kalunga-id-card__logo" src="{% static 'images/branding/logo.png' %}" alt="Logo {{ school_name }}">
+          <div class="kalunga-id-card__brand-text">
+            <div class="kalunga-id-card__school">{{ school_name }}</div>
+            {% if school_slogan %}<div class="kalunga-id-card__slogan">{{ school_slogan }}</div>{% endif %}
+          </div>
+        </div>
+        <div class="kalunga-id-card__meta">
+          <div>Code {{ school_code|default:"71041" }}</div>
+          <div>{{ school_city|default:"Likasi" }}</div>
+        </div>
+      </header>
+      <div class="kalunga-id-card__body">
+        <div class="kalunga-id-card__photo">
+          {% if card.student.photo %}
+            <img src="{{ card.student.photo.url }}" alt="Photo de {{ card.student.prenom }}">
+          {% else %}
+            <span class="kalunga-id-card__initials">{{ card.student.prenom|slice:":1"|upper }}{{ card.student.nom|slice:":1"|upper }}</span>
+            <span class="kalunga-id-card__photo-hint">Photo passeport</span>
+          {% endif %}
+        </div>
+        <dl class="kalunga-id-card__fields">
+          <div><dt>Nom</dt><dd>{{ card.student.nom }}</dd></div>
+          <div><dt>Classe</dt><dd>{{ card.enrollment.school_class.name }}</dd></div>
+          <div><dt>Postnom</dt><dd>{{ card.student.postnom|default:"—" }}</dd></div>
+          <div><dt>Section</dt><dd>{% if card.enrollment.school_class.section %}{{ card.enrollment.school_class.section.name }}{% else %}Tronc commun{% endif %}</dd></div>
+          <div><dt>Prénom</dt><dd>{{ card.student.prenom }}</dd></div>
+          <div><dt>Option</dt><dd>{% if card.enrollment.school_class.option %}{{ card.enrollment.school_class.option.name }}{% else %}—{% endif %}</dd></div>
+          <div><dt>Matricule</dt><dd>{{ card.student.matricule }}</dd></div>
+          <div><dt>Année académique</dt><dd>{{ card.enrollment.academic_year.label }}</dd></div>
+        </dl>
+        <div class="kalunga-id-card__qr">
+          {% if card.qr_image %}
+            <img src="{{ card.qr_image.url }}" alt="Code QR de la carte {{ card.card_number }}">
+          {% endif %}
+          <span>Scanner la présence</span>
+        </div>
+      </div>
+      <footer class="kalunga-id-card__footer">
+        <strong>Carte N° {{ card.card_number }}</strong>
+      </footer>
+    </article>
+  {% endif %}
+
+  {% if card.is_active %}
+    <section class="card secretariat-section no-print">
+      <div class="card__body">
+        <form method="post" action="{% url 'secretariat:card-block' card.public_id %}" class="secretariat-card-actions">
+          {% csrf_token %}
+          <div class="form-group" style="flex:1; margin:0;">
+            <label class="form-label" for="id_reason">Motif du blocage</label>
+            <input class="form-input" id="id_reason" name="reason" required>
+          </div>
+          <button class="btn btn--secondary" style="align-self:end;">Bloquer la carte</button>
+        </form>
+      </div>
+    </section>
+  {% endif %}
+</div>
+{% endblock %}

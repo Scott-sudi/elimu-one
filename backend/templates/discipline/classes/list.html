@@ -1,0 +1,46 @@
+{% extends "layouts/app.html" %}
+{% block title %}Classes | Discipline{% endblock %}
+{% block content %}
+<div data-page="discipline-classes-list">
+  <div class="content__header">
+    <div>
+      <h2 class="content__title">Classes</h2>
+      <p class="content__description">
+        {% if selected_academic_year %}Année {{ selected_academic_year.label }} — synthèse présences et incidents{% else %}Vue synthèse des présences et incidents par classe.{% endif %}
+      </p>
+    </div>
+    <div class="content__actions">
+      <a class="btn btn--secondary" href="{% url 'discipline:attendance-daily' %}">Voir les présences</a>
+    </div>
+  </div>
+
+  <form method="get" class="secretariat-toolbar secretariat-toolbar--filters" data-auto-filter>
+    <input class="form-input form-input--sm" type="search" name="q" value="{{ filters.q }}" placeholder="Nom ou code de classe">
+    <button class="btn btn--secondary btn--sm" type="submit">Rechercher</button>
+    <a class="btn btn--secondary btn--sm secretariat-toolbar__clear" href="{% url 'discipline:classes' %}">Annuler les filtres</a>
+  </form>
+
+  {% if rows %}
+    <div class="entity-grid" role="list">
+      {% for row in rows %}
+        {% with tone=row.class.section.code|default:"tronc"|lower %}
+          <a href="{{ row.folders_url }}" class="entity-tile entity-tile--tone-{{ tone }}" role="listitem">
+            <span class="entity-tile__title">{{ row.class.name }}</span>
+            <span class="entity-tile__meta">{{ row.class.code }}</span>
+            <span class="entity-tile__line">
+              {{ row.class.level }}{% if row.class.section %} · {{ row.class.section }}{% endif %}{% if row.class.option %} · {{ row.class.option }}{% endif %}
+            </span>
+            <span class="entity-tile__footer">
+              <span class="entity-tile__badge">{{ row.students_count }} élèves</span>
+            </span>
+            <span class="entity-tile__line">Présents aujourd'hui: {{ row.present }} · Absents: {{ row.absent }}</span>
+            <span class="entity-tile__status">Incidents ouverts: {{ row.open_incidents }} · Jours saisis: {{ row.days_recorded }}</span>
+          </a>
+        {% endwith %}
+      {% endfor %}
+    </div>
+  {% else %}
+    {% include "components/empty_state.html" with icon="school" title="Aucune classe trouvée" description="Modifiez les filtres pour afficher les classes." %}
+  {% endif %}
+</div>
+{% endblock %}

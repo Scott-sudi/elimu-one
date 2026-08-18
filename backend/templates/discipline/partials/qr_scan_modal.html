@@ -1,0 +1,54 @@
+<div
+  class="modal-backdrop"
+  id="discipline-qr-scan-modal"
+  data-modal="discipline-qr-scan-modal"
+  data-discipline-qr-scan-modal
+  data-resolve-url="{% url 'discipline:scanner-resolve' %}"
+  data-attendance-url="{% url 'discipline:scanner-attendance-scan' %}"
+  hidden
+>
+  <div class="modal modal--form-narrow" data-modal-panel role="dialog" aria-modal="true" aria-labelledby="discipline-qr-scan-title">
+    <div class="modal__header">
+      <h3 id="discipline-qr-scan-title">Scanner élève Discipline</h3>
+      <button type="button" class="modal__close" data-modal-close aria-label="Fermer">
+        <i data-lucide="x" width="18" height="18"></i>
+      </button>
+    </div>
+    <div class="modal__body">
+      <div class="secretariat-toolbar secretariat-toolbar--filters">
+        <button type="button" class="btn btn--secondary btn--sm" data-scan-mode="attendance">Pointage de présence</button>
+        <button type="button" class="btn btn--secondary btn--sm" data-scan-mode="conduct">Consulter la conduite</button>
+      </div>
+      <p class="finance-qr-scan__hint" data-discipline-scan-hint>
+        Scannez la carte de l’élève ou saisissez son matricule pour enregistrer sa présence (entrée).
+      </p>
+      <div id="discipline-qr-reader" class="finance-qr-scan__reader" data-discipline-qr-reader></div>
+      <p class="finance-qr-scan__status" data-discipline-qr-status role="status" aria-live="polite"></p>
+      <div class="form-group">
+        <label class="form-label" for="discipline-qr-manual">Scanner le QR ou saisir matricule</label>
+        <div class="finance-qr-scan__manual">
+          <input
+            class="form-input"
+            id="discipline-qr-manual"
+            type="text"
+            name="identifier_manual"
+            placeholder="KAL-CARD-… ou KAL-2026-00015"
+            autocomplete="off"
+            data-discipline-qr-manual
+          >
+          <button type="button" class="btn btn--primary btn--sm" data-discipline-qr-manual-submit>
+            Ouvrir
+          </button>
+        </div>
+      </div>
+      <section class="card">
+        <div class="card__body">
+          <p data-discipline-scan-result>En attente de scan…</p>
+        </div>
+      </section>
+    </div>
+    <div class="modal__footer">
+      <button type="button" class="btn btn--secondary" data-modal-close>Fermer</button>
+    </div>
+  </div>
+</div>

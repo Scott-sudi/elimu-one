@@ -1,0 +1,22 @@
+{% extends "layouts/app.html" %}
+{% block title %}{{ page_title }}{% endblock %}
+{% block content %}
+<div data-page="discipline-generic">
+  <div class="content__header">
+    <div>
+      <h2 class="content__title">{{ page_title }}</h2>
+      <p class="content__description">
+        {% if selected_academic_year %}Année {{ selected_academic_year.label }} · {% endif %}
+        Module Discipline en cours de déploiement.
+      </p>
+    </div>
+  </div>
+
+  <section class="card">
+    <div class="card__body">
+      {% include "components/empty_state.html" with icon="shield-alert" title="Page en préparation" description="Cette section Discipline est fondée et protégée par rôle/année. Les fonctionnalités métier seront ajoutées progressivement." %}
+    </div>
+  </section>
+</div>
+{% endblock %}
+

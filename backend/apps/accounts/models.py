@@ -17,12 +17,14 @@ class Role(models.Model):
     CODE_SECRETAIRE = "SECRETAIRE"
     CODE_COMPTABLE = "COMPTABLE"
     CODE_DISCIPLINE = "DISCIPLINE"
+    CODE_PREFET = "PREFET"
 
     SYSTEM_ROLES = (
         (CODE_ADMINISTRATEUR, "Administrateur"),
         (CODE_SECRETAIRE, "Secrétaire"),
         (CODE_COMPTABLE, "Comptable"),
         (CODE_DISCIPLINE, "Discipline"),
+        (CODE_PREFET, "Préfet"),
     )
 
     code = models.CharField(max_length=50, unique=True)
@@ -125,6 +127,15 @@ class User(AbstractUser):
             ("view_login_history", "Peut consulter l'historique des connexions"),
             ("view_audit_log", "Peut consulter le journal d'activités"),
             ("manage_own_profile", "Peut gérer son propre profil"),
+            ("view_bi_dashboard", "Peut consulter le tableau de bord décisionnel BI"),
+            ("view_enrollment_analytics", "Peut consulter l'analyse des effectifs"),
+            ("view_financial_analytics", "Peut consulter l'analyse financière"),
+            ("view_attendance_analytics", "Peut consulter l'analyse d'assiduité"),
+            ("view_discipline_analytics", "Peut consulter l'analyse disciplinaire"),
+            ("view_class_analytics", "Peut consulter l'analyse des classes"),
+            ("view_student_summary", "Peut consulter les synthèses élèves en BI"),
+            ("compare_academic_years", "Peut comparer plusieurs années scolaires"),
+            ("export_bi_reports", "Peut exporter les rapports BI"),
         ]
 
     def __str__(self) -> str:
@@ -159,6 +170,15 @@ class User(AbstractUser):
 
     def is_secretaire(self) -> bool:
         return self.has_role(Role.CODE_SECRETAIRE)
+
+    def is_comptable(self) -> bool:
+        return self.has_role(Role.CODE_COMPTABLE)
+
+    def is_discipline(self) -> bool:
+        return self.has_role(Role.CODE_DISCIPLINE)
+
+    def is_prefet(self) -> bool:
+        return self.has_role(Role.CODE_PREFET)
 
     def is_locked(self) -> bool:
         if self.locked_until and self.locked_until > timezone.now():

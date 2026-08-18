@@ -1,1 +1,97 @@
-<div class="table-wrap"><table class="table table--dense"><thead><tr><th>Ordre</th><th>Nom</th><th>Code</th><th>Statut</th></tr></thead><tbody>{% for item in levels %}<tr><td>{{ item.order }}</td><td>{{ item.name }}</td><td>{{ item.code|default:"—" }}</td><td><span class="badge {% if item.is_active %}badge--success{% endif %}">{{ item.is_active|yesno:"Actif,Inactif" }}</span></td></tr>{% empty %}<tr><td colspan="4" class="table__empty">Aucun niveau</td></tr>{% endfor %}</tbody></table></div>
+<div class="table-wrap">
+  <table class="table table--dense">
+    <thead>
+      <tr>
+        <th class="table__index" scope="col">N°</th>
+        <th>Ordre</th>
+        <th>Nom</th>
+        <th>Code</th>
+        <th>Statut</th>
+        <th style="text-align: right;">Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for item in levels %}
+        <tr>
+          <td class="table__index">{{ forloop.counter }}</td>
+          <td>{{ item.order }}</td>
+          <td>{{ item.name }}</td>
+          <td>{{ item.code|default:"—" }}</td>
+          <td>
+            <span class="badge {% if item.is_active %}badge--success{% else %}badge--neutral{% endif %}">
+              {{ item.is_active|yesno:"Actif,Inactif" }}
+            </span>
+          </td>
+          <td>
+            <div class="dropdown" data-dropdown style="display: flex; justify-content: flex-end;">
+              <button type="button" class="btn btn--ghost btn--sm" data-dropdown-trigger aria-label="Actions" aria-haspopup="menu">
+                <i data-lucide="ellipsis-vertical" width="16" height="16"></i>
+              </button>
+              <div class="dropdown__menu dropdown__menu--right" data-dropdown-menu hidden role="menu">
+                {% if year_writable %}
+                <button type="button" class="dropdown__item" data-dropdown-item data-modal-open="level-edit-{{ item.public_id }}">
+                  <span class="dropdown__icon"><i data-lucide="pencil" width="16" height="16"></i></span>
+                  Modifier
+                </button>
+                <div class="dropdown__divider"></div>
+                {% if item.is_active %}
+                  <form method="post" action="{% url 'secretariat:level-action' item.public_id %}" data-confirm-form="Désactiver « {{ item.name }} » ?">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="deactivate">
+                    <button type="submit" class="dropdown__item" data-dropdown-item>
+                      <span class="dropdown__icon"><i data-lucide="ban" width="16" height="16"></i></span>
+                      Désactiver
+                    </button>
+                  </form>
+                {% else %}
+                  <form method="post" action="{% url 'secretariat:level-action' item.public_id %}" data-confirm-form="Réactiver « {{ item.name }} » ?">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="reactivate">
+                    <button type="submit" class="dropdown__item" data-dropdown-item>
+                      <span class="dropdown__icon"><i data-lucide="check-circle" width="16" height="16"></i></span>
+                      Réactiver
+                    </button>
+                  </form>
+                {% endif %}
+                <form method="post" action="{% url 'secretariat:level-action' item.public_id %}" data-confirm-form="Supprimer définitivement « {{ item.name }} » ? Cette action est irréversible." data-confirm-danger>
+                  {% csrf_token %}
+                  <input type="hidden" name="action" value="delete">
+                  <button type="submit" class="dropdown__item dropdown__item--danger" data-dropdown-item>
+                    <span class="dropdown__icon"><i data-lucide="trash-2" width="16" height="16"></i></span>
+                    Supprimer
+                  </button>
+                </form>
+                {% endif %}
+              </div>
+            </div>
+            <div class="modal-backdrop" id="level-edit-{{ item.public_id }}" data-modal="level-edit-{{ item.public_id }}" hidden>
+              <div class="modal" data-modal-panel>
+                <div class="modal__header">
+                  <h2>Modifier le niveau</h2>
+                  <button type="button" class="modal__close" data-modal-close>×</button>
+                </div>
+                <div class="modal__body">
+                  <form method="post" action="{% url 'secretariat:level-action' item.public_id %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="update">
+                    <div class="form-field"><label class="form-label">Nom</label><input class="form-input" name="name" value="{{ item.name }}" required></div>
+                    <div class="form-field"><label class="form-label">Code</label><input class="form-input" name="code" value="{{ item.code|default:'' }}"></div>
+                    <div class="form-field"><label class="form-label">Ordre</label><input class="form-input" type="number" name="order" value="{{ item.order }}" min="0"></div>
+                    <div class="form-field"><label class="form-label">Description</label><textarea class="form-input" name="description" rows="3">{{ item.description }}</textarea></div>
+                    <label class="form-check"><input type="checkbox" name="is_active" value="on" {% if item.is_active %}checked{% endif %}> Actif</label>
+                    <div class="modal__footer">
+                      <button type="button" class="btn btn--secondary" data-modal-close>Annuler</button>
+                      <button class="btn btn--primary">Enregistrer</button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            </div>
+          </td>
+        </tr>
+      {% empty %}
+        <tr><td colspan="6" class="table__empty">Aucun niveau</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>

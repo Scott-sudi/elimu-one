@@ -1,0 +1,302 @@
+{% extends "layouts/app.html" %}
+{% block title %}Incidents | Discipline{% endblock %}
+{% block content %}
+<div
+  data-page="discipline-incidents-list"
+  data-incident-lookup-url="{{ incident_lookup_url }}"
+>
+  <div class="content__header">
+    <div class="content__header-main">
+      <h2 class="content__title">
+        {% if active_view == "convocations" %}Convocations des responsables{% else %}Incidents disciplinaires{% endif %}
+      </h2>
+      <p class="content__description">
+        {% if active_view == "convocations" %}
+          Planification et suivi des convocations parentales.
+        {% else %}
+          Déclaration, qualification et suivi des incidents.
+        {% endif %}
+      </p>
+    </div>
+    <div class="content__actions">
+      {% if year_writable %}
+        <button class="btn btn--primary" type="button" data-modal-open="incident-modal">
+          <i data-lucide="plus" width="16" height="16"></i>
+          Ajouter un incident
+        </button>
+        <button class="btn btn--secondary" type="button" data-modal-open="summons-modal">
+          <i data-lucide="phone-call" width="16" height="16"></i>
+          Convoquer le responsable
+        </button>
+      {% endif %}
+    </div>
+  </div>
+
+  <form method="get" class="secretariat-toolbar secretariat-toolbar--filters" action="{% url 'discipline:incidents' %}" data-auto-filter>
+    <input type="hidden" name="vue" value="{{ active_view }}">
+    <select class="form-input form-input--sm" name="year" aria-label="Filtrer par année">
+      <option value="">Toutes les années</option>
+      {% for y in filter_calendar_years %}
+        <option value="{{ y }}" {% if filters.year == y|stringformat:"s" %}selected{% endif %}>{{ y }}</option>
+      {% endfor %}
+    </select>
+
+    <select class="form-input form-input--sm" name="month" aria-label="Filtrer par mois">
+      {% for value, label in filter_months %}
+        <option value="{{ value }}" {% if filters.month == value|stringformat:"s" %}selected{% endif %}>{{ label }}</option>
+      {% endfor %}
+    </select>
+
+    <select class="form-input form-input--sm" name="day" aria-label="Filtrer par jour">
+      <option value="">Tous les jours</option>
+      {% for d in filter_days %}
+        <option value="{{ d }}" {% if filters.day == d|stringformat:"s" %}selected{% endif %}>{{ d }}</option>
+      {% endfor %}
+    </select>
+
+    <select class="form-input form-input--sm" name="level" aria-label="Filtrer par niveau">
+      <option value="">Tous les niveaux</option>
+      {% for level in filter_levels %}
+        <option value="{{ level.public_id }}" {% if filters.level == level.public_id|stringformat:"s" %}selected{% endif %}>{{ level.name }}</option>
+      {% endfor %}
+    </select>
+
+    <select class="form-input form-input--sm" name="option" aria-label="Filtrer par option">
+      <option value="">Toutes les options</option>
+      {% for option in filter_options %}
+        <option value="{{ option.public_id }}" {% if filters.option == option.public_id|stringformat:"s" %}selected{% endif %}>{{ option.name }}</option>
+      {% endfor %}
+    </select>
+
+    <button class="btn btn--secondary btn--sm" type="submit">Filtrer</button>
+    <a class="btn btn--secondary btn--sm secretariat-toolbar__clear" href="{% url 'discipline:incidents' %}?vue={{ active_view }}" title="Annuler les filtres">Annuler les filtres</a>
+  </form>
+
+  <div class="secretariat-toolbar" style="margin-bottom: 0.75rem;">
+    <a
+      class="btn btn--sm {% if active_view == 'incidents' %}btn--primary{% else %}btn--secondary{% endif %}"
+      href="{% url 'discipline:incidents' %}?vue=incidents{% if filters.year %}&year={{ filters.year }}{% endif %}{% if filters.month %}&month={{ filters.month }}{% endif %}{% if filters.day %}&day={{ filters.day }}{% endif %}{% if filters.level %}&level={{ filters.level }}{% endif %}{% if filters.option %}&option={{ filters.option }}{% endif %}"
+    >Incidents disciplinaires</a>
+    <a
+      class="btn btn--sm {% if active_view == 'convocations' %}btn--primary{% else %}btn--secondary{% endif %}"
+      href="{% url 'discipline:incidents' %}?vue=convocations{% if filters.year %}&year={{ filters.year }}{% endif %}{% if filters.month %}&month={{ filters.month }}{% endif %}{% if filters.day %}&day={{ filters.day }}{% endif %}{% if filters.level %}&level={{ filters.level }}{% endif %}{% if filters.option %}&option={{ filters.option }}{% endif %}"
+    >Convocations des responsables</a>
+  </div>
+
+  {% if active_view == "convocations" %}
+    <section class="card">
+      <div class="table-wrap">
+        <table class="table table--dense">
+          <thead>
+            <tr>
+              <th>N°</th>
+              <th>Élève</th>
+              <th>Date</th>
+              <th>Motif</th>
+              <th>Mode</th>
+              <th>Statut</th>
+              <th>Incident lié</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for summons in summonses %}
+              <tr>
+                <td>{{ summons.summon_number }}</td>
+                <td>{{ summons.student.matricule }} — {{ summons.student.nom }} {{ summons.student.prenom }}</td>
+                <td>{{ summons.summon_date|date:"d/m/Y" }}{% if summons.summon_time %} {{ summons.summon_time|time:"H:i" }}{% endif %}</td>
+                <td>{{ summons.reason }}</td>
+                <td>{{ summons.get_delivery_mode_display }}</td>
+                <td>{{ summons.get_status_display }}</td>
+                <td>
+                  {% if summons.incident %}
+                    <a href="{% url 'discipline:incident-detail' summons.incident.public_id %}">{{ summons.incident.title }}</a>
+                  {% else %}
+                    —
+                  {% endif %}
+                </td>
+              </tr>
+            {% empty %}
+              <tr><td colspan="7" class="table__empty">Aucune convocation trouvée pour ces filtres.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </section>
+  {% else %}
+    <section class="card">
+      <div class="table-wrap">
+        <table class="table table--dense">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Élève</th>
+              <th>Classe</th>
+              <th>Catégorie</th>
+              <th>Gravité</th>
+              <th>Statut</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for incident in incidents %}
+              <tr>
+                <td>{{ incident.incident_date|date:"d/m/Y" }}</td>
+                <td>{{ incident.student.matricule }} — {{ incident.student.nom }} {{ incident.student.prenom }}</td>
+                <td>{{ incident.school_class.name }}</td>
+                <td>{{ incident.category.name }}</td>
+                <td>{{ incident.get_severity_display }}</td>
+                <td>{{ incident.get_status_display }}</td>
+                <td>
+                  <a class="btn btn--secondary btn--sm" href="{% url 'discipline:incident-detail' incident.public_id %}">Consulter</a>
+                </td>
+              </tr>
+            {% empty %}
+              <tr><td colspan="7" class="table__empty">Aucun incident trouvé pour ces filtres.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </section>
+  {% endif %}
+</div>
+{% endblock %}
+
+{% block modals %}
+{% if year_writable %}
+<div
+  class="modal-backdrop"
+  id="incident-modal"
+  data-modal="incident-modal"
+  {% if not open_create_modal %}hidden{% endif %}
+>
+  <div class="modal modal--lg" data-modal-panel role="dialog" aria-modal="true" aria-labelledby="incident-modal-title">
+    <div class="modal__header">
+      <h2 id="incident-modal-title">Nouvel incident</h2>
+      <button type="button" class="modal__close" data-modal-close aria-label="Fermer">×</button>
+    </div>
+    <div class="modal__body">
+      <form method="post" action="{% url 'discipline:incidents' %}" data-matricule-autofill-form data-incident-form>
+        {% csrf_token %}
+        <input type="hidden" name="form_action" value="incident">
+        {% if form.non_field_errors %}
+          <div class="alert alert--danger">{{ form.non_field_errors }}</div>
+        {% endif %}
+
+        <div class="form-group">
+          <label class="form-label form-label--required" for="{{ form.matricule.id_for_label }}">{{ form.matricule.label }}</label>
+          {{ form.matricule }}
+          <p class="form-hint" data-student-hint>{% if form.matricule.help_text %}{{ form.matricule.help_text }}{% endif %}</p>
+          {% for error in form.matricule.errors %}<div class="form-error">{{ error }}</div>{% endfor %}
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="{{ form.school_class_display.id_for_label }}">{{ form.school_class_display.label }}</label>
+          {{ form.school_class_display }}
+          {% if form.school_class_display.help_text %}<small class="form-hint">{{ form.school_class_display.help_text }}</small>{% endif %}
+          {% for error in form.school_class_display.errors %}<div class="form-error">{{ error }}</div>{% endfor %}
+        </div>
+
+        {% for field in form %}
+          {% if field.name != "matricule" and field.name != "school_class_display" and field.name|slice:":7" != "measure" %}
+            <div class="form-group">
+              {% if field.field.widget.input_type == "checkbox" %}
+                <label class="form-check">{{ field }} {{ field.label }}</label>
+              {% else %}
+                <label class="form-label{% if field.field.required %} form-label--required{% endif %}" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                {{ field }}
+              {% endif %}
+              {% if field.help_text %}<small class="form-hint">{{ field.help_text }}</small>{% endif %}
+              {% for error in field.errors %}<div class="form-error">{{ error }}</div>{% endfor %}
+            </div>
+          {% endif %}
+        {% endfor %}
+
+        {% if form.fields.measure_type %}
+          <h3 class="content__subtitle" style="margin: 1rem 0 0.75rem;">Mesure disciplinaire</h3>
+          <p class="form-hint" style="margin-bottom: 0.75rem;">Optionnel — à renseigner seulement si une sanction ou action corrective accompagne l'incident.</p>
+          {% for field in form %}
+            {% if field.name|slice:":7" == "measure" %}
+              <div class="form-group">
+                <label class="form-label{% if field.field.required %} form-label--required{% endif %}" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                {{ field }}
+                {% if field.help_text %}<small class="form-hint">{{ field.help_text }}</small>{% endif %}
+                {% for error in field.errors %}<div class="form-error">{{ error }}</div>{% endfor %}
+              </div>
+            {% endif %}
+          {% endfor %}
+        {% endif %}
+
+        <div class="modal__footer">
+          <button type="button" class="btn btn--secondary" data-modal-close>Annuler</button>
+          <button class="btn btn--primary" type="submit">Enregistrer l'incident</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<div
+  class="modal-backdrop"
+  id="summons-modal"
+  data-modal="summons-modal"
+  {% if not open_summons_modal %}hidden{% endif %}
+>
+  <div class="modal modal--lg" data-modal-panel role="dialog" aria-modal="true" aria-labelledby="summons-modal-title">
+    <div class="modal__header">
+      <h2 id="summons-modal-title">Convoquer le responsable</h2>
+      <button type="button" class="modal__close" data-modal-close aria-label="Fermer">×</button>
+    </div>
+    <div class="modal__body">
+      <form method="post" action="{% url 'discipline:incidents' %}" data-matricule-autofill-form>
+        {% csrf_token %}
+        <input type="hidden" name="form_action" value="summons">
+        {% if summons_form.non_field_errors %}
+          <div class="alert alert--danger">{{ summons_form.non_field_errors }}</div>
+        {% endif %}
+
+        <div class="form-group">
+          <label class="form-label form-label--required" for="{{ summons_form.matricule.id_for_label }}">{{ summons_form.matricule.label }}</label>
+          {{ summons_form.matricule }}
+          <p class="form-hint" data-student-hint>{% if summons_form.matricule.help_text %}{{ summons_form.matricule.help_text }}{% endif %}</p>
+          {% for error in summons_form.matricule.errors %}<div class="form-error">{{ error }}</div>{% endfor %}
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="{{ summons_form.school_class_display.id_for_label }}">{{ summons_form.school_class_display.label }}</label>
+          {{ summons_form.school_class_display }}
+          {% if summons_form.school_class_display.help_text %}<small class="form-hint">{{ summons_form.school_class_display.help_text }}</small>{% endif %}
+          {% for error in summons_form.school_class_display.errors %}<div class="form-error">{{ error }}</div>{% endfor %}
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="{{ summons_form.incident_title.id_for_label }}">{{ summons_form.incident_title.label }}</label>
+          {{ summons_form.incident_title }}
+          {% if summons_form.incident_title.help_text %}<small class="form-hint">{{ summons_form.incident_title.help_text }}</small>{% endif %}
+          {% for error in summons_form.incident_title.errors %}<div class="form-error">{{ error }}</div>{% endfor %}
+        </div>
+
+        {% for field in summons_form %}
+          {% if field.name != "matricule" and field.name != "school_class_display" and field.name != "incident_title" %}
+            <div class="form-group">
+              {% if field.field.widget.input_type == "checkbox" %}
+                <label class="form-check">{{ field }} {{ field.label }}</label>
+              {% else %}
+                <label class="form-label{% if field.field.required %} form-label--required{% endif %}" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                {{ field }}
+              {% endif %}
+              {% if field.help_text %}<small class="form-hint">{{ field.help_text }}</small>{% endif %}
+              {% for error in field.errors %}<div class="form-error">{{ error }}</div>{% endfor %}
+            </div>
+          {% endif %}
+        {% endfor %}
+
+        <div class="modal__footer">
+          <button type="button" class="btn btn--secondary" data-modal-close>Annuler</button>
+          <button class="btn btn--primary" type="submit">Enregistrer la convocation</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,34 @@
+/* BI print — charts and KPIs readable on paper */
+
+@media print {
+  .navbar,
+  .sidebar,
+  .topbar,
+  .bi-filters,
+  .content__actions,
+  .modebar,
+  [data-bi-refresh],
+  [data-bi-refresh-charts] {
+    display: none !important;
+  }
+
+  .bi-page .stat-card,
+  .bi-page .card,
+  .bi-chart,
+  .bi-drillthrough .table-wrap {
+    box-shadow: none !important;
+    break-inside: avoid;
+  }
+
+  .bi-chart {
+    min-height: 220px;
+  }
+
+  .bi-page .dashboard__stats {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  a[href]::after {
+    content: none !important;
+  }
+}

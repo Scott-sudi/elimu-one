@@ -374,6 +374,8 @@ class CardResolveAPIView(GenericAPIView):
             StudentCard.objects.select_related(
                 "student",
                 "enrollment__school_class",
+                "enrollment__school_class__section",
+                "enrollment__school_class__option",
                 "enrollment__academic_year",
             ),
             qr_identifier=qr_identifier,

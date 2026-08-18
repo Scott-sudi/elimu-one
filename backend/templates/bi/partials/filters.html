@@ -1,0 +1,92 @@
+{# Shared BI GET filter bar. Expects: filters (BiFilters), clear_url optional, bi_domain optional. #}
+<form
+  method="get"
+  class="bi-filters secretariat-toolbar secretariat-toolbar--filters"
+  data-bi-filters
+  aria-label="Filtres décisionnels"
+>
+  <div class="bi-filters__field">
+    <label for="bi-date-from">Du</label>
+    <input
+      id="bi-date-from"
+      class="form-input form-input--sm"
+      type="date"
+      name="date_from"
+      value="{% if filters.date_from %}{{ filters.date_from|date:'Y-m-d' }}{% endif %}"
+    >
+  </div>
+  <div class="bi-filters__field">
+    <label for="bi-date-to">Au</label>
+    <input
+      id="bi-date-to"
+      class="form-input form-input--sm"
+      type="date"
+      name="date_to"
+      value="{% if filters.date_to %}{{ filters.date_to|date:'Y-m-d' }}{% endif %}"
+    >
+  </div>
+  <div class="bi-filters__field">
+    <label for="bi-gender">Sexe</label>
+    <select id="bi-gender" class="form-input form-input--sm" name="gender" aria-label="Filtrer par sexe">
+      <option value="">Tous</option>
+      <option value="M" {% if filters.gender == "M" %}selected{% endif %}>Garçons</option>
+      <option value="F" {% if filters.gender == "F" %}selected{% endif %}>Filles</option>
+      <option value="O" {% if filters.gender == "O" %}selected{% endif %}>Autre</option>
+    </select>
+  </div>
+  {% if bi_domain == "enrollments" %}
+  <div class="bi-filters__field">
+    <label for="bi-enrollment-type">Type</label>
+    <select id="bi-enrollment-type" class="form-input form-input--sm" name="enrollment_type">
+      <option value="">Tous les types</option>
+      <option value="NOUVELLE_INSCRIPTION" {% if filters.enrollment_type == "NOUVELLE_INSCRIPTION" %}selected{% endif %}>Nouvelle inscription</option>
+      <option value="REINSCRIPTION" {% if filters.enrollment_type == "REINSCRIPTION" %}selected{% endif %}>Réinscription</option>
+      <option value="TRANSFERT_ENTRANT" {% if filters.enrollment_type == "TRANSFERT_ENTRANT" %}selected{% endif %}>Transfert entrant</option>
+    </select>
+  </div>
+  {% elif bi_domain == "finance" %}
+  <div class="bi-filters__field">
+    <label for="bi-payment-method">Mode</label>
+    <select id="bi-payment-method" class="form-input form-input--sm" name="payment_method">
+      <option value="">Tous les modes</option>
+      <option value="ESPECES" {% if filters.payment_method == "ESPECES" %}selected{% endif %}>Espèces</option>
+      <option value="MOBILE_MONEY" {% if filters.payment_method == "MOBILE_MONEY" %}selected{% endif %}>Mobile money</option>
+      <option value="VIREMENT" {% if filters.payment_method == "VIREMENT" %}selected{% endif %}>Virement</option>
+      <option value="DEPOT" {% if filters.payment_method == "DEPOT" %}selected{% endif %}>Dépôt</option>
+      <option value="CARTE" {% if filters.payment_method == "CARTE" %}selected{% endif %}>Carte</option>
+      <option value="AUTRE" {% if filters.payment_method == "AUTRE" %}selected{% endif %}>Autre</option>
+    </select>
+  </div>
+  {% elif bi_domain == "attendance" %}
+  <div class="bi-filters__field">
+    <label for="bi-attendance-status">Statut</label>
+    <select id="bi-attendance-status" class="form-input form-input--sm" name="attendance_status">
+      <option value="">Tous</option>
+      <option value="PRESENT" {% if filters.attendance_status == "PRESENT" %}selected{% endif %}>Présent</option>
+      <option value="RETARD" {% if filters.attendance_status == "RETARD" %}selected{% endif %}>Retard</option>
+      <option value="ABSENT" {% if filters.attendance_status == "ABSENT" %}selected{% endif %}>Absent</option>
+      <option value="ABSENCE_JUSTIFIEE" {% if filters.attendance_status == "ABSENCE_JUSTIFIEE" %}selected{% endif %}>Absence justifiée</option>
+    </select>
+  </div>
+  {% elif bi_domain == "discipline" %}
+  <div class="bi-filters__field">
+    <label for="bi-severity">Gravité</label>
+    <select id="bi-severity" class="form-input form-input--sm" name="severity">
+      <option value="">Toutes</option>
+      <option value="FAIBLE" {% if filters.incident_severity == "FAIBLE" %}selected{% endif %}>Faible</option>
+      <option value="MODERE" {% if filters.incident_severity == "MODERE" %}selected{% endif %}>Modéré</option>
+      <option value="GRAVE" {% if filters.incident_severity == "GRAVE" %}selected{% endif %}>Grave</option>
+      <option value="TRES_GRAVE" {% if filters.incident_severity == "TRES_GRAVE" %}selected{% endif %}>Très grave</option>
+    </select>
+  </div>
+  {% endif %}
+  <div class="bi-filters__actions">
+    <button class="btn btn--secondary btn--sm" type="submit">Appliquer</button>
+    <a
+      class="btn btn--secondary btn--sm"
+      data-bi-filter-reset
+      href="{{ clear_url|default:request.path }}"
+      title="Réinitialiser les filtres"
+    >Réinitialiser</a>
+  </div>
+</form>

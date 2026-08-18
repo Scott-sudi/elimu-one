@@ -9,6 +9,8 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
+from rest_framework_simplejwt.exceptions import TokenError
+from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
 from apps.accounts.models import Role, SystemConfiguration, User
@@ -27,6 +29,7 @@ from apps.api.serializers import (
     AuditLogSerializer,
     ChangePasswordSerializer,
     LoginAttemptSerializer,
+    LogoutSerializer,
     PasswordResetSerializer,
     RoleSerializer,
     SetupSerializer,
@@ -120,8 +123,16 @@ class LogoutAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
-        # Client-side token discard for Flutter; server-side blacklist
-        # can be enabled later when MySQL index constraints allow it.
+        serializer = LogoutSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        try:
+            RefreshToken(serializer.validated_data["refresh"]).blacklist()
+        except TokenError:
+            return envelope(
+                success=False,
+                message="Jeton de rafraîchissement invalide ou expiré.",
+                http_status=status.HTTP_400_BAD_REQUEST,
+            )
         return envelope(message="Déconnexion effectuée.")
 
 

@@ -1,0 +1,24 @@
+{% extends "layouts/app.html" %}
+{% block title %}Modifier {{ guardian }}{% endblock %}
+{% block content %}
+<div data-page="secretariat-guardians">
+  <div class="content__header">
+    <div>
+      <h2 class="content__title">Modifier le responsable</h2>
+      <p class="content__description">{{ guardian }}{% if guardian.numero_identification %} · {{ guardian.numero_identification }}{% endif %}</p>
+    </div>
+  </div>
+  <section class="card">
+    <div class="card__body">
+      <form method="post">
+        {% csrf_token %}
+        {% include "secretariat/_form_fields.html" with form=form %}
+        <div class="form-actions">
+          <a class="btn btn--secondary" href="{% url 'secretariat:guardian-detail' guardian.public_id %}">Annuler</a>
+          <button class="btn btn--primary">Enregistrer</button>
+        </div>
+      </form>
+    </div>
+  </section>
+</div>
+{% endblock %}

@@ -1,0 +1,273 @@
+{% load static %}
+<article class="dossier-sheet" aria-label="Dossier disciplinaire de l'élève">
+  <header class="dossier-sheet__header">
+    <div class="dossier-sheet__brand">
+      <img class="dossier-sheet__logo" src="{% static 'images/branding/logo.png' %}" alt="Logo {{ school_name }}">
+      <div>
+        <p class="dossier-sheet__school">{{ school_name }}</p>
+        <p class="dossier-sheet__slogan">{{ school_slogan }}</p>
+        {% if school_code %}<p class="dossier-sheet__meta">Code : {{ school_code }}</p>{% endif %}
+      </div>
+    </div>
+    <div class="dossier-sheet__contacts">
+      {% if school_address %}<p>{{ school_address }}</p>{% endif %}
+      {% if school_bp %}<p>B.P. {{ school_bp }}</p>{% endif %}
+      {% if school_city %}<p>{{ school_city }}</p>{% endif %}
+      {% if school_phone %}<p>{{ school_phone }}</p>{% endif %}
+    </div>
+  </header>
+
+  <div class="dossier-sheet__title-block">
+    <h1 class="dossier-sheet__title">DOSSIER DISCIPLINAIRE DE L’ÉLÈVE</h1>
+    <p>Référence du dossier : <strong>{{ dossier.reference }}</strong></p>
+    <p>Année scolaire : <strong>{{ dossier.academic_year.label }}</strong></p>
+  </div>
+
+  <section class="dossier-sheet__identity">
+    <div class="dossier-sheet__identity-main">
+      <h2 class="dossier-sheet__section-title">Identité de l’élève</h2>
+      <dl class="dossier-sheet__grid">
+        <div><dt>Matricule</dt><dd>{{ dossier.student.matricule }}</dd></div>
+        <div><dt>Nom</dt><dd>{{ dossier.student.nom }}</dd></div>
+        <div><dt>Postnom</dt><dd>{{ dossier.student.postnom|default:"—" }}</dd></div>
+        <div><dt>Prénom</dt><dd>{{ dossier.student.prenom }}</dd></div>
+        <div><dt>Sexe</dt><dd>{{ dossier.student.get_sexe_display }}</dd></div>
+        <div><dt>Date de naissance</dt><dd>{{ dossier.student.date_naissance|date:"d/m/Y" }}</dd></div>
+        {% if dossier.student.lieu_naissance %}
+          <div><dt>Lieu de naissance</dt><dd>{{ dossier.student.lieu_naissance }}</dd></div>
+        {% endif %}
+        <div><dt>Classe</dt><dd>{{ dossier.enrollment.school_class.name }}</dd></div>
+        {% if dossier.enrollment.school_class.level %}
+          <div><dt>Niveau</dt><dd>{{ dossier.enrollment.school_class.level }}</dd></div>
+        {% endif %}
+        {% if dossier.enrollment.school_class.section %}
+          <div><dt>Section</dt><dd>{{ dossier.enrollment.school_class.section }}</dd></div>
+        {% endif %}
+        {% if dossier.enrollment.school_class.option %}
+          <div><dt>Option</dt><dd>{{ dossier.enrollment.school_class.option }}</dd></div>
+        {% endif %}
+        <div><dt>Date d’admission</dt><dd>{{ dossier.student.date_admission|date:"d/m/Y" }}</dd></div>
+        <div><dt>Statut inscription</dt><dd>{{ dossier.enrollment.get_status_display }}</dd></div>
+        <div><dt>Statut de suivi</dt><dd><span class="badge">{{ dossier.followup_status_label }}</span></dd></div>
+      </dl>
+
+      <h3 class="dossier-sheet__subsection">Responsable principal</h3>
+      {% if dossier.primary_guardian %}
+        <dl class="dossier-sheet__grid">
+          <div><dt>Responsable</dt><dd>{{ dossier.primary_guardian.guardian.nom }} {{ dossier.primary_guardian.guardian.postnom }} {{ dossier.primary_guardian.guardian.prenom }}</dd></div>
+          <div><dt>Lien</dt><dd>{{ dossier.primary_guardian.get_lien_parente_display }}</dd></div>
+          <div><dt>Téléphone</dt><dd>{{ dossier.primary_guardian.guardian.telephone_principal|default:"—" }}</dd></div>
+          {% if dossier.primary_guardian.guardian.telephone_secondaire %}
+            <div><dt>Téléphone 2</dt><dd>{{ dossier.primary_guardian.guardian.telephone_secondaire }}</dd></div>
+          {% endif %}
+          {% if dossier.primary_guardian.guardian.email %}
+            <div><dt>E-mail</dt><dd>{{ dossier.primary_guardian.guardian.email }}</dd></div>
+          {% endif %}
+        </dl>
+      {% else %}
+        <p class="dossier-sheet__empty">Aucun responsable principal enregistré.</p>
+      {% endif %}
+    </div>
+    <aside class="dossier-sheet__photo-wrap">
+      {% if dossier.student.photo %}
+        <img class="dossier-sheet__photo" src="{{ dossier.student.photo.url }}" alt="Photo de {{ dossier.student.nom }}">
+      {% else %}
+        <div class="dossier-sheet__photo dossier-sheet__photo--empty">
+          <span>Photographie non disponible</span>
+        </div>
+      {% endif %}
+    </aside>
+  </section>
+
+  <section class="dossier-sheet__section">
+    <h2 class="dossier-sheet__section-title">Résumé disciplinaire</h2>
+    <div class="dossier-sheet__stats">
+      <div class="dossier-sheet__stat"><span>Présences</span><strong>{{ dossier.attendance_stats.present }}</strong></div>
+      <div class="dossier-sheet__stat"><span>Retards</span><strong>{{ dossier.attendance_stats.late }}</strong></div>
+      <div class="dossier-sheet__stat"><span>Absences</span><strong>{{ dossier.attendance_stats.absent }}</strong></div>
+      <div class="dossier-sheet__stat"><span>Injustifiées</span><strong>{{ dossier.attendance_stats.unjustified }}</strong></div>
+      <div class="dossier-sheet__stat"><span>Obs. positives</span><strong>{{ dossier.attendance_stats.positive_observations }}</strong></div>
+      <div class="dossier-sheet__stat"><span>Obs. négatives</span><strong>{{ dossier.attendance_stats.negative_observations }}</strong></div>
+      <div class="dossier-sheet__stat"><span>Incidents ouverts</span><strong>{{ dossier.attendance_stats.open_incidents }}</strong></div>
+      <div class="dossier-sheet__stat"><span>Incidents clôturés</span><strong>{{ dossier.attendance_stats.closed_incidents }}</strong></div>
+      <div class="dossier-sheet__stat"><span>Convocations</span><strong>{{ dossier.attendance_stats.total_summons }}</strong></div>
+      <div class="dossier-sheet__stat"><span>Mesures en cours</span><strong>{{ dossier.attendance_stats.active_measures }}</strong></div>
+    </div>
+  </section>
+
+  <section class="dossier-sheet__section">
+    <h2 class="dossier-sheet__section-title">Assiduité et ponctualité</h2>
+    <p class="dossier-sheet__meta">
+      Totaux depuis le début de l’année scolaire {{ dossier.academic_year.label }} :
+      Présences {{ dossier.attendance_stats.present }} ·
+      Retards {{ dossier.attendance_stats.late }} ·
+      Minutes de retard cumulées {{ dossier.attendance_stats.late_minutes }} ·
+      Absences {{ dossier.attendance_stats.absent }} ·
+      Absences justifiées {{ dossier.attendance_stats.justified }} ·
+      Absences injustifiées {{ dossier.attendance_stats.unjustified }} ·
+      Sorties autorisées {{ dossier.attendance_stats.authorized_exit }}
+    </p>
+    <h3 class="dossier-sheet__subsection">Derniers pointages</h3>
+    {% if dossier.recent_attendance %}
+      <div class="table-wrap">
+        <table class="table table--dense">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>État</th>
+              <th>Heure d’arrivée</th>
+              <th>Retard</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in dossier.recent_attendance %}
+              <tr>
+                <td>{{ row.date|date:"d/m/Y" }}</td>
+                <td>{{ row.get_status_display }}</td>
+                <td>{% if row.arrival_time %}{{ row.arrival_time|time:"H:i" }}{% else %}—{% endif %}</td>
+                <td>{% if row.late_minutes %}{{ row.late_minutes }} min{% else %}—{% endif %}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <p class="dossier-sheet__empty">Aucun pointage récent pour cette année scolaire.</p>
+    {% endif %}
+  </section>
+
+  <section class="dossier-sheet__section">
+    <h2 class="dossier-sheet__section-title">Incidents disciplinaires</h2>
+    <p class="dossier-sheet__meta">Total année : {{ dossier.attendance_stats.total_incidents }} · Affichage des 3 derniers</p>
+    {% if dossier.incidents %}
+      <div class="table-wrap">
+        <table class="table table--dense">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Titre</th>
+              <th>Catégorie</th>
+              <th>Gravité</th>
+              <th>Statut</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for incident in dossier.incidents %}
+              <tr>
+                <td>{{ incident.incident_date|date:"d/m/Y" }}</td>
+                <td>{{ incident.title }}</td>
+                <td>{{ incident.category.name }}</td>
+                <td>{{ incident.get_severity_display }}</td>
+                <td>{{ incident.get_status_display }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <p class="dossier-sheet__empty">Aucun incident disciplinaire enregistré pour cette année scolaire.</p>
+    {% endif %}
+  </section>
+
+  <section class="dossier-sheet__section">
+    <h2 class="dossier-sheet__section-title">Mesures disciplinaires</h2>
+    <p class="dossier-sheet__meta">Affichage des 3 dernières mesures</p>
+    {% if dossier.measures %}
+      <div class="table-wrap">
+        <table class="table table--dense">
+          <thead>
+            <tr>
+              <th>Mesure</th>
+              <th>Motif / période</th>
+              <th>Statut</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for measure in dossier.measures %}
+              <tr>
+                <td>{{ measure.measure_type.name }}</td>
+                <td>
+                  {{ measure.reason|default:measure.description|default:"—" }}
+                  {% if measure.start_date or measure.end_date %}
+                    <br><span class="table__cell-muted">{{ measure.start_date|date:"d/m/Y"|default:"—" }} → {{ measure.end_date|date:"d/m/Y"|default:"—" }}</span>
+                  {% endif %}
+                </td>
+                <td>{{ measure.get_status_display }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <p class="dossier-sheet__empty">Aucune mesure disciplinaire appliquée.</p>
+    {% endif %}
+  </section>
+
+  <section class="dossier-sheet__section">
+    <h2 class="dossier-sheet__section-title">Convocations des responsables</h2>
+    <div class="dossier-sheet__stats dossier-sheet__stats--compact">
+      <div class="dossier-sheet__stat">
+        <span>Nombre de convocations</span>
+        <strong>{{ dossier.attendance_stats.total_summons }}</strong>
+      </div>
+      <div class="dossier-sheet__stat">
+        <span>En attente</span>
+        <strong>{{ dossier.attendance_stats.pending_summons }}</strong>
+      </div>
+    </div>
+    {% if dossier.summonses %}
+      <h3 class="dossier-sheet__subsection">3 dernières convocations</h3>
+      <div class="table-wrap">
+        <table class="table table--dense">
+          <thead>
+            <tr>
+              <th>N°</th>
+              <th>Date prévue</th>
+              <th>Motif</th>
+              <th>Statut</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for summons in dossier.summonses %}
+              <tr>
+                <td>{{ summons.summon_number }}</td>
+                <td>{{ summons.summon_date|date:"d/m/Y" }}</td>
+                <td>{{ summons.reason }}</td>
+                <td>{{ summons.get_status_display }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <p class="dossier-sheet__empty">Aucune convocation enregistrée.</p>
+    {% endif %}
+  </section>
+
+  <section class="dossier-sheet__section">
+    <h2 class="dossier-sheet__section-title">Suivi et observations générales</h2>
+    <dl class="dossier-sheet__grid">
+      <div><dt>État actuel</dt><dd>{{ dossier.followup_status_label }}</dd></div>
+      <div><dt>Dernière mise à jour affichée</dt><dd>{% now "d/m/Y H:i" %}</dd></div>
+      {% if dossier.student.observations %}
+        <div class="dossier-sheet__span-2"><dt>Observation générale</dt><dd>{{ dossier.student.observations }}</dd></div>
+      {% endif %}
+    </dl>
+  </section>
+
+  <footer class="dossier-sheet__signatures">
+    <div>
+      <p>Agent de discipline</p>
+      <p class="dossier-sheet__sign-line">________________________</p>
+      <p class="dossier-sheet__meta">{{ request.user.get_full_name|default:request.user.username }}</p>
+    </div>
+    <div>
+      <p>Responsable de l’élève</p>
+      <p class="dossier-sheet__sign-line">________________________</p>
+    </div>
+    <div>
+      <p>Direction</p>
+      <p class="dossier-sheet__sign-line">________________________</p>
+    </div>
+  </footer>
+</article>

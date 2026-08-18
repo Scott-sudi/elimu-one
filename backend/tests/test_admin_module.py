@@ -129,6 +129,15 @@ def test_lockout_after_failures(rf, admin_user, settings):
 
 
 @pytest.mark.django_db
+def test_user_create_page_renders(client, admin_user, roles):
+    client.force_login(admin_user)
+    response = client.get(reverse("accounts:user_create"))
+    assert response.status_code == 200
+    assert "Créer l'utilisateur".encode() in response.content
+    assert b"user-sexe" in response.content
+
+
+@pytest.mark.django_db
 def test_user_lifecycle(client, admin_user, roles):
     client.force_login(admin_user)
     secretaire = roles[Role.CODE_SECRETAIRE]
@@ -181,27 +190,63 @@ def test_user_lifecycle(client, admin_user, roles):
 
 
 @pytest.mark.django_db
-def test_non_admin_can_login_to_personal_workspace(client, roles, admin_user):
-    role = roles[Role.CODE_COMPTABLE]
+def test_non_admin_login_redirects_to_year_picker_then_module(client, roles, admin_user):
+    from datetime import date
+
+    from apps.secretariat.services.academic_service import create_academic_year
+
+    role = roles[Role.CODE_DISCIPLINE]
     user = User.objects.create_user(
+        username="disc.only",
+        password="TempPass123!",
+        nom="Disc",
+        prenom="Only",
+        role=role,
+    )
+    open_year = create_academic_year(
+        label="2026-2027",
+        start_date=date(2026, 9, 1),
+        end_date=date(2027, 7, 31),
+    )
+
+    response = client.post(
+        reverse("accounts:login"),
+        {"username": "disc.only", "password": "TempPass123!"},
+    )
+
+    assert response.status_code == 302
+    assert response.url == reverse("dashboard:home")
+    response = client.get(reverse("dashboard:home"))
+    assert response.status_code == 302
+    assert response.url == reverse("secretariat:academic-year-select")
+
+    choose = client.post(
+        reverse("secretariat:academic-year-choose", args=[open_year.public_id])
+    )
+    assert choose.status_code == 302
+    assert choose.url == reverse("discipline:dashboard")
+    assert user.pk
+
+
+@pytest.mark.django_db
+def test_accountant_login_redirects_to_year_select(client, roles, admin_user):
+    role = roles[Role.CODE_COMPTABLE]
+    User.objects.create_user(
         username="compt.only",
         password="TempPass123!",
         nom="Compt",
         prenom="Only",
         role=role,
     )
-
     response = client.post(
         reverse("accounts:login"),
         {"username": "compt.only", "password": "TempPass123!"},
     )
-
     assert response.status_code == 302
     assert response.url == reverse("dashboard:home")
     response = client.get(reverse("dashboard:home"))
-    assert response.status_code == 200
-    assert b"Espace de travail" in response.content
-    assert user.pk
+    assert response.status_code == 302
+    assert response.url == reverse("secretariat:academic-year-select")
 
 
 @pytest.mark.django_db
@@ -222,8 +267,8 @@ def test_secretary_login_redirects_to_secretariat(client, roles, admin_user):
     assert response.url == reverse("dashboard:home")
     redirected = client.get(reverse("dashboard:home"))
     assert redirected.status_code == 302
-    assert redirected.url == reverse("secretariat:dashboard")
-    page = client.get(reverse("secretariat:dashboard"))
+    assert redirected.url == reverse("secretariat:academic-year-select")
+    page = client.get(reverse("secretariat:academic-year-select"))
     assert page.status_code == 200
 
 
@@ -264,7 +309,24 @@ def test_forced_password_change_does_not_redirect_loop(client, roles, admin_user
     assert reverse("accounts:change_password") in bounced.url
     assert "forced=1" in bounced.url
     assert client.get(bounced.url).status_code == 200
-    assert user.pk
+
+    # Submitting the change-password form with the template field names
+    # must clear the flag and release navigation.
+    submit = client.post(
+        reverse("accounts:change_password"),
+        {
+            "old_password": "TempPass123!",
+            "new_password": "NouveauPass456!",
+            "new_password_confirm": "NouveauPass456!",
+        },
+    )
+    assert submit.status_code == 302
+    user.refresh_from_db()
+    assert not user.must_change_password
+    dashboard = client.get(reverse("secretariat:dashboard"))
+    assert dashboard.status_code == 302
+    assert reverse("secretariat:academic-year-select") in dashboard.url
+    assert client.get(reverse("secretariat:academic-year-select")).status_code == 200
 
 
 

@@ -1,11 +1,11 @@
 {% load static %}
-{# Logo officiel si présent, sinon icône scolaire Lucide provisoire #}
+{# ELIMU One — plateforme ; le nom de l'établissement est configuré séparément (cartes, reçus). #}
 <div class="brand {% if compact %}brand--compact{% endif %}" data-brand>
-  <a href="{% url 'dashboard:home' %}" class="brand__link" title="{{ school_full_name|default:'Kalunga – La Source du Savoir' }}">
+  <a href="{% url 'dashboard:home' %}" class="brand__link" title="{{ app_full_name }}">
     <span class="brand__mark">
       <img
         src="{% static 'images/branding/logo.png' %}"
-        alt="{{ school_name|default:'Kalunga' }}"
+        alt="{{ platform_name }}"
         class="brand__logo"
         width="32"
         height="32"
@@ -19,9 +19,9 @@
     </span>
     {% if not icon_only %}
       <span class="brand__text sidebar__brand-text">
-        <span class="brand__name">{{ school_name|default:"Kalunga" }}</span>
+        <span class="brand__name">{{ platform_name }}</span>
         {% if not compact %}
-          <span class="brand__slogan">{{ school_slogan|default:"La Source du Savoir" }}</span>
+          <span class="brand__slogan">{{ platform_tagline }}</span>
         {% endif %}
       </span>
     {% endif %}

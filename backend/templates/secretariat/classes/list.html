@@ -1,4 +1,93 @@
-{% extends "layouts/app.html" %}{% block title %}Classes{% endblock %}{% block content %}
-<div data-page="secretariat-classes"><div class="content__header"><div><h2 class="content__title">Classes</h2><p class="content__description">Capacités et effectifs</p></div><button class="btn btn--primary" data-modal-open="class-modal">Nouvelle classe</button></div>
-<form class="secretariat-toolbar" method="get" hx-get="{% url 'secretariat:classes' %}" hx-target="#classes-table" hx-push-url="true"><input class="form-input form-input--sm" name="q" value="{{ request.GET.q }}" placeholder="Nom ou code"><button class="btn btn--secondary btn--sm">Rechercher</button></form>{% include "secretariat/classes/_table.html" %}</div>{% endblock %}
-{% block modals %}<div class="modal-backdrop" id="class-modal" data-modal="class-modal" hidden><div class="modal modal--lg" data-modal-panel><div class="modal__header"><h2>Nouvelle classe</h2><button class="modal__close" data-modal-close>×</button></div><div class="modal__body">{% include "secretariat/classes/_form.html" %}</div></div></div>{% endblock %}
+{% extends "layouts/app.html" %}
+{% block title %}Classes{% endblock %}
+{% block content %}
+<div data-page="secretariat-classes">
+  <div class="content__header">
+    <div>
+      <h2 class="content__title">Classes</h2>
+      <p class="content__description">
+        {% if selected_academic_year %}
+          Classes de l'année {{ selected_academic_year.label }}
+        {% else %}
+          Capacités et effectifs
+        {% endif %}
+      </p>
+    </div>
+    {% if year_writable %}
+      <button class="btn btn--primary" type="button" data-modal-open="class-modal">Créer une nouvelle classe</button>
+    {% else %}
+      <button class="btn btn--secondary" type="button" disabled title="Année scolaire clôturée">Créer une nouvelle classe</button>
+    {% endif %}
+  </div>
+
+  <form
+    class="secretariat-toolbar secretariat-toolbar--filters"
+    method="get"
+    hx-get="{% url 'secretariat:classes' %}"
+    hx-target="#classes-grid"
+    hx-push-url="true"
+    hx-trigger="submit, change delay:150ms from:select"
+  >
+    <input
+      class="form-input form-input--sm"
+      name="q"
+      value="{{ current_filters.q }}"
+      placeholder="Rechercher (nom ou code)"
+    >
+    <button class="btn btn--secondary btn--sm" type="submit">Rechercher</button>
+
+    <select class="form-input form-input--sm" name="level" aria-label="Filtrer par niveau">
+      <option value="">Tous les niveaux</option>
+      {% for level in filter_levels %}
+        <option value="{{ level.public_id }}" {% if current_filters.level == level.public_id|stringformat:"s" %}selected{% endif %}>{{ level.name }}</option>
+      {% endfor %}
+    </select>
+
+    <select class="form-input form-input--sm" name="section" aria-label="Filtrer par section">
+      <option value="">Toutes les sections</option>
+      {% if has_tronc %}
+        <option value="tronc" {% if current_filters.section == "tronc" %}selected{% endif %}>Tronc commun</option>
+      {% endif %}
+      {% for section in filter_sections %}
+        <option value="{{ section.public_id }}" {% if current_filters.section == section.public_id|stringformat:"s" %}selected{% endif %}>{{ section.name }}</option>
+      {% endfor %}
+    </select>
+
+    <select class="form-input form-input--sm" name="option" aria-label="Filtrer par option">
+      <option value="">Toutes les options</option>
+      {% for option in filter_options %}
+        <option value="{{ option.public_id }}" {% if current_filters.option == option.public_id|stringformat:"s" %}selected{% endif %}>{{ option.name }}</option>
+      {% endfor %}
+    </select>
+
+    <select class="form-input form-input--sm" name="letter" aria-label="Filtrer par lettre">
+      <option value="">Toutes les lettres</option>
+      {% for letter in filter_letters %}
+        <option value="{{ letter }}" {% if current_filters.letter == letter %}selected{% endif %}>Classe {{ letter }}</option>
+      {% endfor %}
+    </select>
+
+    <a
+      class="btn btn--secondary btn--sm secretariat-toolbar__clear"
+      href="{% url 'secretariat:classes' %}"
+      title="Annuler les filtres"
+    >Annuler les filtres</a>
+  </form>
+
+  {% include "secretariat/classes/_table.html" %}
+</div>
+{% endblock %}
+
+{% block modals %}
+{% if year_writable %}
+<div class="modal-backdrop" id="class-modal" data-modal="class-modal" hidden>
+  <div class="modal modal--lg" data-modal-panel>
+    <div class="modal__header">
+      <h2>Nouvelle classe</h2>
+      <button class="modal__close" data-modal-close type="button">×</button>
+    </div>
+    <div class="modal__body">{% include "secretariat/classes/_form.html" %}</div>
+  </div>
+</div>
+{% endif %}
+{% endblock %}

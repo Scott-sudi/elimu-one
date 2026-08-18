@@ -1,0 +1,67 @@
+<div id="payments-table">
+  <div class="table-wrap">
+    <table class="table table--dense">
+      <thead>
+        <tr>
+          <th class="table__index" scope="col">N°</th>
+          <th>Reçu</th>
+          <th>Date</th>
+          <th>Élève</th>
+          <th>Classe</th>
+          <th>Montant</th>
+          <th>Statut</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for payment in page_obj %}
+          {% with tone=payment.list_tone %}
+          <tr>
+            <td class="table__index">{{ forloop.counter0|add:page_obj.start_index }}</td>
+            <td>
+              <a
+                {% if tone %}class="finance-pay--{{ tone }}"{% endif %}
+                href="{% url 'finance:payment-detail' payment.public_id %}"
+              >{{ payment.receipt_number }}</a>
+            </td>
+            <td>{{ payment.payment_date|date:"d/m/Y" }}</td>
+            <td>
+              <a
+                {% if tone %}class="finance-pay--{{ tone }}"{% endif %}
+                href="{% url 'finance:student-situation' payment.student.public_id %}"
+              >
+                {{ payment.student.matricule }} — {{ payment.student.nom }} {{ payment.student.prenom }}
+              </a>
+            </td>
+            <td>{{ payment.enrollment.school_class.name }}</td>
+            <td {% if tone %}class="finance-pay--{{ tone }}"{% endif %}>
+              {{ payment.amount_total }} {{ payment.currency }}
+            </td>
+            <td>
+              {% if payment.status == "ANNULE" %}
+                <span class="badge badge--danger">{{ payment.get_status_display }}</span>
+              {% elif tone == "paid" %}
+                <span class="badge badge--success">Soldé</span>
+              {% elif tone == "partial" %}
+                <span class="badge badge--warning">Partiel</span>
+              {% else %}
+                <span class="badge badge--success">{{ payment.get_status_display }}</span>
+              {% endif %}
+            </td>
+          </tr>
+          {% endwith %}
+        {% empty %}
+          <tr>
+            <td colspan="7" class="table__empty">
+              {% include "components/empty_state.html" with icon="banknote" title="Aucun paiement trouvé" %}
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <p class="finance-matrix__legend" aria-label="Légende des couleurs">
+    <span class="is-partial">Paiement partiel</span>
+    <span class="is-paid">Soldé</span>
+  </p>
+  {% include "components/pagination.html" with page_obj=page_obj hx_target="#payments-table" hx_swap="outerHTML" %}
+</div>

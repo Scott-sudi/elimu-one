@@ -1,0 +1,251 @@
+<style>
+.form-input--readonly,
+.form-input[readonly] {
+  background-color: #e8ebe9 !important;
+  color: #6b746e !important;
+  cursor: default;
+}
+.guardian-lookup-wrap {
+  position: relative;
+}
+.guardian-lookup-hint {
+  display: block;
+  margin-top: 0.35rem;
+  font-size: 0.85rem;
+  color: #5c665f;
+}
+.guardian-lookup-hint--known { color: #2f6b3a; }
+.guardian-lookup-hint--new { color: #5c665f; }
+.guardian-lookup-hint--wait { color: #6b746e; }
+.guardian-phone-suggestions {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(100% + 2px);
+  z-index: 40;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  background: #fff;
+  border: 1px solid #cfd5d1;
+  border-radius: 6px;
+  max-height: 220px;
+  overflow: auto;
+  box-shadow: 0 8px 20px rgba(0,0,0,.08);
+}
+.guardian-phone-suggestions[hidden] { display: none !important; }
+.guardian-phone-suggestions button {
+  display: block;
+  width: 100%;
+  text-align: left;
+  border: 0;
+  background: transparent;
+  padding: .55rem .75rem;
+  cursor: pointer;
+  font: inherit;
+}
+.guardian-phone-suggestions button:hover,
+.guardian-phone-suggestions button:focus {
+  background: #f3f5f3;
+  outline: none;
+}
+.guardian-phone-suggestions .meta {
+  display: block;
+  font-size: .8rem;
+  color: #6b746e;
+}
+</style>
+<script>
+(function () {
+  const page = document.querySelector('[data-page="secretariat-enrollment"]');
+  if (!page || page.dataset.guardianBound === '1') return;
+  page.dataset.guardianBound = '1';
+
+  const lookupUrl = page.dataset.guardianLookupUrl || '';
+  const classId = page.dataset.classId || '';
+  const phoneInput = page.querySelector('[data-guardian-phone]');
+  const nameInput = page.querySelector('[data-guardian-name]');
+  const phone2Input = page.querySelector('[data-guardian-phone-2]');
+  if (!phoneInput || !lookupUrl || !nameInput) {
+    console.warn('[guardian-lookup] missing phone/name/url', { lookupUrl: !!lookupUrl, phone: !!phoneInput, name: !!nameInput });
+    return;
+  }
+
+  const RO = 'form-input--readonly';
+  const phoneGroup = phoneInput.closest('.form-group') || phoneInput.parentElement;
+  if (phoneGroup) phoneGroup.classList.add('guardian-lookup-wrap');
+
+  let hint = phoneGroup && phoneGroup.querySelector('.guardian-lookup-hint');
+  if (!hint && phoneGroup) {
+    hint = document.createElement('small');
+    hint.className = 'guardian-lookup-hint';
+    phoneGroup.appendChild(hint);
+  }
+
+  let list = phoneGroup && phoneGroup.querySelector('.guardian-phone-suggestions');
+  if (!list && phoneGroup) {
+    list = document.createElement('ul');
+    list.className = 'guardian-phone-suggestions';
+    list.hidden = true;
+    phoneGroup.appendChild(list);
+  }
+
+  const setHint = (text, kind) => {
+    if (!hint) return;
+    hint.textContent = text || '';
+    hint.classList.toggle('guardian-lookup-hint--known', kind === 'known');
+    hint.classList.toggle('guardian-lookup-hint--new', kind === 'new');
+    hint.classList.toggle('guardian-lookup-hint--wait', kind === 'wait');
+  };
+
+  const digitCount = (value) => String(value || '').replace(/\D/g, '').length;
+
+  const setField = (input, value, locked) => {
+    if (!input) return;
+    input.value = value || '';
+    if (locked) {
+      input.setAttribute('readonly', 'readonly');
+      input.readOnly = true;
+      input.classList.add(RO);
+      input.dataset.locked = '1';
+      input.setAttribute('tabindex', '-1');
+    } else {
+      input.removeAttribute('readonly');
+      input.readOnly = false;
+      input.classList.remove(RO);
+      input.dataset.locked = '0';
+      input.removeAttribute('tabindex');
+    }
+  };
+
+  const hideSuggestions = () => {
+    if (!list) return;
+    list.innerHTML = '';
+    list.hidden = true;
+  };
+
+  const lockNameEmpty = (message) => {
+    setField(nameInput, '', true);
+    if (phone2Input && phone2Input.dataset.locked === '1') setField(phone2Input, '', false);
+    setHint(message || 'Saisissez le téléphone — le nom réagit automatiquement.', 'wait');
+  };
+
+  const applyNew = () => {
+    hideSuggestions();
+    setField(nameInput, '', false);
+    if (phone2Input && phone2Input.dataset.locked === '1') setField(phone2Input, '', false);
+    setHint('Aucun responsable pour ce numéro — saisissez le nom.', 'new');
+    nameInput.focus();
+  };
+
+  const applyMatch = (payload, fromPick) => {
+    hideSuggestions();
+    if (payload.telephone_principal && fromPick) {
+      phoneInput.value = payload.telephone_principal;
+    }
+    setField(nameInput, payload.full_name || '', true);
+    if (phone2Input) {
+      if (payload.telephone_secondaire) setField(phone2Input, payload.telephone_secondaire, true);
+      else if (phone2Input.dataset.locked === '1') setField(phone2Input, '', false);
+    }
+    setHint('Responsable trouvé — nom rempli et verrouillé.', 'known');
+  };
+
+  const showSuggestions = (matches) => {
+    if (!list) return;
+    list.innerHTML = '';
+    if (!matches || !matches.length) {
+      list.hidden = true;
+      return;
+    }
+    matches.forEach((m) => {
+      const li = document.createElement('li');
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.innerHTML = '<strong></strong><span class="meta"></span>';
+      btn.querySelector('strong').textContent = m.full_name || 'Responsable';
+      btn.querySelector('.meta').textContent = [
+        m.telephone_principal || '',
+        m.numero_identification || '',
+      ].filter(Boolean).join(' · ');
+      btn.addEventListener('click', () => applyMatch(m, true));
+      li.appendChild(btn);
+      list.appendChild(li);
+    });
+    list.hidden = false;
+  };
+
+  let timer = null;
+  let reqId = 0;
+
+  const lookup = async () => {
+    const phone = phoneInput.value.trim();
+    const digits = digitCount(phone);
+    if (digits < 3) {
+      hideSuggestions();
+      lockNameEmpty('Tapez au moins 3 chiffres du téléphone…');
+      return;
+    }
+
+    setHint('Recherche du responsable…', 'wait');
+    const params = new URLSearchParams();
+    params.set('phone', phone);
+    if (classId) params.set('class_id', classId);
+    const myReq = ++reqId;
+    try {
+      const response = await fetch(lookupUrl + '?' + params.toString(), {
+        headers: { Accept: 'application/json' },
+        credentials: 'same-origin',
+      });
+      if (myReq !== reqId) return;
+      if (!response.ok) {
+        setHint('Recherche impossible (erreur ' + response.status + ').', 'wait');
+        if (digits >= 9) applyNew();
+        return;
+      }
+      const payload = await response.json();
+      if (myReq !== reqId) return;
+
+      if (payload.found) {
+        applyMatch(payload, false);
+        return;
+      }
+
+      const matches = payload.matches || [];
+      if (matches.length) {
+        setField(nameInput, '', true);
+        showSuggestions(matches);
+        setHint(matches.length + ' responsable(s) possible(s) — choisissez ou continuez le numéro.', 'wait');
+        return;
+      }
+
+      hideSuggestions();
+      if (digits >= 8) {
+        applyNew();
+      } else {
+        lockNameEmpty('Aucun résultat pour l’instant — continuez le numéro.');
+      }
+    } catch (err) {
+      if (myReq !== reqId) return;
+      console.error('[guardian-lookup]', err);
+      setHint('Erreur réseau pendant la recherche.', 'wait');
+      if (digits >= 9) applyNew();
+    }
+  };
+
+  lockNameEmpty();
+
+  phoneInput.addEventListener('input', () => {
+    window.clearTimeout(timer);
+    timer = window.setTimeout(lookup, 180);
+  });
+  phoneInput.addEventListener('blur', () => {
+    window.setTimeout(lookup, 120);
+  });
+  phoneInput.addEventListener('change', lookup);
+  document.addEventListener('click', (ev) => {
+    if (!phoneGroup || phoneGroup.contains(ev.target)) return;
+    hideSuggestions();
+  });
+})();
+</script>

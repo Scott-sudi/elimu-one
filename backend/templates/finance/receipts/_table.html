@@ -1,0 +1,50 @@
+<div id="receipts-table">
+  <div class="table-wrap">
+    <table class="table table--dense">
+      <thead>
+        <tr>
+          <th class="table__index" scope="col">N°</th>
+          <th>N° reçu</th>
+          <th>Date</th>
+          <th>Élève</th>
+          <th>Classe</th>
+          <th>Montant</th>
+          <th>Mode</th>
+          <th scope="col">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for payment in page_obj %}
+          <tr>
+            <td class="table__index">{{ forloop.counter0|add:page_obj.start_index }}</td>
+            <td>
+              <a href="{% url 'finance:receipt-detail' payment.public_id %}">{{ payment.receipt_number }}</a>
+            </td>
+            <td>{{ payment.payment_date|date:"d/m/Y" }}</td>
+            <td>
+              {{ payment.student.nom }}{% if payment.student.postnom %} {{ payment.student.postnom }}{% endif %}
+              {{ payment.student.prenom }}
+              <span class="table__muted">({{ payment.student.matricule }})</span>
+            </td>
+            <td>{{ payment.enrollment.school_class.name }}</td>
+            <td>{{ payment.amount_total }} {{ payment.currency }}</td>
+            <td>{{ payment.get_payment_method_display }}</td>
+            <td>
+              <div class="content__actions" style="justify-content:flex-start;gap:0.35rem;">
+                <a class="btn btn--secondary btn--sm" href="{% url 'finance:receipt-detail' payment.public_id %}">Consulter</a>
+                <a class="btn btn--primary btn--sm" href="{% url 'finance:receipt-pdf' payment.public_id %}">PDF</a>
+              </div>
+            </td>
+          </tr>
+        {% empty %}
+          <tr>
+            <td colspan="8" class="table__empty">
+              {% include "components/empty_state.html" with icon="receipt" title="Aucun reçu trouvé" %}
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% include "components/pagination.html" with page_obj=page_obj hx_target="#receipts-table" hx_swap="outerHTML" %}
+</div>

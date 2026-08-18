@@ -1,0 +1,17 @@
+{% extends "layouts/app.html" %}
+{% block title %}Validation des frais{% endblock %}
+{% block content %}
+<div data-page="secretariat-fee-approvals">
+  <div class="content__header">
+    <div>
+      <h2 class="content__title">Validation des frais</h2>
+      <p class="content__description">Nouveaux frais et modifications de montants en attente</p>
+    </div>
+  </div>
+  <form class="secretariat-toolbar" method="get" hx-get="{% url 'secretariat:fee-approvals' %}" hx-target="#fee-approvals-table" hx-push-url="true">
+    <input class="form-input form-input--sm" type="search" name="q" value="{{ current_filters.q }}" placeholder="Code, libellé ou classe">
+    <button class="btn btn--secondary btn--sm" type="submit">Filtrer</button>
+  </form>
+  {% include "secretariat/fee_approvals/_table.html" %}
+</div>
+{% endblock %}

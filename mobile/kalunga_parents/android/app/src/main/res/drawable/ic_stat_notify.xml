@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <!-- Silhouette blanche IK : I à gauche, K à droite (barre de statut). -->
+    <!-- I -->
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M3,3.5h4v17H3z"/>
+    <!-- K : barre verticale -->
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M10,3.5h4v17h-4z"/>
+    <!-- K : bras haut -->
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M13.2,11.2 L21,3.5 h-4.2 L10.8,11.2 z"/>
+    <!-- K : bras bas -->
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M13.2,12.8 L21,20.5 h-4.2 L10.8,12.8 z"/>
+</vector>

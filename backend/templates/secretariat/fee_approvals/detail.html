@@ -1,0 +1,78 @@
+{% extends "layouts/app.html" %}
+{% block title %}Validation — {{ fee.label }}{% endblock %}
+{% block content %}
+<div data-page="secretariat-fee-approvals">
+  <div class="content__header">
+    <div>
+      <h2 class="content__title">{{ fee.label }}</h2>
+      <p class="content__description">{{ fee.code }} · {{ fee.get_status_display }}</p>
+    </div>
+    <div class="content__actions">
+      <a class="btn btn--secondary" href="{% url 'secretariat:fee-approvals' %}">Retour</a>
+    </div>
+  </div>
+
+  <div class="secretariat-detail-grid">
+    <article class="card">
+      <div class="card__body">
+        <dl class="secretariat-dl">
+          <dt>Catégorie</dt><dd>{{ fee.category.name }}</dd>
+          <dt>Montant</dt><dd>{{ fee.amount }} {{ fee.currency }}</dd>
+          <dt>Échéance</dt><dd>{% if fee.due_date %}{{ fee.due_date|date:"d/m/Y" }}{% else %}—{% endif %}</dd>
+          <dt>Application</dt><dd>{{ fee.get_application_type_display }}</dd>
+          <dt>Créé par</dt><dd>{% if fee.created_by %}{{ fee.created_by }}{% else %}—{% endif %}</dd>
+        </dl>
+        {% if fee.description %}<p>{{ fee.description }}</p>{% endif %}
+        {% if target_classes %}
+          <h3>Classes concernées</h3>
+          <ul>{% for c in target_classes %}<li>{{ c.name }}</li>{% endfor %}</ul>
+        {% endif %}
+      </div>
+    </article>
+
+    {% if can_decide %}
+    <section class="card">
+      <div class="card__header"><h3>Approuver</h3></div>
+      <div class="card__body">
+            <form method="post" action="{% url 'secretariat:fee-approve' fee.public_id %}">
+              {% csrf_token %}
+              <input type="hidden" name="next" value="{% url 'secretariat:fee-approval-detail' fee.public_id %}">
+              <div class="form-group">
+                <label class="form-label" for="approve_comment">Commentaire</label>
+                <input class="form-input" id="approve_comment" name="comment" maxlength="500">
+              </div>
+              <div class="form-group">
+                <label class="form-label form-label--required" for="approve_password">Mot de passe</label>
+                <input class="form-input" id="approve_password" type="password" name="password" required autocomplete="current-password">
+              </div>
+              <div class="content__actions">
+                <button class="btn btn--primary" type="submit">Approuver</button>
+              </div>
+            </form>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="card__header"><h3>Rejeter</h3></div>
+      <div class="card__body">
+            <form method="post" action="{% url 'secretariat:fee-reject' fee.public_id %}">
+              {% csrf_token %}
+              <input type="hidden" name="next" value="{% url 'secretariat:fee-approval-detail' fee.public_id %}">
+              <div class="form-group">
+                <label class="form-label form-label--required" for="rejection_reason">Motif de rejet</label>
+                <textarea class="form-input" id="rejection_reason" name="rejection_reason" rows="3" required></textarea>
+              </div>
+              <div class="form-group">
+                <label class="form-label form-label--required" for="reject_password">Mot de passe</label>
+                <input class="form-input" id="reject_password" type="password" name="password" required autocomplete="current-password">
+              </div>
+              <div class="content__actions">
+                <button class="btn btn--danger" type="submit">Rejeter</button>
+              </div>
+            </form>
+      </div>
+    </section>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,73 @@
+{% extends "layouts/app.html" %}
+{% block title %}Sortie · {{ exit_auth.student.matricule }} | Discipline{% endblock %}
+{% block content %}
+<div data-page="discipline-exit-detail">
+  <div class="content__header">
+    <div class="content__header-main">
+      <h2 class="content__title">Autorisation de sortie</h2>
+      <p class="content__description">
+        {{ exit_auth.get_status_display }} · {{ exit_auth.date|date:"d/m/Y" }}
+        {% if selected_year %} · Année {{ selected_year.label }}{% endif %}
+      </p>
+    </div>
+    <div class="content__actions">
+      <a class="btn btn--secondary" href="{{ back_url }}">Retour aux sorties</a>
+      <a class="btn btn--secondary" href="{{ dossier_url }}">Dossier de l'élève</a>
+    </div>
+  </div>
+
+  <div class="secretariat-detail-grid">
+    <article class="card">
+      <div class="card__header"><h3>Élève</h3></div>
+      <div class="card__body">
+        <dl class="secretariat-dl">
+          <dt>Matricule</dt>
+          <dd>{{ exit_auth.student.matricule }}</dd>
+          <dt>Nom complet</dt>
+          <dd>{{ exit_auth.student.nom }} {{ exit_auth.student.postnom }} {{ exit_auth.student.prenom }}</dd>
+          <dt>Classe</dt>
+          <dd>{{ exit_auth.enrollment.school_class.name }}</dd>
+        </dl>
+      </div>
+    </article>
+
+    <article class="card">
+      <div class="card__header"><h3>Autorisation</h3></div>
+      <div class="card__body">
+        <dl class="secretariat-dl">
+          <dt>Date</dt>
+          <dd>{{ exit_auth.date|date:"d/m/Y" }}</dd>
+          <dt>Sortie prévue</dt>
+          <dd>{% if exit_auth.planned_exit_time %}{{ exit_auth.planned_exit_time|time:"H:i" }}{% else %}—{% endif %}</dd>
+          <dt>Retour prévu</dt>
+          <dd>{% if exit_auth.expected_return_time %}{{ exit_auth.expected_return_time|time:"H:i" }}{% else %}—{% endif %}</dd>
+          <dt>Sortie effective</dt>
+          <dd>{% if exit_auth.actual_exit_time %}{{ exit_auth.actual_exit_time|time:"H:i" }}{% else %}—{% endif %}</dd>
+          <dt>Retour effectif</dt>
+          <dd>{% if exit_auth.actual_return_time %}{{ exit_auth.actual_return_time|time:"H:i" }}{% else %}—{% endif %}</dd>
+          <dt>Statut</dt>
+          <dd>{{ exit_auth.get_status_display }}</dd>
+        </dl>
+      </div>
+    </article>
+
+    <article class="card">
+      <div class="card__header"><h3>Motif et contacts</h3></div>
+      <div class="card__body">
+        <dl class="secretariat-dl">
+          <dt>Motif</dt>
+          <dd>{{ exit_auth.reason|linebreaksbr }}</dd>
+          <dt>Responsable demandeur</dt>
+          <dd>{{ exit_auth.requesting_guardian|default:"—" }}</dd>
+          <dt>Contact</dt>
+          <dd>{{ exit_auth.guardian_contact|default:"—" }}</dd>
+          <dt>Observation</dt>
+          <dd>{{ exit_auth.note|default:"—"|linebreaksbr }}</dd>
+          <dt>Autorisé par</dt>
+          <dd>{% if exit_auth.authorized_by %}{{ exit_auth.authorized_by }}{% else %}—{% endif %}</dd>
+        </dl>
+      </div>
+    </article>
+  </div>
+</div>
+{% endblock %}
