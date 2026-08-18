@@ -11,7 +11,7 @@ on:
       api_host:
         description: 'URL ELIMU One (https://...)'
         required: false
-        default: 'https://REMPLACER-PAR-VOTRE-DOMAINE-ELIMU'
+        default: 'http://elimu.susc3383.odns.fr'
 
 jobs:
   build:
@@ -35,7 +35,7 @@ jobs:
       - name: Build release APK
         run: |
           flutter build apk --release \
-            --dart-define=ELIMU_API_HOST=${{ github.event.inputs.api_host || 'https://REMPLACER-PAR-VOTRE-DOMAINE-ELIMU' }}
+            --dart-define=ELIMU_API_HOST=${{ github.event.inputs.api_host || 'http://elimu.susc3383.odns.fr' }}
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4

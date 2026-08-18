@@ -36,7 +36,7 @@
         <!-- Affichage système app fermée : canal + icône IK + couleur école. -->
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_channel_id"
-            android:value="kalunga_parents_alerts_v8" />
+            android:value="elimu_go_alerts_v1" />
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_icon"
             android:resource="@drawable/ic_stat_notify" />

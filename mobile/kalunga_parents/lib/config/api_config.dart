@@ -27,7 +27,7 @@ abstract final class ApiConfig {
   /// Ex. `flutter build apk --dart-define=ELIMU_API_HOST=https://app.elimu.cd`
   static const String productionHost = String.fromEnvironment(
     'ELIMU_API_HOST',
-    defaultValue: 'https://REMPLACER-PAR-VOTRE-DOMAINE-ELIMU',
+    defaultValue: 'http://elimu.susc3383.odns.fr',
   );
 
   /// Django local (Android émulateur : 10.0.2.2 = localhost PC).

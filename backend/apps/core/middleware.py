@@ -1,7 +1,39 @@
 """Middleware helpers."""
 
+from urllib.parse import urlparse
+
+from django.conf import settings
 from django.shortcuts import redirect
 from django.urls import reverse
+
+
+class SameOriginCsrfBypassMiddleware:
+    """Accept POST when Origin/Referer is this site.
+
+    Some browsers (HTTP, self-signed HTTPS, privacy extensions) drop the
+    csrftoken cookie even though Django sends Set-Cookie. Modern browsers
+    still send Origin on POST; matching it to ALLOWED_HOSTS is sufficient
+    CSRF protection. Must run *before* CsrfViewMiddleware.
+    """
+
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        if request.method not in ("GET", "HEAD", "OPTIONS", "TRACE"):
+            if self._is_same_origin(request):
+                request.csrf_processing_done = True
+        return self.get_response(request)
+
+    def _is_same_origin(self, request) -> bool:
+        allowed = {h.lower() for h in settings.ALLOWED_HOSTS if h and h != "*"}
+        raw = (request.META.get("HTTP_ORIGIN") or request.META.get("HTTP_REFERER") or "").strip()
+        if not raw or raw.lower() == "null":
+            return False
+        hostname = (urlparse(raw).hostname or "").lower()
+        if not hostname:
+            return False
+        return hostname in allowed
 
 
 class MustChangePasswordMiddleware:

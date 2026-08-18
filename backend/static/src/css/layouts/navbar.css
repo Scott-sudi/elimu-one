@@ -192,16 +192,33 @@
 }
 
 .navbar__menu-toggle {
-    display: none;
+    display: inline-flex;
     align-items: center;
     justify-content: center;
     width: 36px;
     height: 36px;
+    flex-shrink: 0;
     border: 1px solid var(--color-border);
     border-radius: 10px;
     background: var(--color-surface);
     color: var(--color-text-primary);
     cursor: pointer;
+}
+
+.navbar__burger {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    width: 16px;
+    height: 12px;
+}
+
+.navbar__burger span {
+    display: block;
+    height: 2px;
+    width: 100%;
+    background: currentColor;
+    border-radius: 1px;
 }
 
 /* Secrétariat : menu hamburger même sur PC (plus d'onglets en ligne) */

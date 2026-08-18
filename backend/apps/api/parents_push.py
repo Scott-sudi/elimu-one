@@ -18,7 +18,7 @@ from apps.secretariat.models import Guardian
 
 logger = logging.getLogger(__name__)
 
-ANDROID_CHANNEL_ID = "kalunga_parents_alerts_v6"
+ANDROID_CHANNEL_ID = "elimu_go_alerts_v1"
 FCM_SCOPE = "https://www.googleapis.com/auth/firebase.messaging"
 
 # Anti-doublon signal + hook service (même événement < 60 s).
@@ -41,7 +41,7 @@ def _claim_push_key(key: str) -> bool:
 def _project_id() -> str:
     return (
         getattr(settings, "FCM_PROJECT_ID", None) or ""
-    ).strip() or "institut-kalunga"
+    ).strip() or "elimu-go"
 
 
 def _service_account_path() -> Path | None:

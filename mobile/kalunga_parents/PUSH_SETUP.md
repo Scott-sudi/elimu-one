@@ -1,49 +1,56 @@
-# Notifications push — Institut Kalunga Parents
+# Notifications push — ELIMU Go (app fermée)
 
-## Deux modes
+Sans Firebase, le téléphone ne peut pas être réveillé si l’app est fermée.
+Google (FCM) pousse le message, comme WhatsApp.
 
-| Situation | Comment ça marche | État |
-|-----------|-------------------|------|
-| **App ouverte** | Notification système Android native + son | OK (apk récent) |
-| **App fermée / téléphone verrouillé** | **Firebase Cloud Messaging (FCM)** — comme WhatsApp | **À activer une fois** (ci-dessous) |
+Package Android : `net.institutkalunga.parents`
+API ELIMU One : `http://elimu.susc3383.odns.fr`
 
-Sans Firebase, le téléphone **ne peut pas** être réveillé si l’app est fermée.
-Ce n’est pas un « serveur dans le téléphone » : c’est Google qui pousse le message.
+## 1. Créer le projet Firebase (compte Google)
 
-## Activer le push app fermée (une seule fois)
-
-### 1. Firebase (toi — 10 min)
-1. Va sur https://console.firebase.google.com
-2. Crée / ouvre le projet **Institut Kalunga**
-3. Ajoute une app **Android**
-   - Package name : `net.institutkalunga.parents`
-4. Télécharge **`google-services.json`**
-5. Place-le ici :
+1. Ouvrez https://console.firebase.google.com
+2. Cliquez **Ajouter un projet**
+3. Nom : `elimu-go`
+4. Désactivez Google Analytics si proposé → **Créer le projet**
+5. Cliquez l’icône **Android**
+6. Nom du package : `net.institutkalunga.parents` (exactement)
+7. Surnom : `ELIMU Go`
+8. Téléchargez **google-services.json**
+9. Placez-le dans :
    `mobile/kalunga_parents/android/app/google-services.json`
-6. Dans Firebase → Project settings → Cloud Messaging :
-   - copie la **Server key** (ou crée une clé API Cloud Messaging)
 
-### 2. Serveur o2switch
-Dans le fichier `.env` du backend :
+## 2. Clé privée (compte de service)
+
+1. Firebase → ⚙️ **Paramètres du projet**
+2. Onglet **Comptes de service**
+3. **Générer une nouvelle clé privée** → un fichier JSON se télécharge
+4. Ne le commitez jamais sur GitHub
+5. Sur o2switch, copiez-le vers :
+   `/home/susc3383/elimu-school/backend/secrets/firebase-adminsdk.json`
+
+## 3. Serveur o2switch
+
+Dans `~/elimu-school/.env` :
+
 ```
-FCM_SERVER_KEY=ta_cle_serveur_firebase
-```
-Puis dans le Terminal cPanel :
-```bash
-cd ~/kalunga-school/backend && mkdir -p tmp && touch tmp/restart.txt
+FCM_PROJECT_ID=elimu-go
+FCM_SERVICE_ACCOUNT_FILE=secrets/firebase-adminsdk.json
 ```
 
-### 3. Rebuild APK
-Après avoir mis `google-services.json` dans le projet, republier l’APK
-(GitHub Actions ou `flutter build apk --release`).
+Puis Terminal :
 
-Réinstalle l’APK, ouvre l’app **une fois** (pour enregistrer le jeton FCM),
-puis ferme-la complètement et teste un message secrétariat / paiement / présence.
+```sh
+source /home/susc3383/virtualenv/elimu-school/backend/3.12/bin/activate
+cd /home/susc3383/elimu-school/backend
+pip install 'google-auth>=2.29'
+python manage.py send_test_parent_push --help
+touch tmp/restart.txt
+```
 
-## Déjà branché côté serveur
-- Message secrétariat publié → push FCM
-- Présence / retard → push FCM
-- Paiement enregistré → push FCM
+## 4. APK
 
-## Canal Android
-`kalunga_parents_alerts_v8` — Alertes Institut Kalunga (icône statut « IK »)
+Rebuild après `google-services.json` :
+GitHub Actions → **Build ELIMU Go APK**
+`--dart-define=ELIMU_API_HOST=http://elimu.susc3383.odns.fr`
+
+Réinstallez l’APK, ouvrez l’app **une fois** (jeton FCM), fermez-la, testez un message secrétariat.

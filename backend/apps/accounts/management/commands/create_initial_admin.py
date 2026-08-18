@@ -17,15 +17,22 @@ class Command(BaseCommand):
         parser.add_argument("--postnom", default="")
         parser.add_argument("--telephone", default="")
         parser.add_argument("--email", default="")
+        parser.add_argument(
+            "--password",
+            default="",
+            help="Si omis, le mot de passe est demandé interactivement.",
+        )
 
     def handle(self, *args, **options):
         if has_administrator():
             raise CommandError("Un administrateur existe déjà.")
 
-        password = getpass("Mot de passe : ")
-        confirm = getpass("Confirmation : ")
-        if password != confirm:
-            raise CommandError("Les mots de passe ne correspondent pas.")
+        password = options.get("password") or ""
+        if not password:
+            password = getpass("Mot de passe : ")
+            confirm = getpass("Confirmation : ")
+            if password != confirm:
+                raise CommandError("Les mots de passe ne correspondent pas.")
         if not password:
             raise CommandError("Le mot de passe est obligatoire.")
 

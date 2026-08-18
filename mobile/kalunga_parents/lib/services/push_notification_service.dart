@@ -21,7 +21,7 @@ import '../providers/home_providers.dart';
 import '../providers/notifications_providers.dart';
 
 /// Canal Android — doit matcher MainActivity.kt / KalungaParentsApplication.
-const kParentsAlertChannelId = 'kalunga_parents_alerts_v6';
+const kParentsAlertChannelId = 'elimu_go_alerts_v1';
 const kParentsAlertChannelName = 'Alertes ELIMU Go';
 const _kNativeAlertsChannel = 'net.institutkalunga.parents/alerts';
 

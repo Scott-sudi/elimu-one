@@ -1,6 +1,6 @@
 {% load static %}
 {% with ns=request.resolver_match.namespace|default:'' name=request.resolver_match.url_name|default:'' %}
-<header class="navbar {% if request.user.is_secretaire or request.user.is_comptable or request.user.role_code == 'DISCIPLINE' %}navbar--menu-only{% endif %}" data-navbar>
+<header class="navbar navbar--menu-only" data-navbar>
   <div class="navbar__inner">
     <div class="navbar__row">
       <a href="{% if request.user.is_secretaire %}{% url 'secretariat:dashboard' %}{% elif request.user.is_comptable %}{% url 'finance:dashboard' %}{% elif request.user.role_code == 'DISCIPLINE' %}{% url 'discipline:dashboard' %}{% else %}{% url 'dashboard:home' %}{% endif %}" class="navbar__brand" title="{{ school_full_name }}">
@@ -97,7 +97,7 @@
         </form>
 
         <button type="button" class="navbar__menu-toggle" data-navbar-toggle aria-label="Ouvrir le menu" aria-expanded="false" aria-controls="navbar-side-panel">
-          <i data-lucide="menu" width="18" height="18"></i>
+          <span class="navbar__burger" aria-hidden="true"><span></span><span></span><span></span></span>
         </button>
       </div>
     </div>
@@ -386,4 +386,49 @@
   </div>
 </div>
 {% endif %}
+<script>
+(function () {
+  var navbar = document.querySelector('[data-navbar]');
+  if (!navbar || navbar.dataset.navbarBound) return;
+  navbar.dataset.navbarBound = '1';
+  var toggle = navbar.querySelector('[data-navbar-toggle]');
+  var panel = navbar.querySelector('[data-navbar-drawer]');
+  var scrim = navbar.querySelector('[data-navbar-scrim]');
+  var closeBtn = navbar.querySelector('[data-navbar-close]');
+  if (!toggle || !panel) return;
+  function setOpen(open) {
+    if (open) {
+      panel.hidden = false;
+      panel.removeAttribute('hidden');
+      panel.classList.add('is-open', 'is-visible');
+      if (scrim) {
+        scrim.hidden = false;
+        scrim.removeAttribute('hidden');
+        scrim.classList.add('is-open', 'is-visible');
+      }
+      toggle.setAttribute('aria-expanded', 'true');
+      document.body.classList.add('navbar-panel-open');
+    } else {
+      panel.classList.remove('is-open', 'is-visible');
+      panel.hidden = true;
+      panel.setAttribute('hidden', '');
+      if (scrim) {
+        scrim.classList.remove('is-open', 'is-visible');
+        scrim.hidden = true;
+        scrim.setAttribute('hidden', '');
+      }
+      toggle.setAttribute('aria-expanded', 'false');
+      document.body.classList.remove('navbar-panel-open');
+    }
+  }
+  toggle.addEventListener('click', function () {
+    setOpen(panel.hasAttribute('hidden') || !panel.classList.contains('is-visible'));
+  });
+  if (closeBtn) closeBtn.addEventListener('click', function () { setOpen(false); });
+  if (scrim) scrim.addEventListener('click', function () { setOpen(false); });
+  panel.querySelectorAll('[data-navbar-close], [data-modal-open]').forEach(function (el) {
+    el.addEventListener('click', function () { setOpen(false); });
+  });
+})();
+</script>
 {% endwith %}

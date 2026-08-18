@@ -60,6 +60,7 @@ MIDDLEWARE = [
     "corsheaders.middleware.CorsMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
+    "apps.core.middleware.SameOriginCsrfBypassMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
@@ -200,6 +201,9 @@ LOGIN_URL = "accounts:login"
 LOGIN_REDIRECT_URL = "dashboard:home"
 LOGOUT_REDIRECT_URL = "accounts:login"
 
+# Avoid the names csrftoken/sessionid: some adblockers drop them → 403 CSRF.
+SESSION_COOKIE_NAME = env("SESSION_COOKIE_NAME", default="elimu_session")
+CSRF_COOKIE_NAME = env("CSRF_COOKIE_NAME", default="elimu_csrf")
 SESSION_COOKIE_HTTPONLY = True
 SESSION_COOKIE_SAMESITE = "Lax"
 CSRF_COOKIE_HTTPONLY = False
@@ -265,7 +269,7 @@ SIMPLE_JWT = {
 }
 
 # Firebase Cloud Messaging HTTP v1 (API legacy désactivée sur Firebase).
-FCM_PROJECT_ID = env("FCM_PROJECT_ID", default="institut-kalunga")
+FCM_PROJECT_ID = env("FCM_PROJECT_ID", default="elimu-go")
 FCM_SERVICE_ACCOUNT_FILE = env("FCM_SERVICE_ACCOUNT_FILE", default="")
 # Ancien champ legacy — ignoré si compte de service présent.
 FCM_SERVER_KEY = env("FCM_SERVER_KEY", default="")
