@@ -22,6 +22,7 @@ from apps.finance.services.matricule_lookup import (
 )
 from apps.finance.services.payment_sequence_service import (
     build_payable_fee_groups,
+    build_payable_fee_groups_for_enrollment,
     fee_period_short_label,
     resolve_sequential_obligation,
 )
@@ -109,6 +110,24 @@ class PaymentCreateView(FinanceViewMixin, ServiceFormMixin, FormView):
             )
         return super().dispatch(request, *args, **kwargs)
 
+    def resolve_enrollment_from_request(self):
+        """Enrollment from POST/GET matricule suffix when available."""
+        year = self.require_selected_year()
+        suffix = ""
+        if self.request.method == "POST":
+            suffix = (self.request.POST.get("matricule_suffix") or "").strip()
+        if not suffix:
+            return None
+        try:
+            return find_enrollment_by_matricule_suffix(
+                suffix=suffix,
+                academic_year=year,
+                school_class=self.school_class,
+                stem=self.get_matricule_stem(),
+            )
+        except Enrollment.DoesNotExist:
+            return None
+
     def get_payable_fees(self):
         """Fees for the class context, or for the student resolved from matricule."""
         year = self.require_selected_year()
@@ -134,7 +153,9 @@ class PaymentCreateView(FinanceViewMixin, ServiceFormMixin, FormView):
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
-        kwargs["fees"] = self.get_payable_fees()
+        fees = self.get_payable_fees()
+        kwargs["fees"] = fees
+        kwargs["enrollment"] = self.resolve_enrollment_from_request()
         return kwargs
 
     def get_matricule_stem(self) -> str:
@@ -218,7 +239,14 @@ class PaymentCreateView(FinanceViewMixin, ServiceFormMixin, FormView):
                 kwargs={"public_id": self.school_class.public_id},
             )
         fees = self.get_payable_fees()
-        fee_groups = build_payable_fee_groups(fees)
+        enrollment = self.resolve_enrollment_from_request()
+        if enrollment:
+            fee_groups = build_payable_fee_groups_for_enrollment(
+                enrollment=enrollment,
+                fees=fees,
+            )
+        else:
+            fee_groups = build_payable_fee_groups(fees)
         fee_groups_payload = [
             {
                 "key": g["key"],
@@ -294,8 +322,19 @@ class PaymentMatriculeLookupView(FinanceViewMixin, View):
                 "schedule_mode": g["schedule_mode"],
                 "periods": g["periods"],
             }
-            for g in build_payable_fee_groups(fees)
+            for g in build_payable_fee_groups_for_enrollment(
+                enrollment=enrollment,
+                fees=fees,
+            )
         ]
+        if not fee_groups:
+            return JsonResponse(
+                {
+                    "ok": False,
+                    "error": "Cet élève n'a plus de frais impayés pour cette année.",
+                },
+                status=404,
+            )
         return JsonResponse(
             {
                 "ok": True,

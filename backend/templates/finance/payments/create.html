@@ -73,7 +73,7 @@
               <span class="matricule-input__prefix">{{ matricule_stem }}</span>
               {{ form.matricule_suffix }}
             </div>
-            <p class="form-hint">Saisissez la fin du matricule — les frais de la classe de l’élève s’affichent ensuite.</p>
+            <p class="form-hint">Saisissez la fin du matricule — le nom, la classe et les frais encore dus s’affichent ensuite.</p>
             <p class="payment-student-hint" data-payment-student-hint hidden></p>
             {% if form.matricule_suffix.errors %}<div class="form-error">{{ form.matricule_suffix.errors|striptags }}</div>{% endif %}
           </div>
@@ -83,7 +83,7 @@
             {{ form.fee_group }}
             {% if form.fee_group.errors %}<div class="form-error">{{ form.fee_group.errors|striptags }}</div>{% endif %}
             <p class="table__empty" data-payment-fees-empty {% if payable_fees %}hidden{% endif %}>
-              Complétez le matricule pour charger les frais de la classe.
+              Complétez le matricule pour afficher les frais impayés de l’élève.
             </p>
           </div>
 
@@ -91,7 +91,7 @@
             <label class="form-label" for="{{ form.fee.id_for_label }}">{{ form.fee.label }}</label>
             {{ form.fee }}
             <p class="form-hint" data-payment-period-hint>
-              Choisissez le mois ou la tranche. Les périodes antérieures non soldées restent prioritaires.
+              Choisissez le mois ou la tranche impayé(e). Les périodes déjà soldées à 100&nbsp;% n’apparaissent pas.
             </p>
             {% if form.fee.errors %}<div class="form-error">{{ form.fee.errors|striptags }}</div>{% endif %}
           </div>

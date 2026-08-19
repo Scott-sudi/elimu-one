@@ -5,6 +5,7 @@ from django import forms
 from apps.finance.models import Payment, SchoolFee
 from apps.finance.services.payment_sequence_service import (
     build_payable_fee_groups,
+    build_payable_fee_groups_for_enrollment,
     fee_period_short_label,
 )
 
@@ -55,10 +56,16 @@ class PaymentForm(forms.Form):
         initial=Payment.PaymentMethod.CASH,
     )
 
-    def __init__(self, *args, fees=None, **kwargs):
+    def __init__(self, *args, fees=None, enrollment=None, **kwargs):
         super().__init__(*args, **kwargs)
         fees = list(fees or [])
-        self.fee_groups = build_payable_fee_groups(fees)
+        if enrollment is not None:
+            self.fee_groups = build_payable_fee_groups_for_enrollment(
+                enrollment=enrollment,
+                fees=fees,
+            )
+        else:
+            self.fee_groups = build_payable_fee_groups(fees)
         self._groups_by_key = {g["key"]: g for g in self.fee_groups}
 
         self.fields["fee_group"].choices = [("", "Choisir…")] + [

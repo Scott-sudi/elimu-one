@@ -409,6 +409,101 @@ def test_payable_fee_groups_names_then_periods(accountant, academic_structure):
 
 
 @pytest.mark.django_db
+def test_payable_fee_groups_for_enrollment_hides_paid_periods(
+    accountant, academic_structure, enrolled_student
+):
+    from apps.finance.services.fee_structure_service import (
+        ensure_structural_fees,
+        payable_fees_for_class,
+    )
+    from apps.finance.services.payment_sequence_service import (
+        build_payable_fee_groups,
+        build_payable_fee_groups_for_enrollment,
+    )
+
+    year = academic_structure["year"]
+    school_class = academic_structure["school_class"]
+    enrollment = enrolled_student["enrollment"]
+    ensure_structural_fees(academic_year=year, actor=accountant)
+    fees = payable_fees_for_class(school_class=school_class)
+    all_groups = build_payable_fee_groups(fees)
+    minerval_all = next(g for g in all_groups if g["key"] == "MINERVAL")
+    assert len(minerval_all["periods"]) >= 2
+
+    first_fee = minerval_all["fees"][0]
+    obligation = StudentFeeObligation.objects.get(fee=first_fee, enrollment=enrollment)
+    record_payment(
+        enrollment=enrollment,
+        amount_total=obligation.amount_due,
+        payment_date=date(2026, 10, 1),
+        payment_method=Payment.PaymentMethod.CASH,
+        allocations=[{"obligation": obligation, "amount": obligation.amount_due}],
+        actor=accountant,
+    )
+
+    filtered = build_payable_fee_groups_for_enrollment(
+        enrollment=enrollment,
+        fees=fees,
+    )
+    minerval_open = next(g for g in filtered if g["key"] == "MINERVAL")
+    open_ids = {p["id"] for p in minerval_open["periods"]}
+    assert first_fee.pk not in open_ids
+    assert len(minerval_open["periods"]) == len(minerval_all["periods"]) - 1
+
+
+@pytest.mark.django_db
+def test_payment_matricule_lookup_returns_open_periods_only(
+    client, accountant, academic_structure, enrolled_student
+):
+    from apps.finance.services.fee_structure_service import ensure_structural_fees
+    from apps.secretariat.services.year_context import SESSION_KEY
+
+    year = academic_structure["year"]
+    enrollment = enrolled_student["enrollment"]
+    student = enrolled_student["student"]
+    ensure_structural_fees(academic_year=year, actor=accountant)
+
+    first_ob = (
+        StudentFeeObligation.objects.filter(enrollment=enrollment)
+        .select_related("fee")
+        .order_by("fee__due_date", "fee__period_index")
+        .first()
+    )
+    assert first_ob is not None
+    record_payment(
+        enrollment=enrollment,
+        amount_total=first_ob.amount_due,
+        payment_date=date(2026, 10, 1),
+        payment_method=Payment.PaymentMethod.CASH,
+        allocations=[{"obligation": first_ob, "amount": first_ob.amount_due}],
+        actor=accountant,
+    )
+
+    client.force_login(accountant)
+    session = client.session
+    session[SESSION_KEY] = year.pk
+    session.save()
+
+    suffix = student.matricule.split("-")[-1]
+    stem = "-".join(student.matricule.split("-")[:-1]) + "-"
+    response = client.get(
+        reverse("finance:payment-matricule-lookup"),
+        {"suffix": suffix, "stem": stem},
+    )
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["ok"] is True
+    assert payload["student"]["name"]
+    assert payload["student"]["class_name"]
+    period_ids = {
+        period["id"]
+        for group in payload["fee_groups"]
+        for period in group["periods"]
+    }
+    assert first_ob.fee_id not in period_ids
+
+
+@pytest.mark.django_db
 def test_secretary_fee_approval_list(client, secretary, academic_structure):
     client.force_login(secretary)
     _set_year(client, academic_structure["year"])

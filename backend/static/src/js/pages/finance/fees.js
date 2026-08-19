@@ -397,8 +397,10 @@ function initPaymentFeeGroups(page) {
     if (hint) {
       hint.textContent =
         group.schedule_mode === 'MOIS'
-          ? 'Choisissez le mois. Les mois antérieurs non soldés restent prioritaires.'
-          : 'Choisissez la tranche. Les tranches antérieures non soldées restent prioritaires.';
+          ? 'Seuls les mois impayés ou partiellement payés sont proposés.'
+          : group.schedule_mode === 'TRANCHES'
+            ? 'Seules les tranches impayées ou partiellement payées sont proposées.'
+            : 'Ce frais se paie en une seule fois.';
     }
   }
 
@@ -440,8 +442,13 @@ function initPaymentFeeGroups(page) {
       }
 
       const student = payload.student || {};
+      const name = student.name || 'Élève';
+      const className = student.class_name || '';
+      const matricule = student.matricule || '';
       setStudentHint(
-        `${student.name || 'Élève'} · ${student.class_name || ''} · ${student.matricule || ''}`.trim(),
+        className
+          ? `${name} — Classe : ${className}${matricule ? ` (${matricule})` : ''}`
+          : `${name}${matricule ? ` (${matricule})` : ''}`,
         'ok'
       );
       preferredGroup = '';

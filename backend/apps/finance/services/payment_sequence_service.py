@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from decimal import Decimal
+
 from apps.finance.models import SchoolFee, StudentFeeObligation
 from apps.finance.services.exceptions import FinanceError
 from apps.finance.services.fee_structure_service import MONTH_LABELS_FR
@@ -72,6 +74,91 @@ def build_payable_fee_groups(fees: list[SchoolFee]) -> list[dict]:
             groups[key]["schedule_mode"] = mode
 
     return list(groups.values())
+
+
+def _obligation_period_is_payable(obligation: StudentFeeObligation | None) -> bool:
+    """True when the period may still receive a payment."""
+    if obligation is None:
+        return True
+    if obligation.status in {
+        StudentFeeObligation.Status.EXEMPTED,
+        StudentFeeObligation.Status.CANCELLED,
+        StudentFeeObligation.Status.PAID,
+    }:
+        return False
+    return obligation.amount_remaining > 0
+
+
+def _period_option_label(
+    fee: SchoolFee,
+    *,
+    base_label: str,
+    obligation: StudentFeeObligation | None,
+) -> str:
+    if obligation is None or obligation.amount_remaining <= 0:
+        return base_label
+    remaining = obligation.amount_remaining.quantize(Decimal("0.01"))
+    currency = (fee.currency or "CDF").strip()
+    if obligation.status == StudentFeeObligation.Status.PARTIAL:
+        return f"{base_label} — reste {remaining} {currency}"
+    return base_label
+
+
+def build_payable_fee_groups_for_enrollment(
+    *,
+    enrollment: Enrollment,
+    fees: list[SchoolFee],
+) -> list[dict]:
+    """
+    Fee groups for the payment form: only periods still owed (unpaid or partial).
+
+    Fully paid periods are omitted so accountants are not misled.
+    """
+    fee_ids = [fee.pk for fee in fees]
+    obligations = {
+        row.fee_id: row
+        for row in StudentFeeObligation.objects.filter(
+            enrollment=enrollment,
+            fee_id__in=fee_ids,
+        ).select_related("fee")
+    }
+
+    filtered: list[dict] = []
+    for group in build_payable_fee_groups(fees):
+        open_fees: list[SchoolFee] = []
+        open_periods: list[dict] = []
+        for fee in group["fees"]:
+            obligation = obligations.get(fee.pk)
+            if not _obligation_period_is_payable(obligation):
+                continue
+            base_label = fee_period_short_label(fee)
+            open_fees.append(fee)
+            period_payload = {
+                "id": fee.pk,
+                "label": _period_option_label(
+                    fee,
+                    base_label=base_label,
+                    obligation=obligation,
+                ),
+            }
+            if obligation is not None:
+                period_payload["status"] = obligation.status
+                period_payload["amount_remaining"] = str(
+                    obligation.amount_remaining.quantize(Decimal("0.01"))
+                )
+            open_periods.append(period_payload)
+
+        if not open_fees:
+            continue
+
+        filtered.append(
+            {
+                **group,
+                "fees": open_fees,
+                "periods": open_periods,
+            }
+        )
+    return filtered
 
 
 def fee_period_short_label(fee: SchoolFee) -> str:

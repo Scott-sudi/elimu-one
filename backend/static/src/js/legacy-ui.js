@@ -543,6 +543,227 @@
     );
   }
 
+  /* ---------- Comptabilité : formulaire paiement ---------- */
+
+  function initFinancePaymentForm(root) {
+    var page = root.querySelector('[data-page="finance-payments"]');
+    if (!page || page.dataset.paymentFeesBound === "1") return;
+    page.dataset.paymentFeesBound = "1";
+
+    var dataEl = page.querySelector("#payment-fee-groups-data");
+    var groupSelect = page.querySelector("[data-payment-fee-group]");
+    var periodSelect = page.querySelector("[data-payment-period]");
+    var hint = page.querySelector("[data-payment-period-hint]");
+    var matriculeInput = page.querySelector("[data-payment-matricule]");
+    var studentHint = page.querySelector("[data-payment-student-hint]");
+    var emptyFees = page.querySelector("[data-payment-fees-empty]");
+    var submitBtn = page.querySelector("[data-payment-submit]");
+    var lookupUrl = page.dataset.matriculeLookupUrl || "";
+    var stem = page.dataset.matriculeStem || "";
+    var classe = page.dataset.classe || "";
+    if (!dataEl || !groupSelect || !periodSelect) return;
+
+    var groups = [];
+    try {
+      groups = JSON.parse(dataEl.textContent || "[]");
+    } catch (_) {
+      groups = [];
+    }
+    var initialGroups = groups.slice();
+    var byKey = {};
+    var preferredGroup = groupSelect.value;
+    var preferredPeriod = periodSelect.value;
+    var lookupTimer = null;
+    var lookupSeq = 0;
+
+    function fillEmpty(select, label) {
+      select.innerHTML = "";
+      var empty = document.createElement("option");
+      empty.value = "";
+      empty.textContent = label || "Choisir…";
+      select.appendChild(empty);
+    }
+
+    function setStudentHint(message, tone) {
+      if (!studentHint) return;
+      if (!message) {
+        studentHint.hidden = true;
+        studentHint.textContent = "";
+        studentHint.classList.remove("is-ok", "is-error");
+        return;
+      }
+      studentHint.hidden = false;
+      studentHint.textContent = message;
+      studentHint.classList.toggle("is-ok", tone === "ok");
+      studentHint.classList.toggle("is-error", tone === "error");
+    }
+
+    function rebuildByKey() {
+      byKey = {};
+      groups.forEach(function (g) {
+        byKey[g.key] = g;
+      });
+    }
+
+    function applyGroups(nextGroups, resetSelection) {
+      groups = nextGroups || [];
+      dataEl.textContent = JSON.stringify(groups);
+      rebuildByKey();
+
+      var previousGroup = resetSelection ? "" : preferredGroup || groupSelect.value;
+      fillEmpty(groupSelect);
+      groups.forEach(function (group) {
+        var opt = document.createElement("option");
+        opt.value = group.key;
+        opt.textContent = group.label;
+        groupSelect.appendChild(opt);
+      });
+
+      var hasFees = groups.length > 0;
+      groupSelect.disabled = !hasFees;
+      if (submitBtn) submitBtn.disabled = !hasFees;
+      if (emptyFees) emptyFees.hidden = hasFees;
+
+      if (previousGroup && byKey[previousGroup]) {
+        groupSelect.value = previousGroup;
+      } else {
+        groupSelect.value = "";
+        preferredPeriod = "";
+      }
+      syncPeriod();
+    }
+
+    function syncPeriod() {
+      var group = byKey[groupSelect.value];
+      fillEmpty(periodSelect);
+
+      if (!group) {
+        periodSelect.disabled = true;
+        if (hint) hint.textContent = "Choisissez d'abord un frais.";
+        return;
+      }
+
+      if (group.schedule_mode === "UNE_FOIS") {
+        periodSelect.disabled = true;
+        if (hint) {
+          hint.textContent =
+            "Ce frais se paie en une seule fois — mois et tranches non applicables.";
+        }
+        return;
+      }
+
+      periodSelect.disabled = false;
+      (group.periods || []).forEach(function (period) {
+        var opt = document.createElement("option");
+        opt.value = String(period.id);
+        opt.textContent = period.label;
+        periodSelect.appendChild(opt);
+      });
+
+      if (
+        preferredPeriod &&
+        Array.prototype.some.call(periodSelect.options, function (o) {
+          return o.value === preferredPeriod;
+        })
+      ) {
+        periodSelect.value = preferredPeriod;
+      }
+
+      if (hint) {
+        hint.textContent =
+          group.schedule_mode === "MOIS"
+            ? "Seuls les mois impayés ou partiellement payés sont proposés."
+            : "Seules les tranches impayées ou partiellement payées sont proposées.";
+      }
+    }
+
+    function lookupMatricule() {
+      if (!lookupUrl || !matriculeInput) return;
+      var suffix = (matriculeInput.value || "").trim();
+      if (!suffix) {
+        setStudentHint("", null);
+        preferredGroup = "";
+        preferredPeriod = "";
+        applyGroups(classe ? initialGroups : [], true);
+        return;
+      }
+
+      var seq = ++lookupSeq;
+      var params = new URLSearchParams({ suffix: suffix, stem: stem });
+      if (classe) params.set("classe", classe);
+
+      fetch(lookupUrl + "?" + params.toString(), {
+        headers: { Accept: "application/json" },
+        credentials: "same-origin",
+      })
+        .then(function (response) {
+          return response.json().catch(function () {
+            return {};
+          }).then(function (payload) {
+            return { response: response, payload: payload };
+          });
+        })
+        .then(function (result) {
+          if (seq !== lookupSeq) return;
+          if (!result.response.ok || !result.payload.ok) {
+            setStudentHint(
+              result.payload.error || "Aucun élève trouvé pour ce matricule.",
+              "error"
+            );
+            preferredGroup = "";
+            preferredPeriod = "";
+            applyGroups([], true);
+            return;
+          }
+
+          var student = result.payload.student || {};
+          var name = student.name || "Élève";
+          var className = student.class_name || "";
+          var matricule = student.matricule || "";
+          setStudentHint(
+            className
+              ? name + " — Classe : " + className + (matricule ? " (" + matricule + ")" : "")
+              : name + (matricule ? " (" + matricule + ")" : ""),
+            "ok"
+          );
+          preferredGroup = "";
+          preferredPeriod = "";
+          applyGroups(result.payload.fee_groups || [], true);
+        })
+        .catch(function () {
+          if (seq !== lookupSeq) return;
+          setStudentHint("Impossible de vérifier le matricule pour le moment.", "error");
+        });
+    }
+
+    function scheduleLookup() {
+      if (lookupTimer) window.clearTimeout(lookupTimer);
+      lookupTimer = window.setTimeout(lookupMatricule, 350);
+    }
+
+    groupSelect.addEventListener("change", function () {
+      preferredGroup = groupSelect.value;
+      preferredPeriod = "";
+      syncPeriod();
+    });
+
+    if (matriculeInput) {
+      matriculeInput.addEventListener("input", scheduleLookup);
+      matriculeInput.addEventListener("blur", lookupMatricule);
+    }
+
+    rebuildByKey();
+    if (groups.length) {
+      applyGroups(groups, false);
+    } else {
+      applyGroups([], true);
+    }
+
+    if (matriculeInput && (matriculeInput.value || "").trim()) {
+      lookupMatricule();
+    }
+  }
+
   function boot(root) {
     initModals(root);
     initAutoFilterForms(root);
@@ -552,6 +773,7 @@
     initPasswordToggles(root);
     initDisciplineMatricule(root);
     initSidebar(root);
+    initFinancePaymentForm(root);
     paintIcons();
   }
 
