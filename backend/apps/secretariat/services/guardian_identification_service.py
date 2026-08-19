@@ -7,13 +7,20 @@ import re
 from django.db.models import Q
 
 from apps.secretariat.models import Guardian
+from apps.secretariat.services.identifier_format import (
+    GUARDIAN_MARKER,
+    SCHOOL_PREFIX,
+    _ELM_PARENT_IDENT_RE,
+    _LEGACY_PARENT_IDENT_RE,
+    guardian_identification_stem,
+    normalize_code,
+)
 
 # Legacy compact format: YY + IK + section + option + letter + seq (12 chars)
 _LEGACY_IDENT_RE = re.compile(r"^[A-Z0-9]{12}$")
-# New parent registry: KAL-2026-R-0042 (distinct from student matricules KAL-2026-#####)
-_PARENT_IDENT_RE = re.compile(r"^KAL-\d{4}-R-\d{4,6}$", re.IGNORECASE)
-SCHOOL_CODE = "KAL"
 LEGACY_SCHOOL_CODE = "IK"
+# Backward compatibility for existing KAL-R IDs in production.
+LEGACY_GUARDIAN_SCHOOL_CODE = "KAL"
 
 
 def generate_guardian_identification(
@@ -26,17 +33,27 @@ def generate_guardian_identification(
 ) -> str:
     """Build a parent ID unique to the responsable (not the student).
 
-    Format: ``KAL-{year}-R-{seq}``
-    Example: ``KAL-2026-R-0042``
+    Format: ``ELM{year}R{seq}``
+    Example: ``ELM2026R00042``
 
-    ``section_code`` / ``option_code`` / ``class_letter`` are accepted for
-    backward-compatible call sites but are not embedded in the ID: a parent
-    may have children in several classes, so the ID must stay parent-scoped.
+    Section / option / class are not embedded: a parent may have children
+    in several classes.
     """
-    del section_code, option_code, class_letter  # parent-scoped — not class-scoped
+    del section_code, option_code, class_letter
+    stem = guardian_identification_stem(academic_year_start=academic_year_start)
+    seq_part = f"{max(1, int(sequence)) % 1_000_000:05d}"
+    return f"{stem}{seq_part}"
+
+
+def generate_legacy_kal_guardian_identification(
+    *,
+    academic_year_start: int,
+    sequence: int,
+) -> str:
+    """Former KAL-R format kept for migration reference."""
     year_part = int(academic_year_start)
     seq_part = f"{max(1, int(sequence)) % 1_000_000:04d}"
-    return f"{SCHOOL_CODE}-{year_part}-R-{seq_part}"
+    return f"{LEGACY_GUARDIAN_SCHOOL_CODE}-{year_part}-R-{seq_part}"
 
 
 def generate_legacy_guardian_identification(
@@ -49,21 +66,22 @@ def generate_legacy_guardian_identification(
 ) -> str:
     """Former 12-char format kept for tests / migration reference."""
     year_part = str(academic_year_start)[-2:]
-    section_part = (section_code[:1] or "X").upper()
-    option_part = (option_code[:2] or "XX").upper()
-    letter_part = (class_letter[:1] or "A").upper()
+    section_part = normalize_code(section_code, max_len=1, fallback="X")
+    option_part = normalize_code(option_code, max_len=2, fallback="XX")
+    letter_part = normalize_code(class_letter, max_len=1, fallback="A")
     seq_part = f"{int(sequence) % 10_000:04d}"
     return f"{year_part}{LEGACY_SCHOOL_CODE}{section_part}{option_part}{letter_part}{seq_part}"
 
 
 def normalize_identification_number(value: str) -> str:
-    """Normalize for comparison; keep dashes for the KAL-R format."""
+    """Normalize for comparison; strip spaces, uppercase."""
     raw = (value or "").strip().upper()
     if not raw:
         return ""
-    if _PARENT_IDENT_RE.fullmatch(raw.replace(" ", "")):
+    if _LEGACY_PARENT_IDENT_RE.fullmatch(raw.replace(" ", "")):
         return re.sub(r"\s+", "", raw)
-    # Legacy: strip spaces and dashes
+    if _ELM_PARENT_IDENT_RE.fullmatch(re.sub(r"[\s\-]", "", raw)):
+        return re.sub(r"[\s\-]", "", raw)
     return re.sub(r"[\s\-]", "", raw)
 
 
@@ -71,11 +89,15 @@ def assert_valid_identification_format(value: str) -> str:
     cleaned = normalize_identification_number(value)
     if not cleaned:
         return ""
-    if _PARENT_IDENT_RE.fullmatch(cleaned) or _LEGACY_IDENT_RE.fullmatch(cleaned):
+    if (
+        _ELM_PARENT_IDENT_RE.fullmatch(cleaned)
+        or _LEGACY_PARENT_IDENT_RE.fullmatch(cleaned)
+        or _LEGACY_IDENT_RE.fullmatch(cleaned)
+    ):
         return cleaned
     raise ValueError(
         "Le numéro d'identification du responsable doit être du type "
-        "KAL-2026-R-0042 (ou l'ancien format 12 caractères)."
+        "ELM2026R00042 (ou l'ancien format KAL-2026-R-0042)."
     )
 
 
@@ -100,7 +122,17 @@ def ensure_unique_guardian_identification(
     if not _taken(ident):
         return ident
 
-    # Bump sequence for KAL-YYYY-R-NNNN
+    elm_match = _ELM_PARENT_IDENT_RE.fullmatch(ident)
+    if elm_match:
+        stem = f"{SCHOOL_PREFIX}{elm_match.group(1)}{GUARDIAN_MARKER}"
+        seq = int(elm_match.group(2))
+        width = max(5, len(elm_match.group(2)))
+        for offset in range(1, 1_000_000):
+            retry = f"{stem}{(seq + offset):0{width}d}"
+            if not _taken(retry):
+                return retry
+        raise ValueError("Impossible de générer un numéro d'identification unique.")
+
     parent_match = re.fullmatch(r"(KAL-\d{4}-R-)(\d+)", ident, flags=re.IGNORECASE)
     if parent_match:
         prefix, seq = parent_match.group(1).upper(), int(parent_match.group(2))
@@ -111,7 +143,6 @@ def ensure_unique_guardian_identification(
                 return retry
         raise ValueError("Impossible de générer un numéro d'identification unique.")
 
-    # Legacy 12-char: bump last 4 digits
     prefix = ident[:8]
     for offset in range(1, 10_000):
         retry = f"{prefix}{offset:04d}"
@@ -122,7 +153,7 @@ def ensure_unique_guardian_identification(
 
 def next_guardian_sequence(*, academic_year_start: int) -> int:
     """Next free sequence for parent IDs of the given year."""
-    stem = f"{SCHOOL_CODE}-{int(academic_year_start)}-R-"
+    stem = guardian_identification_stem(academic_year_start=academic_year_start)
     latest = (
         Guardian.objects.filter(numero_identification__istartswith=stem)
         .order_by("-numero_identification")
@@ -130,11 +161,24 @@ def next_guardian_sequence(*, academic_year_start: int) -> int:
         .first()
     )
     if not latest:
-        # Also count legacy IDs so new sequence stays ahead of total guardians
+        legacy_stem = f"{LEGACY_GUARDIAN_SCHOOL_CODE}-{int(academic_year_start)}-R-"
+        legacy_latest = (
+            Guardian.objects.filter(numero_identification__istartswith=legacy_stem)
+            .order_by("-numero_identification")
+            .values_list("numero_identification", flat=True)
+            .first()
+        )
+        if legacy_latest:
+            try:
+                return int(str(legacy_latest).rsplit("-", 1)[-1]) + 1
+            except (TypeError, ValueError):
+                pass
         return max(1, Guardian.objects.count() + 1)
+    tail = str(latest)[len(stem) :]
+    digits = "".join(ch for ch in tail if ch.isdigit())
     try:
-        return int(str(latest).rsplit("-", 1)[-1]) + 1
-    except (TypeError, ValueError):
+        return int(digits) + 1 if digits else 1
+    except ValueError:
         return Guardian.objects.count() + 1
 
 

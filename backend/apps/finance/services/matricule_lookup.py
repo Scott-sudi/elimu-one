@@ -5,29 +5,45 @@ from __future__ import annotations
 from django.utils import timezone
 
 from apps.secretariat.models import Enrollment, SecretariatSetting
+from apps.secretariat.services.identifier_format import (
+    SCHOOL_PREFIX,
+    parse_student_matricule_suffix,
+    student_matricule_stem,
+)
+
+
+def matricule_prefix() -> str:
+    setting = SecretariatSetting.objects.filter(key="MATRICULE_PREFIX").first()
+    value = (setting.value if setting else SCHOOL_PREFIX).strip().upper()
+    return value or SCHOOL_PREFIX
 
 
 def matricule_stem(*, year: int | None = None) -> str:
-    """Return the common matricule prefix, e.g. ``KAL-2026-``."""
+    """Return the year-level prefix, e.g. ``ELM2026`` (legacy: ``KAL-2026-``)."""
     year = year or timezone.localdate().year
-    prefix_setting = SecretariatSetting.objects.filter(key="MATRICULE_PREFIX").first()
-    prefix = (prefix_setting.value if prefix_setting else "KAL").strip().upper() or "KAL"
-    return f"{prefix}-{year}-"
+    prefix = matricule_prefix()
+    if prefix == "KAL":
+        return f"{prefix}-{year}-"
+    return f"{prefix}{year}"
 
 
 def matricule_padding() -> int:
     setting = SecretariatSetting.objects.filter(key="MATRICULE_PADDING").first()
     try:
-        return max(1, int(setting.value)) if setting else 5
+        return max(4, int(setting.value)) if setting else 5
     except (TypeError, ValueError):
         return 5
 
 
 def class_matricule_stem(*, school_class) -> str:
     """
-    Prefer the shared prefix of students in the class; fallback to year stem.
+    Prefer ELM class stem; fall back to common prefix of enrolled students.
     """
     year = school_class.academic_year.start_date.year
+    prefix = matricule_prefix()
+    if prefix != "KAL":
+        return student_matricule_stem(school_class=school_class)
+
     matricules = list(
         Enrollment.objects.filter(
             school_class=school_class,
@@ -44,14 +60,11 @@ def class_matricule_stem(*, school_class) -> str:
         if not common:
             break
 
-    # Keep a useful stem ending before the numeric identity part when possible.
     if "-" in common:
-        # e.g. KAL-2026-00012 → KAL-2026-
         head, _, tail = common.rpartition("-")
         if tail.isdigit() or tail == "":
             return f"{head}-"
         return common if common.endswith("-") else f"{common}"
-    # Compact seed style KAL202600012 → keep non-digit prefix
     i = len(common)
     while i > 0 and common[i - 1].isdigit():
         i -= 1
@@ -64,12 +77,13 @@ def build_matricule(*, stem: str, suffix: str) -> str:
     suffix = (suffix or "").strip()
     if not suffix:
         raise ValueError("Le numéro de matricule est obligatoire.")
-    # Allow pasting a full matricule that already includes the stem.
     if stem and suffix.upper().startswith(stem.upper()):
         return suffix.strip().upper()
     digits = "".join(ch for ch in suffix if ch.isdigit())
     if digits and digits == suffix.replace(" ", ""):
         pad = matricule_padding()
+        if stem.endswith("-"):
+            return f"{stem}{int(digits):0{pad}d}"
         return f"{stem}{int(digits):0{pad}d}"
     return f"{stem}{suffix}".upper()
 
@@ -92,13 +106,19 @@ def find_enrollment_by_matricule_suffix(
     if not raw:
         raise Enrollment.DoesNotExist("Numéro de matricule manquant.")
 
-    # Full matricule pasted
     candidates.append(raw.upper())
     try:
         candidates.append(build_matricule(stem=stem, suffix=raw))
     except ValueError:
         pass
-    # Unpadded / alternate padding attempts
+
+    identity_suffix = parse_student_matricule_suffix(raw, stem=stem)
+    if identity_suffix:
+        pad = matricule_padding()
+        candidates.append(f"{stem}{identity_suffix}")
+        if identity_suffix.isdigit():
+            candidates.append(f"{stem}{int(identity_suffix):0{pad}d}")
+
     digits = "".join(ch for ch in raw if ch.isdigit())
     if digits:
         pad = matricule_padding()
@@ -124,13 +144,12 @@ def find_enrollment_by_matricule_suffix(
         qs = qs.filter(school_class=school_class)
     enrollment = qs.first()
     if enrollment is None:
-        # Last resort: suffix match within class/year
         fallback = Enrollment.objects.select_related(
             "student", "school_class", "academic_year"
         ).filter(
             academic_year=academic_year,
             status=Enrollment.Status.VALIDATED,
-            student__matricule__iendswith=digits or raw,
+            student__matricule__iendswith=identity_suffix or digits or raw,
         )
         if school_class is not None:
             fallback = fallback.filter(school_class=school_class)

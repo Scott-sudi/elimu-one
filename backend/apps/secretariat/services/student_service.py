@@ -43,9 +43,9 @@ def _validate_student(student: Student) -> None:
 
 
 @transaction.atomic
-def create_student(*, actor=None, request=None, **data) -> Student:
+def create_student(*, school_class=None, actor=None, request=None, **data) -> Student:
     validate_photo(data.get("photo"))
-    data.setdefault("matricule", generate_matricule())
+    data.setdefault("matricule", generate_matricule(school_class=school_class))
     student = Student(**data)
     _validate_student(student)
     student.save()

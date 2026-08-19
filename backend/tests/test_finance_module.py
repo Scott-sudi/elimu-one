@@ -484,8 +484,12 @@ def test_payment_matricule_lookup_returns_open_periods_only(
     session[SESSION_KEY] = year.pk
     session.save()
 
-    suffix = student.matricule.split("-")[-1]
-    stem = "-".join(student.matricule.split("-")[:-1]) + "-"
+    from apps.finance.services.matricule_lookup import class_matricule_stem
+
+    school_class = enrolled_student["enrollment"].school_class
+    student = enrolled_student["student"]
+    stem = class_matricule_stem(school_class=school_class)
+    suffix = student.matricule[len(stem) :] if student.matricule.startswith(stem) else student.matricule
     response = client.get(
         reverse("finance:payment-matricule-lookup"),
         {"suffix": suffix, "stem": stem},

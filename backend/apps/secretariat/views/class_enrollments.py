@@ -101,6 +101,7 @@ class ClassInscriptionView(ClassEnrollmentMixin, FormView):
                 )
             with transaction.atomic():
                 student = student_service.create_student(
+                    school_class=self.school_class,
                     actor=self.request.user,
                     request=self.request,
                     **data,

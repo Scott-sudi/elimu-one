@@ -12,6 +12,7 @@ from apps.secretariat.models import Enrollment, SchoolClass, Student
 from . import audit_secretariat_action
 from .enrollment_number_service import generate_enrollment_number
 from .exceptions import SecretariatError
+from .matricule_service import ensure_student_matricule
 
 ACTIVE_STATUSES = (Enrollment.Status.DRAFT, Enrollment.Status.VALIDATED)
 
@@ -70,6 +71,8 @@ def create_enrollment(
             "La classe a atteint sa capacité maximale. "
             "Élargissez le nombre de places (mot de passe + description) avant d'inscrire."
         )
+
+    student = ensure_student_matricule(student=student, school_class=school_class)
 
     enrollment = Enrollment(
         student=student,

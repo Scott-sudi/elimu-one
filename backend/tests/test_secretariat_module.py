@@ -121,8 +121,35 @@ def test_matricule_unique_generation():
         date_admission=date(2026, 9, 1),
     )
     assert s1.matricule != s2.matricule
-    assert s1.matricule.startswith("KAL-")
-    assert s2.matricule.startswith("KAL-")
+    assert s1.matricule.startswith("ELM")
+    assert s2.matricule.startswith("ELM")
+
+
+@pytest.mark.django_db
+def test_class_enrollment_assigns_elm_matricule(academic_structure, secretary):
+    from apps.secretariat.services.enrollment_service import create_enrollment
+    from apps.secretariat.services.identifier_format import student_matricule_stem
+
+    school_class = academic_structure["school_class"]
+    student = create_student(
+        nom="Kabila",
+        prenom="Jean",
+        sexe=Student.Gender.MALE,
+        date_naissance=date(2011, 5, 5),
+        date_admission=date(2026, 9, 1),
+    )
+    assert "GENGENGEN" in student.matricule
+    create_enrollment(
+        student=student,
+        school_class=school_class,
+        enrollment_type=Enrollment.EnrollmentType.NEW,
+        actor=secretary,
+        skip_reenrollment_guard=True,
+    )
+    student.refresh_from_db()
+    stem = student_matricule_stem(school_class=school_class)
+    assert student.matricule.startswith(stem)
+    assert not student.matricule.startswith("KAL")
 
 
 @pytest.mark.django_db

@@ -182,7 +182,7 @@ def test_new_guardian_gets_kal_parent_id(two_students):
         lien_parente=StudentGuardian.Relationship.MOTHER,
         academic_year_start=2027,
     )
-    assert link.guardian.numero_identification.startswith("KAL-2027-R-")
+    assert link.guardian.numero_identification.startswith("ELM2027R")
 
 
 @pytest.mark.django_db
@@ -194,7 +194,7 @@ def test_create_guardian_ignores_manual_identification():
         numero_identification="SAISIE-MANUELLE",
         academic_year_start=2027,
     )
-    assert guardian.numero_identification.startswith("KAL-2027-R-")
+    assert guardian.numero_identification.startswith("ELM2027R")
     assert guardian.numero_identification != "SAISIE-MANUELLE"
 
 

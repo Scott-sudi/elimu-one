@@ -19,7 +19,7 @@ def test_generate_guardian_identification_parent_format():
         class_letter="A",
         sequence=42,
     )
-    assert ident == "KAL-2026-R-0042"
+    assert ident == "ELM2026R00042"
 
 
 def test_generate_legacy_guardian_identification_length_and_parts():
@@ -36,5 +36,6 @@ def test_generate_legacy_guardian_identification_length_and_parts():
 
 
 def test_normalize_identification_number():
+    assert normalize_identification_number("elm2026r00042") == "ELM2026R00042"
     assert normalize_identification_number("kal-2026-r-0042") == "KAL-2026-R-0042"
     assert normalize_identification_number("26 ik-spga 0847") == "26IKSPGA0847"

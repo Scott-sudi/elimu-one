@@ -16,7 +16,7 @@ DOCUMENT_TYPES = (
 )
 
 SETTINGS = (
-    ("MATRICULE_PREFIX", "KAL", "Préfixe des matricules"),
+    ("MATRICULE_PREFIX", "ELM", "Préfixe des matricules"),
     ("MATRICULE_PADDING", "5", "Longueur du compteur matricule"),
     ("ENROLLMENT_NUMBER_PREFIX", "INS", "Préfixe des numéros d'inscription"),
 )
