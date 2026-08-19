@@ -381,6 +381,118 @@
     });
   }
 
+  /* ---------- Boîtes de dialogue (remplace window.confirm) ---------- */
+
+  var DIALOG_ANIM_MS = 160;
+
+  function styleDialogBtn(btn, primary, danger) {
+    btn.type = "button";
+    btn.style.borderRadius = "6px";
+    btn.style.padding = "0.45rem 0.85rem";
+    btn.style.fontSize = "0.85rem";
+    btn.style.cursor = "pointer";
+    btn.style.border = "1px solid var(--color-border, #2b3940)";
+    btn.style.background = primary
+      ? danger
+        ? "var(--color-danger, #d15b5b)"
+        : "var(--color-primary, #1f6f4a)"
+      : "var(--color-surface, #152028)";
+    btn.style.color = "var(--color-text-primary, #f4f7f5)";
+  }
+
+  function confirmDialog(message, options) {
+    options = options || {};
+    var title = options.title || "Confirmation";
+    var confirmLabel = options.confirmLabel || "Confirmer";
+    var cancelLabel = options.cancelLabel || "Annuler";
+    var danger = !!options.danger;
+
+    return new Promise(function (resolve) {
+      var overlay = document.createElement("div");
+      overlay.className = "kalunga-dialog-overlay";
+      overlay.style.cssText =
+        "position:fixed;inset:0;z-index:10000;display:flex;align-items:center;" +
+        "justify-content:center;padding:1rem;background:var(--color-overlay,rgba(11,17,22,0.72));" +
+        "opacity:0;transition:opacity " +
+        DIALOG_ANIM_MS +
+        "ms ease";
+
+      var panel = document.createElement("div");
+      panel.className = "kalunga-dialog";
+      panel.setAttribute("role", "alertdialog");
+      panel.setAttribute("aria-modal", "true");
+      panel.style.cssText =
+        "width:min(24rem,100%);border-radius:6px;border:1px solid var(--color-border,#2b3940);" +
+        "background:var(--color-surface-elevated,#1a2730);color:var(--color-text-primary,#f4f7f5);" +
+        "padding:1.1rem 1.15rem;box-shadow:0 8px 24px rgba(0,0,0,0.35);transform:scale(0.98);" +
+        "transition:transform " +
+        DIALOG_ANIM_MS +
+        "ms ease";
+
+      var titleEl = document.createElement("h2");
+      titleEl.textContent = title;
+      titleEl.style.cssText = "margin:0 0 0.5rem;font-size:1rem;font-weight:600";
+
+      var msgEl = document.createElement("p");
+      msgEl.textContent = message;
+      msgEl.style.cssText =
+        "margin:0 0 1rem;font-size:0.875rem;color:var(--color-text-secondary,#a2aea8);line-height:1.45";
+
+      var actions = document.createElement("div");
+      actions.style.cssText = "display:flex;justify-content:flex-end;gap:0.5rem";
+
+      var cancelBtn = document.createElement("button");
+      cancelBtn.textContent = cancelLabel;
+      styleDialogBtn(cancelBtn, false, false);
+
+      var confirmBtn = document.createElement("button");
+      confirmBtn.textContent = confirmLabel;
+      styleDialogBtn(confirmBtn, true, danger);
+
+      function finish(value) {
+        overlay.style.opacity = "0";
+        panel.style.transform = "scale(0.98)";
+        window.setTimeout(function () {
+          overlay.remove();
+          document.removeEventListener("keydown", onKey);
+          resolve(value);
+        }, DIALOG_ANIM_MS);
+      }
+
+      function onKey(e) {
+        if (e.key === "Escape") {
+          e.preventDefault();
+          finish(false);
+        }
+      }
+
+      cancelBtn.addEventListener("click", function () {
+        finish(false);
+      });
+      confirmBtn.addEventListener("click", function () {
+        finish(true);
+      });
+      overlay.addEventListener("click", function (e) {
+        if (e.target === overlay) finish(false);
+      });
+
+      actions.appendChild(cancelBtn);
+      actions.appendChild(confirmBtn);
+      panel.appendChild(titleEl);
+      panel.appendChild(msgEl);
+      panel.appendChild(actions);
+      overlay.appendChild(panel);
+      document.body.appendChild(overlay);
+      document.addEventListener("keydown", onKey);
+
+      window.requestAnimationFrame(function () {
+        overlay.style.opacity = "1";
+        panel.style.transform = "scale(1)";
+        confirmBtn.focus();
+      });
+    });
+  }
+
   /* ---------- Confirmations ---------- */
 
   function initConfirms(root) {
@@ -392,11 +504,41 @@
           form.dataset.confirmAccepted = "";
           return;
         }
+        event.preventDefault();
         var message =
-          form.getAttribute("data-confirm-form") ||
-          "Confirmer cette opération ?";
-        if (!window.confirm(message)) event.preventDefault();
-        else form.dataset.confirmAccepted = "1";
+          form.getAttribute("data-confirm-form") || "Confirmer cette opération ?";
+        var danger = form.hasAttribute("data-confirm-danger");
+        confirmDialog(message, {
+          confirmLabel: "Confirmer",
+          cancelLabel: "Annuler",
+          danger: danger,
+        }).then(function (ok) {
+          if (!ok) return;
+          form.dataset.confirmAccepted = "1";
+          if (typeof form.requestSubmit === "function") form.requestSubmit();
+          else form.submit();
+        });
+      });
+    });
+
+    root.querySelectorAll("[data-confirm][data-confirm-submit]").forEach(function (btn) {
+      if (btn.dataset.confirmBound) return;
+      btn.dataset.confirmBound = "1";
+      btn.addEventListener("click", function (event) {
+        event.preventDefault();
+        var message = btn.getAttribute("data-confirm") || "Confirmer cette opération ?";
+        confirmDialog(message, {
+          confirmLabel: "Confirmer",
+          cancelLabel: "Annuler",
+          danger: btn.hasAttribute("data-confirm-danger"),
+        }).then(function (ok) {
+          if (!ok) return;
+          var form = btn.closest("form");
+          if (!form) return;
+          form.dataset.confirmAccepted = "1";
+          if (typeof form.requestSubmit === "function") form.requestSubmit();
+          else form.submit();
+        });
       });
     });
   }
@@ -408,15 +550,20 @@
       form.addEventListener("submit", function (event) {
         if (form.dataset.logoutConfirmed === "1") return;
         event.preventDefault();
-        if (
-          window.confirm(
-            "Voulez-vous vraiment vous déconnecter de votre espace ?"
-          )
-        ) {
+        confirmDialog(
+          "Voulez-vous vraiment vous déconnecter de votre espace ?",
+          {
+            title: "Confirmer la déconnexion",
+            confirmLabel: "Se déconnecter",
+            cancelLabel: "Rester connecté",
+            danger: true,
+          }
+        ).then(function (ok) {
+          if (!ok) return;
           form.dataset.logoutConfirmed = "1";
           if (typeof form.requestSubmit === "function") form.requestSubmit();
           else form.submit();
-        }
+        });
       });
     });
   }
@@ -785,6 +932,7 @@
 
   window.Kalunga = window.Kalunga || {};
   window.Kalunga.modal = { open: openModal, close: closeModal };
+  window.Kalunga.confirm = confirmDialog;
 
   ready(function () {
     initHtmxCsrf();
