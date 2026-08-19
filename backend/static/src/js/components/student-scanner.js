@@ -160,8 +160,14 @@ export function createStudentScanner({
     observer.observe(modal, { attributes: true, attributeFilter: ['class', 'hidden'] });
 
     // Safety net: modal component emits these events on open/close.
+    document.addEventListener('elimu:modal-open', (event) => {
+      if (event?.detail?.modal === modal) startScanner();
+    });
     document.addEventListener('kalunga:modal-open', (event) => {
       if (event?.detail?.modal === modal) startScanner();
+    });
+    document.addEventListener('elimu:modal-close', (event) => {
+      if (event?.detail?.modal === modal) stopScanner();
     });
     document.addEventListener('kalunga:modal-close', (event) => {
       if (event?.detail?.modal === modal) stopScanner();

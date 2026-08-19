@@ -112,6 +112,9 @@
     document.dispatchEvent(
       new CustomEvent("elimu:modal-open", { detail: { modal: modal } })
     );
+    document.dispatchEvent(
+      new CustomEvent("kalunga:modal-open", { detail: { modal: modal } })
+    );
     paintIcons();
     return modal;
   }
@@ -146,6 +149,9 @@
 
     document.dispatchEvent(
       new CustomEvent("elimu:modal-close", { detail: { modal: modal } })
+    );
+    document.dispatchEvent(
+      new CustomEvent("kalunga:modal-close", { detail: { modal: modal } })
     );
   }
 
