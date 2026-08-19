@@ -171,7 +171,7 @@ Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
           priority: Priority.max,
           icon: '@drawable/ic_stat_notify',
           color: Color(0xFF002858),
-          largeIcon: DrawableResourceAndroidBitmap('@mipmap/ic_launcher'),
+          largeIcon: DrawableResourceAndroidBitmap('@drawable/ic_notification_large'),
         ),
       ),
     );
@@ -362,7 +362,7 @@ class PushNotificationService {
       styleInformation: BigTextStyleInformation(body, contentTitle: title),
       audioAttributesUsage: AudioAttributesUsage.notificationRingtone,
       icon: icon ?? '@drawable/ic_stat_notify',
-      largeIcon: const DrawableResourceAndroidBitmap('@mipmap/ic_launcher'),
+      largeIcon: const DrawableResourceAndroidBitmap('@drawable/ic_notification_large'),
       color: const Color(0xFF002858),
       channelShowBadge: true,
       onlyAlertOnce: false,

@@ -227,7 +227,7 @@ def send_push_to_guardians(
                 "android": {
                     "priority": "HIGH",
                     "ttl": "86400s",
-                    "direct_boot_ok": True,
+                    "restricted_package_name": "net.institutkalunga.parents",
                     "notification": {
                         "channel_id": ANDROID_CHANNEL_ID,
                         "icon": "ic_stat_notify",
@@ -235,9 +235,7 @@ def send_push_to_guardians(
                         "sound": "default",
                         "default_sound": True,
                         "default_vibrate_timings": True,
-                        "notification_priority": "PRIORITY_MAX",
-                        "visibility": "PUBLIC",
-                        "ticker": title[:40],
+                        "notification_priority": "PRIORITY_HIGH",
                     },
                 },
                 "data": payload_data,
@@ -263,9 +261,10 @@ def send_push_to_guardians(
             )
             if response.status_code == 401:
                 _invalidate_token_cache()
-            if response.status_code in (400, 404) or any(
-                s in text
-                for s in ("UNREGISTERED", "NOT_FOUND", "INVALID_ARGUMENT")
+            # Ne désactiver le jeton que s’il n’existe plus chez Firebase.
+            # Un 400 (payload) ne doit PAS tuer tous les appareils.
+            if response.status_code == 404 or any(
+                s in text for s in ("UNREGISTERED", "NOT_FOUND")
             ):
                 ParentPushDevice.objects.filter(token=device_token).update(
                     is_active=False

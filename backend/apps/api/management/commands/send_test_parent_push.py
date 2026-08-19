@@ -43,8 +43,15 @@ class Command(BaseCommand):
             digits = "".join(c for c in phone if c.isdigit())
             guardian = None
             for g in qs.iterator():
-                gdigits = "".join(c for c in (g.phone or "") if c.isdigit())
-                if gdigits.endswith(digits[-9:]) or digits.endswith(gdigits[-9:]):
+                raw = (
+                    getattr(g, "telephone_principal", None)
+                    or getattr(g, "phone", None)
+                    or ""
+                )
+                gdigits = "".join(c for c in str(raw) if c.isdigit())
+                if len(gdigits) >= 8 and len(digits) >= 8 and (
+                    gdigits.endswith(digits[-9:]) or digits.endswith(gdigits[-9:])
+                ):
                     guardian = g
                     break
         else:
@@ -92,3 +99,10 @@ class Command(BaseCommand):
             data={"type": "test_push", "source_id": "manual-test"},
         )
         self.stdout.write(self.style.SUCCESS(f"Envois FCM OK: {sent}/{count}"))
+        if sent == 0:
+            self.stdout.write(
+                self.style.ERROR(
+                    "Aucun envoi FCM. Vérifiez secrets/firebase-adminsdk.json "
+                    "(projet elimu-go) et rouvrez ELIMU Go une fois."
+                )
+            )
